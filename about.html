@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CHIMINI - About Us. Read our story on handcrafted soy wax candles and botanical scent curations.">
+  <title>CHIMINI | Our Story & Purity Mission</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    @media (max-width: 992px) {
+      .story-row-1, .story-row-2, .values-row {
+        grid-template-columns: 1fr !important;
+        gap: 30px !important;
+      }
+      .story-row-2 > div {
+        order: 0 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. Top Announcement Bar -->
+  <div class="announcement-bar" id="announcementBar">
+    <div class="announcement-slider" id="announcementSlider">
+      <!-- Dynamic slides -->
+    </div>
+  </div>
+
+  <!-- 2. Header & Navigation -->
+  <header id="mainHeader">
+    <div class="container">
+      <div class="header-main">
+        <div class="header-search">
+          <div class="search-input-wrapper">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="text" placeholder="Search fragrances..." id="searchInput" aria-label="Search fragrances">
+          </div>
+        </div>
+
+        <div class="brand-logo">
+          <a href="index.html" id="brandLogoText">CHIMINI</a>
+        </div>
+
+        <div class="header-actions">
+          <button class="header-icon-btn" aria-label="User Account" onclick="alert('Account system demo: Logged in as Guest')">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+          </button>
+          
+          <button class="header-icon-btn" aria-label="Wishlist" onclick="alert('Wishlist demo: 0 items added')">
+            <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          </button>
+
+          <button class="header-icon-btn" id="cartToggleBtn" aria-label="Open Shopping Cart">
+            <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.9 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            <span class="cart-count" id="cartBadgeCount">0</span>
+          </button>
+        </div>
+      </div>
+
+      <nav aria-label="Main Navigation">
+        <ul class="nav-menu">
+          <li class="nav-item"><a href="index.html">Home</a></li>
+          <li class="nav-item"><a href="collections.html">Collections</a></li>
+          <li class="nav-item"><a href="gifts.html">Gifts</a></li>
+          <li class="nav-item active"><a href="about.html">About Us</a></li>
+          <li class="nav-item"><a href="contact.html">Contact Us</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Page Hero Banner -->
+    <section class="page-hero-section" style="background: linear-gradient(rgba(46,30,18,0.5), rgba(46,30,18,0.5)), url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat; padding: 120px 0; text-align: center; color: var(--color-white);">
+      <div class="container">
+        <span class="hero-slide-subtitle" style="margin-bottom:12px; display:block;">Our Journey & Mission</span>
+        <h1 class="hero-slide-title" style="font-size:3.2rem; margin-bottom:15px; line-height:1.2;">Designed for Sensation</h1>
+        <p style="font-family: var(--font-sans); font-size:0.95rem; letter-spacing:0.1em; color:var(--color-beige); max-width:650px; margin: 0 auto; line-height:1.7;">At CHIMINI, we design sensory objects that combine the clean light of natural soy with custom essential oil formulations.</p>
+      </div>
+    </section>
+
+    <!-- Detailed Brand Story Section -->
+    <section style="padding: 100px 0;">
+      <div class="container">
+        <!-- Story Block 1 -->
+        <div class="story-row-1" style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; margin-bottom: 80px;">
+          <div>
+            <span style="font-size: 0.85rem; color: var(--color-gold); font-weight: 600; text-transform: uppercase; letter-spacing: 0.2em; display: block; margin-bottom: 15px;">The Beginning</span>
+            <h2 style="font-family: var(--font-serif); font-size: 2.2rem; line-height: 1.3; margin-bottom: 25px; color: var(--color-primary-dark);">A Quest for Olfactory Purity</h2>
+            <p style="color: var(--color-text-muted); font-size: 1rem; line-height: 1.8; margin-bottom: 20px;">CHIMINI was born out of a desire to create clean-burning home scent products that elevate daily spaces without compromising on health or ecological sustainability. Frustrated by chemical soot and synthetic fragrances, we spent years testing natural botanical waxes and organic essential oil profiles.</p>
+            <p style="color: var(--color-text-muted); font-size: 1rem; line-height: 1.8;">We choose to focus strictly on pure soy, botanical oils, and natural cotton wicks. The result is a slow, soot-free burn that gently releases complex scent notes throughout your room.</p>
+          </div>
+          <div style="position: relative; padding-bottom: 80%; overflow: hidden; border: 1px solid var(--color-border); box-shadow: 0 10px 30px var(--color-shadow); border-radius: 4px;">
+            <img src="https://images.unsplash.com/photo-1596433809252-260c2745df6b?auto=format&fit=crop&w=800&q=80" alt="Candle Pouring" style="position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;">
+          </div>
+        </div>
+
+        <!-- Story Block 2 (Reverse) -->
+        <div class="story-row-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; margin-bottom: 80px;">
+          <div style="position: relative; padding-bottom: 80%; overflow: hidden; border: 1px solid var(--color-border); box-shadow: 0 10px 30px var(--color-shadow); border-radius: 4px; order: 2;">
+            <img src="https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=800&q=80" alt="Natural Ingredients" style="position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;">
+          </div>
+          <div style="order: 1;">
+            <span style="font-size: 0.85rem; color: var(--color-gold); font-weight: 600; text-transform: uppercase; letter-spacing: 0.2em; display: block; margin-bottom: 15px;">The Process</span>
+            <h2 style="font-family: var(--font-serif); font-size: 2.2rem; line-height: 1.3; margin-bottom: 25px; color: var(--color-primary-dark);">Handcrafted in Small Batches</h2>
+            <p style="color: var(--color-text-muted); font-size: 1rem; line-height: 1.8; margin-bottom: 20px;">We pour our candles in small batches of no more than twelve at our Southern California atelier. This slow, artisanal method ensures that wax temperatures remain precise and essential oils blend seamlessly, preventing standard tunneling issues during lighting.</p>
+            <p style="color: var(--color-text-muted); font-size: 1rem; line-height: 1.8;">From printing labels on sustainable linen stock to packing each box in recycled cotton pouches, our hands are on every detail of the ritual.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Core Values Section -->
+    <section style="background-color: var(--color-beige); padding: 80px 0; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
+      <div class="container">
+        <div class="text-center">
+          <h2 class="section-title">Our Brand Core Values</h2>
+          <p class="section-subtitle">Commitment to natural elements and fine sensory curation</p>
+        </div>
+
+        <div class="values-row" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; margin-top: 40px;">
+          <!-- Value 1 -->
+          <div style="background: var(--color-white); border: 1px solid var(--color-border); padding: 30px; text-align: center; box-shadow: 0 5px 15px var(--color-shadow); border-radius: 4px;">
+            <div style="font-size: 2rem; color: var(--color-gold); margin-bottom: 15px;">🌿</div>
+            <h3 style="font-family: var(--font-serif); font-size: 1.25rem; margin-bottom: 10px;">100% Soy Wax</h3>
+            <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.6;">Biodegradable, renewable, and clean-burning without petroleum by-products or black soot.</p>
+          </div>
+          <!-- Value 2 -->
+          <div style="background: var(--color-white); border: 1px solid var(--color-border); padding: 30px; text-align: center; box-shadow: 0 5px 15px var(--color-shadow); border-radius: 4px;">
+            <div style="font-size: 2rem; color: var(--color-gold); margin-bottom: 15px;">🌸</div>
+            <h3 style="font-family: var(--font-serif); font-size: 1.25rem; margin-bottom: 10px;">Botanical Oils</h3>
+            <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.6;">Pure essential oils and natural botanical scents that fill your space with raw organic aromas.</p>
+          </div>
+          <!-- Value 3 -->
+          <div style="background: var(--color-white); border: 1px solid var(--color-border); padding: 30px; text-align: center; box-shadow: 0 5px 15px var(--color-shadow); border-radius: 4px;">
+            <div style="font-size: 2rem; color: var(--color-gold); margin-bottom: 15px;">♻️</div>
+            <h3 style="font-family: var(--font-serif); font-size: 1.25rem; margin-bottom: 10px;">Eco-Friendly</h3>
+            <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.6;">Responsibly sourced wood wicks, organic cotton wicks, glass jars, and recycled paper packaging.</p>
+          </div>
+          <!-- Value 4 -->
+          <div style="background: var(--color-white); border: 1px solid var(--color-border); padding: 30px; text-align: center; box-shadow: 0 5px 15px var(--color-shadow); border-radius: 4px;">
+            <div style="font-size: 2rem; color: var(--color-gold); margin-bottom: 15px;">👐</div>
+            <h3 style="font-family: var(--font-serif); font-size: 1.25rem; margin-bottom: 10px;">Hand-Poured</h3>
+            <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.6;">Crafted with focus and patience in boutique batches to ensure structural and fragrance excellence.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Founder Quote Section -->
+    <section style="padding: 100px 0; background: var(--color-ivory);">
+      <div class="container" style="max-width: 800px; text-align: center;">
+        <div style="font-size: 4rem; font-family: var(--font-serif); color: var(--color-gold); line-height: 1; margin-bottom: 10px; height: 30px; overflow: hidden;">“</div>
+        <p style="font-family: var(--font-serif); font-style: italic; font-size: 1.5rem; line-height: 1.7; color: var(--color-primary-dark); margin-bottom: 25px;">Scent holds the key to memory and mood. With CHIMINI, our mission is to craft light that not only brightens a room, but triggers a state of deep, natural relaxation and sensory purity.</p>
+        <span style="font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 600; display: block; color: var(--color-text-muted);">— Harshida & the CHIMINI Concierge team</span>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer id="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-info">
+          <div class="footer-info-logo" id="footerLogoText">CHIMINI</div>
+          <p class="footer-info-desc">Bespoke home scenting and natural luxury candles crafted with botanical purity. Making gift-giving an unforgettable ritual.</p>
+          <div class="footer-socials">
+            <a href="#" class="footer-social-icon" aria-label="Facebook">
+              <svg viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z"/></svg>
+            </a>
+            <a href="#" class="footer-social-icon" aria-label="Instagram">
+              <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+            </a>
+            <a href="#" class="footer-social-icon" aria-label="Pinterest">
+              <svg viewBox="0 0 24 24"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.41 7.61 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.906 2.17-2.906 1.023 0 1.518.769 1.518 1.69 0 1.03-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.27 1.043-1.002 2.35-1.492 3.146 1.124.347 2.317.535 3.554.535 6.607 0 11.985-5.36 11.985-11.987C23.97 5.39 18.592 0 12.017 0z"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <div class="footer-heading">Quick Links</div>
+          <ul class="footer-links">
+            <li><a href="#">Track Your Order</a></li>
+            <li><a href="#">Shipping & Returns</a></li>
+            <li><a href="#">FAQ & Help</a></li>
+            <li><a href="#">Store Policy</a></li>
+            <li><a href="about.html">About Us</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <div class="footer-heading">Shop Categories</div>
+          <ul class="footer-links">
+            <li><a href="collections.html">Soy Candles</a></li>
+            <li><a href="gifts.html">Gift Hampers</a></li>
+            <li><a href="collections.html">Reed Diffusers</a></li>
+            <li><a href="collections.html">Artisan Collection</a></li>
+            <li><a href="collections.html">Eco-Luxe range</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <div class="footer-heading">Contact Details</div>
+          <div class="footer-contact-item">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            <span>742 Luxe Avenue, Suite 100<br>Beverly Hills, CA 90210</span>
+          </div>
+          <div class="footer-contact-item">
+            <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            <span>concierge@chiminiluxe.com</span>
+          </div>
+          <div class="footer-contact-item">
+            <svg viewBox="0 0 24 24"><path d="M6.62 10.79a15.149 15.149 0 0 0 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+            <span>1-800-CHIMINI (1-800-244-6464)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 CHIMINI Luxe Fragrances. All rights reserved.</div>
+        <div>Designed with sensory purity. <a href="#" class="admin-access-link" id="adminOpenLink">Admin Dashboard Portal</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 12. Slide-Out Cart Drawer -->
+  <div class="cart-overlay" id="cartOverlay">
+    <div class="cart-drawer">
+      <div class="cart-header">
+        <h2>Shopping Cart</h2>
+        <button class="cart-close-btn" id="cartCloseBtn" aria-label="Close Cart">
+          <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
+      
+      <div class="cart-body" id="cartBody">
+        <!-- Rendered dynamically -->
+      </div>
+      
+      <div class="cart-footer" id="cartFooter">
+        <div class="cart-summary-line">
+          <span>Shipping</span>
+          <span id="cartShippingValue">Calculated at next step</span>
+        </div>
+        <div class="cart-summary-line cart-summary-total">
+          <span>Estimated Total</span>
+          <span id="cartTotalValue">$0.00</span>
+        </div>
+        <button class="btn-gold cart-checkout-btn" onclick="alert('Checkout initiated! Thank you for purchasing from CHIMINI.')">Proceed to Checkout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 13. Admin Control Panel Modal -->
+  <div class="admin-overlay" id="adminOverlay">
+    <div class="admin-modal">
+      <div class="admin-header">
+        <h2>CHIMINI Brand Management Portal</h2>
+        <button class="admin-close-btn" id="adminCloseBtn" aria-label="Close Admin Portal">
+          <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
+      
+      <div class="admin-layout">
+        <div class="admin-sidebar">
+          <button class="admin-tab-btn active" data-tab="tabBanners">Banners & Hero</button>
+          <button class="admin-tab-btn" data-tab="tabProducts">Best Sellers</button>
+          <button class="admin-tab-btn" data-tab="tabSettings">Announcement Bar</button>
+        </div>
+        
+        <div class="admin-main-content">
+          <!-- Banners & Hero Tab -->
+          <div class="admin-section active" id="tabBanners">
+            <h3>Custom Graphics & Banners</h3>
+            <form id="adminBannersForm">
+              <div class="admin-form-group">
+                <label for="adminHeroImage">Hero Carousel Slide 1 Image URL</label>
+                <input type="text" id="adminHeroImage" class="admin-form-control" placeholder="https://...">
+              </div>
+              <div class="admin-form-group">
+                <label for="adminHeroTitle">Hero Slide 1 Title Overlay</label>
+                <input type="text" id="adminHeroTitle" class="admin-form-control" placeholder="Enter title...">
+              </div>
+              <div class="admin-form-group">
+                <label for="adminHeroUrl">Hero Slide 1 Clickable Redirect URL</label>
+                <input type="text" id="adminHeroUrl" class="admin-form-control" placeholder="#bestSellers">
+              </div>
+              <hr style="margin: 25px 0; border: none; border-top: 1px solid var(--color-border);">
+              
+              <div class="admin-form-group">
+                <label for="adminPromoBannerUrl">Promotional Offer Banner Image URL</label>
+                <input type="text" id="adminPromoBannerUrl" class="admin-form-control">
+              </div>
+              <div class="admin-form-group">
+                <label for="adminPromoLink">Promotional Offer Redirect Link</label>
+                <input type="text" id="adminPromoLink" class="admin-form-control">
+              </div>
+              <hr style="margin: 25px 0; border: none; border-top: 1px solid var(--color-border);">
+              
+              <div class="admin-form-group">
+                <label for="adminCampaignBannerUrl">Seasonal Campaign Banner Image URL</label>
+                <input type="text" id="adminCampaignBannerUrl" class="admin-form-control">
+              </div>
+              <div class="admin-form-group">
+                <label for="adminCampaignLink">Seasonal Campaign Redirect Link</label>
+                <input type="text" id="adminCampaignLink" class="admin-form-control">
+              </div>
+              <hr style="margin: 25px 0; border: none; border-top: 1px solid var(--color-border);">
+              
+              <div class="admin-form-group">
+                <label for="adminStoryBannerUrl">Brand Story Banner Image URL</label>
+                <input type="text" id="adminStoryBannerUrl" class="admin-form-control">
+              </div>
+              <div class="admin-form-group">
+                <label for="adminStoryTitle">Brand Story Card Title</label>
+                <input type="text" id="adminStoryTitle" class="admin-form-control">
+              </div>
+              <div class="admin-form-group">
+                <label for="adminStoryDesc">Brand Story Body Text</label>
+                <textarea id="adminStoryDesc" class="admin-form-control" rows="3"></textarea>
+              </div>
+              
+              <button type="submit" class="btn-gold" style="width: 100%; margin-top: 20px;">Save Banner Setup</button>
+            </form>
+          </div>
+
+          <!-- Products Tab -->
+          <div class="admin-section" id="tabProducts">
+            <h3>Manage Best Sellers Grid</h3>
+            <div style="overflow-x: auto; margin-bottom: 30px;">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="adminProductsTableBody">
+                  <!-- Dynamic rows -->
+                </tbody>
+              </table>
+            </div>
+            
+            <h3>Add New Product</h3>
+            <form id="adminAddProductForm">
+              <div class="admin-form-group">
+                <label for="newProductName">Product Name</label>
+                <input type="text" id="newProductName" class="admin-form-control" placeholder="e.g. Saffron & Sandalwood Candle" required>
+              </div>
+              <div class="admin-form-group">
+                <label for="newProductPrice">Price ($)</label>
+                <input type="number" id="newProductPrice" class="admin-form-control" placeholder="e.g. 45" step="0.01" required>
+              </div>
+              <div class="admin-form-group">
+                <label for="newProductImage">Image URL</label>
+                <input type="text" id="newProductImage" class="admin-form-control" placeholder="https://..." required>
+              </div>
+              <div class="admin-form-group">
+                <label for="newProductBadge">Badge (Optional)</label>
+                <input type="text" id="newProductBadge" class="admin-form-control" placeholder="e.g. Best Seller">
+              </div>
+              <button type="submit" class="btn-gold" style="width: 100%;">Create Product</button>
+            </form>
+          </div>
+
+          <!-- Announcement Bar Tab -->
+          <div class="admin-section" id="tabSettings">
+            <h3>Store Announcements</h3>
+            <form id="adminAnnouncementsForm">
+              <div class="admin-form-group">
+                <label for="announcement1">Announcement Text 1</label>
+                <input type="text" id="announcement1" class="admin-form-control">
+              </div>
+              <div class="admin-form-group">
+                <label for="announcement2">Announcement Text 2</label>
+                <input type="text" id="announcement2" class="admin-form-control">
+              </div>
+              <div class="admin-form-group">
+                <label for="announcement3">Announcement Text 3</label>
+                <input type="text" id="announcement3" class="admin-form-control">
+              </div>
+              <button type="submit" class="btn-gold" style="width: 100%; margin-top: 20px;">Save Announcements</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
