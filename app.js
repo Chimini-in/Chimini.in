@@ -2,9 +2,9 @@
    CHIMINI LUXURY ECOMMERCE - APPLICATION LOGIC
    ========================================================================== */
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // Initialize Default Store Data in LocalStorage if Empty
-  initStoreData();
+  await initStoreData();
 
   // Load and Render Store Components
   renderStore();
@@ -22,417 +22,50 @@ document.addEventListener('DOMContentLoaded', () => {
   initCollectionsPage();
 });
 
+import { supabaseClient } from './config.js';
+
 /* ==========================================================================
-   STATE MANAGEMENT (LOCAL STORAGE)
+   STATE MANAGEMENT (SUPABASE TO LOCAL CACHE SYNC)
    ========================================================================== */
 
-function initStoreData() {
-  // Version check: clear old product data if it doesn't have the new catalog fields
-  const existingProducts = JSON.parse(localStorage.getItem('chimini_products') || '[]');
-  if (existingProducts.length > 0 && !existingProducts[0].hasOwnProperty('category')) {
-    localStorage.removeItem('chimini_products');
-  }
-
-  // 1. Announcements Default
-  if (!localStorage.getItem('chimini_announcements')) {
-    const defaultAnnouncements = [
-      "Free shipping on orders over $150 | Use code: LUXE150",
-      "Scent of the Month: 50% off - Madagascar Vanilla | Use Code: SOF50",
-      "Sustainably sourced 100% natural soy wax & botanical oils"
-    ];
-    localStorage.setItem('chimini_announcements', JSON.stringify(defaultAnnouncements));
-  }
-
-  // 2. Hero Slides Default
-  if (!localStorage.getItem('chimini_hero_slides')) {
-    const defaultSlides = [
-      {
-        image: "https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=1600&q=80",
-        subtitle: "Handcrafted Scented Lighting",
-        title: "Aura of Botanicals",
-        link: "#bestSellers"
-      },
-      {
-        image: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=1600&q=80",
-        subtitle: "Luxury Gifting Rituals",
-        title: "The Artisan Hamper",
-        link: "#featuredCollections"
-      },
-      {
-        image: "https://images.unsplash.com/photo-1590794056226-79ef3a8147e1?auto=format&fit=crop&w=1600&q=80",
-        subtitle: "Organic & Pure Living",
-        title: "Eco Coconut Series",
-        link: "#bestSellers"
+async function initStoreData() {
+  if (supabaseClient) {
+    try {
+      // Fetch Products
+      const { data: products } = await supabaseClient.from('products').select('*');
+      if (products && products.length > 0) {
+        // Map Supabase schema to local app schema to maintain compatibility
+        const mappedProducts = products.map(p => ({
+          id: p.id,
+          name: p.title,
+          price: parseFloat(p.price),
+          image: p.image_url,
+          category: p.category,
+          fragrance: p.fragrance,
+          availability: p.availability ? "In Stock" : "Out of Stock",
+          badge: p.badges || ""
+        }));
+        localStorage.setItem('chimini_products', JSON.stringify(mappedProducts));
       }
-    ];
-    localStorage.setItem('chimini_hero_slides', JSON.stringify(defaultSlides));
-  }
 
-  // 3. Products Default â€” rich catalog with categories, fragrances, discounts
-  if (!localStorage.getItem('chimini_products')) {
-    const defaultProducts = [
-      {
-        id: "prod_1",
-        name: "Saffron & Amberwood Soy Candle",
-        price: 48.00,
-        originalPrice: 65.00,
-        image: "https://images.unsplash.com/photo-1596433809252-260c2745df6b?auto=format&fit=crop&w=600&q=80",
-        badge: "Best Seller",
-        category: "Soy Candles",
-        fragrance: "Sandalwood",
-        availability: "In Stock",
-        isNew: false
-      },
-      {
-        id: "prod_2",
-        name: "Peony & Oud Wood Candle",
-        price: 52.00,
-        image: "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=600&q=80",
-        badge: "Popular",
-        category: "Soy Candles",
-        fragrance: "Velvet Rose",
-        availability: "In Stock",
-        isNew: false
-      },
-      {
-        id: "prod_3",
-        name: "Jasmine & Sandalwood Blend",
-        price: 45.00,
-        originalPrice: 58.00,
-        image: "https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=600&q=80",
-        badge: "Limited",
-        category: "Soy Candles",
-        fragrance: "White Jasmine",
-        availability: "Low Stock",
-        isNew: false
-      },
-      {
-        id: "prod_4",
-        name: "Madagascar Vanilla & Clove",
-        price: 42.00,
-        image: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=600&q=80",
-        badge: "Eco-Friendly",
-        category: "Soy Candles",
-        fragrance: "Sandalwood",
-        availability: "In Stock",
-        isNew: false
-      },
-      {
-        id: "prod_5",
-        name: "Velvet Rose Pillar Candle",
-        price: 38.00,
-        originalPrice: 50.00,
-        image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80",
-        badge: "Sale",
-        category: "Pillar Candles",
-        fragrance: "Velvet Rose",
-        availability: "In Stock",
-        isNew: false
-      },
-      {
-        id: "prod_6",
-        name: "White Jasmine Diffuser Set",
-        price: 68.00,
-        image: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=600&q=80",
-        badge: null,
-        category: "Reed Diffusers",
-        fragrance: "White Jasmine",
-        availability: "In Stock",
-        isNew: true
-      },
-      {
-        id: "prod_7",
-        name: "Lemon & Eucalyptus Room Mist",
-        price: 32.00,
-        image: "https://images.unsplash.com/photo-1534531173927-aeb928d54385?auto=format&fit=crop&w=600&q=80",
-        badge: "New Arrival",
-        category: "Room Mists",
-        fragrance: "Lemon Citrus",
-        availability: "In Stock",
-        isNew: true
-      },
-      {
-        id: "prod_8",
-        name: "Blueberry Fig & Amber Candle",
-        price: 55.00,
-        originalPrice: 72.00,
-        image: "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?auto=format&fit=crop&w=600&q=80",
-        badge: "Best Seller",
-        category: "Soy Candles",
-        fragrance: "Blueberry Fig",
-        availability: "In Stock",
-        isNew: false
-      },
-      {
-        id: "prod_9",
-        name: "Cedar & Pine Forest Candle",
-        price: 46.00,
-        image: "https://images.unsplash.com/photo-1572917789718-490333767417?auto=format&fit=crop&w=600&q=80",
-        badge: null,
-        category: "Soy Candles",
-        fragrance: "Sandalwood",
-        availability: "In Stock",
-        isNew: true
-      },
-      {
-        id: "prod_10",
-        name: "Coconut & Warm Vanilla Wax Melt",
-        price: 22.00,
-        image: "https://images.unsplash.com/photo-1590794056226-79ef3a8147e1?auto=format&fit=crop&w=600&q=80",
-        badge: "Eco-Friendly",
-        category: "Wax Melts",
-        fragrance: "Sandalwood",
-        availability: "In Stock",
-        isNew: false
-      },
-      {
-        id: "prod_11",
-        name: "Noir Oud & Musk Luxury Candle",
-        price: 75.00,
-        image: "https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=600&q=80",
-        badge: "Luxury",
-        category: "Soy Candles",
-        fragrance: "Sandalwood",
-        availability: "In Stock",
-        isNew: false
-      },
-      {
-        id: "prod_12",
-        name: "Bergamot & Neroli Reed Diffuser",
-        price: 62.00,
-        originalPrice: 78.00,
-        image: "https://images.unsplash.com/photo-1523293182086-7651a899d37f?auto=format&fit=crop&w=600&q=80",
-        badge: "Sale",
-        category: "Reed Diffusers",
-        fragrance: "Lemon Citrus",
-        availability: "In Stock",
-        isNew: false
-      },
-      {
-        id: "prod_13",
-        name: "Rose & Geranium Bath Salts",
-        price: 28.00,
-        image: "https://images.unsplash.com/photo-1605651260444-c6031201944e?auto=format&fit=crop&w=600&q=80",
-        badge: "New Arrival",
-        category: "Bath & Body",
-        fragrance: "Velvet Rose",
-        availability: "In Stock",
-        isNew: true
-      },
-      {
-        id: "prod_14",
-        name: "Patchouli & Vetiver Soy Candle",
-        price: 49.00,
-        image: "https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=600&q=80",
-        badge: null,
-        category: "Soy Candles",
-        fragrance: "Sandalwood",
-        availability: "Low Stock",
-        isNew: false
-      },
-      {
-        id: "prod_15",
-        name: "Citrus Grove Morning Candle",
-        price: 40.00,
-        originalPrice: 52.00,
-        image: "https://images.unsplash.com/photo-1508747703725-719777637510?auto=format&fit=crop&w=600&q=80",
-        badge: "Sale",
-        category: "Soy Candles",
-        fragrance: "Lemon Citrus",
-        availability: "In Stock",
-        isNew: false
-      },
-      {
-        id: "prod_16",
-        name: "Artisan Wood Wick Candle Set",
-        price: 88.00,
-        image: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=600&q=80",
-        badge: "Luxury",
-        category: "Soy Candles",
-        fragrance: "Sandalwood",
-        availability: "In Stock",
-        isNew: false
-      },
-      {
-        id: "prod_17",
-        name: "Hibiscus & Guava Wax Melt",
-        price: 18.00,
-        image: "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80",
-        badge: "New Arrival",
-        category: "Wax Melts",
-        fragrance: "Blueberry Fig",
-        availability: "In Stock",
-        isNew: true
-      },
-      {
-        id: "prod_18",
-        name: "Midnight Jasmine Pillar Candle",
-        price: 44.00,
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80",
-        badge: null,
-        category: "Pillar Candles",
-        fragrance: "White Jasmine",
-        availability: "Out of Stock",
-        isNew: false
-      },
-      {
-        id: "prod_19",
-        name: "Spiced Clove & Cinnamon Candle",
-        price: 42.00,
-        originalPrice: 55.00,
-        image: "https://images.unsplash.com/photo-1481349518771-20055b2a7b24?auto=format&fit=crop&w=600&q=80",
-        badge: "Best Seller",
-        category: "Soy Candles",
-        fragrance: "Blueberry Fig",
-        availability: "In Stock",
-        isNew: false
-      },
-      {
-        id: "prod_20",
-        name: "Pure Coconut Soy Travel Candle",
-        price: 26.00,
-        image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=600&q=80",
-        badge: "Eco-Friendly",
-        category: "Travel Size",
-        fragrance: "Sandalwood",
-        availability: "In Stock",
-        isNew: true
+      // Fetch Hero Banner
+      const { data: heroSettings } = await supabaseClient.from('settings').select('setting_value').eq('setting_key', 'hero_banner').single();
+      if (heroSettings) {
+        localStorage.setItem('chimini_hero_slides', JSON.stringify([heroSettings.setting_value]));
       }
-    ];
-    localStorage.setItem('chimini_products', JSON.stringify(defaultProducts));
-  }
 
-  // 3b. Gifts Default
-  if (!localStorage.getItem('chimini_gifts')) {
-    const defaultGifts = [
-      {
-        id: "gift_1",
-        name: "The Signature Ritual Hamper",
-        price: 120.00,
-        image: "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80",
-        badge: "Luxury Pack"
-      },
-      {
-        id: "gift_2",
-        name: "Duo Botanical Candle Gift Set",
-        price: 85.00,
-        image: "https://images.unsplash.com/photo-1481349518771-20055b2a7b24?auto=format&fit=crop&w=600&q=80",
-        badge: "Popular"
-      },
-      {
-        id: "gift_3",
-        name: "Miniature Scent Discovery Set",
-        price: 45.00,
-        image: "https://images.unsplash.com/photo-1508747703725-719777637510?auto=format&fit=crop&w=600&q=80",
-        badge: "Curated"
-      },
-      {
-        id: "gift_4",
-        name: "Eco-Luxe Aromatics Box",
-        price: 95.00,
-        image: "https://images.unsplash.com/photo-1590794056226-79ef3a8147e1?auto=format&fit=crop&w=600&q=80",
-        badge: "Eco-Friendly"
+      // Fetch Announcements
+      const { data: annSettings } = await supabaseClient.from('settings').select('setting_value').eq('setting_key', 'announcements').single();
+      if (annSettings) {
+        localStorage.setItem('chimini_announcements', JSON.stringify(annSettings.setting_value));
       }
-    ];
-    localStorage.setItem('chimini_gifts', JSON.stringify(defaultGifts));
-  }
-
-  // 4. Categories / Fragrances Default
-  if (!localStorage.getItem('chimini_categories')) {
-    const defaultCategories = [
-      { name: "Velvet Rose", image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=300&q=80" },
-      { name: "White Jasmine", image: "https://images.unsplash.com/photo-1508747703725-719777637510?auto=format&fit=crop&w=300&q=80" },
-      { name: "Sandalwood", image: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=300&q=80" },
-      { name: "Lemon Citrus", image: "https://images.unsplash.com/photo-1534531173927-aeb928d54385?auto=format&fit=crop&w=300&q=80" },
-      { name: "Blueberry Fig", image: "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?auto=format&fit=crop&w=300&q=80" }
-    ];
-    localStorage.setItem('chimini_categories', JSON.stringify(defaultCategories));
-  }
-
-  // 5. Featured Collections Default
-  if (!localStorage.getItem('chimini_collections')) {
-    const defaultCollections = [
-      {
-        title: "Festive Collection",
-        image: "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80",
-        link: "#bestSellers"
-      },
-      {
-        title: "Gift Hampers",
-        image: "https://images.unsplash.com/photo-1481349518771-20055b2a7b24?auto=format&fit=crop&w=800&q=80",
-        link: "#bestSellers"
-      },
-      {
-        title: "Artisan Wood Collection",
-        image: "https://images.unsplash.com/photo-1572917789718-490333767417?auto=format&fit=crop&w=800&q=80",
-        link: "#bestSellers"
-      },
-      {
-        title: "Eco Coconut Series",
-        image: "https://images.unsplash.com/photo-1590794056226-79ef3a8147e1?auto=format&fit=crop&w=800&q=80",
-        link: "#bestSellers"
-      }
-    ];
-    localStorage.setItem('chimini_collections', JSON.stringify(defaultCollections));
-  }
-
-  // 6. Testimonials Default
-  if (!localStorage.getItem('chimini_testimonials')) {
-    const defaultTestimonials = [
-      {
-        rating: 5,
-        text: "The Madagascar Vanilla candle burns incredibly clean and fills the room with the warmest, most natural vanilla scent. The packaging makes it the perfect ready-to-go luxury gift.",
-        author: "Eleanor Vance"
-      },
-      {
-        rating: 5,
-        text: "I purchased the Artisan Gift Hamper for a colleague and she was absolutely thrilled. The attention to detail, ribbon curation, and raw fragrance blends feel so premium.",
-        author: "Marcus Sterling"
-      },
-      {
-        rating: 5,
-        text: "Eco-Luxe Coconut candles are my absolute favorites. Not only is the crackling burn beautiful, but knowing it's 100% natural soy wax gives me complete peace of mind.",
-        author: "Aria Thorne"
-      }
-    ];
-    localStorage.setItem('chimini_testimonials', JSON.stringify(defaultTestimonials));
-  }
-
-  // 7. Banners & General Graphics Defaults
-  if (!localStorage.getItem('chimini_banners')) {
-    const defaultBanners = {
-      promoBanner: {
-        image: "https://images.unsplash.com/photo-1605651260444-c6031201944e?auto=format&fit=crop&w=1200&q=80",
-        link: "#bestSellers",
-        tagline: "Exclusive Review Reward",
-        title: "Share Your Light",
-        desc: "Receive 10% off for a review, 15% off for a photo review, and 20% off for a video review. Spark the glow."
-      },
-      campaignBanner: {
-        image: "https://images.unsplash.com/photo-1523293182086-7651a899d37f?auto=format&fit=crop&w=1600&q=80",
-        link: "#bestSellers",
-        title: "Scent of the Month",
-        subtitle: "Get 50% Off Our Signature Aromatics"
-      },
-      storyBanner: {
-        image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80",
-        link: "#brandStory",
-        title: "Pure Soy, Clean Light, Handcrafted",
-        desc: "At CHIMINI, each candle is individually poured with attention to balance and sensory purity. We marry rich botanical waxes, pure essential oils, and organic cotton wicks for a slow, clean soot-free burn that elevates any room."
-      }
-    };
-    localStorage.setItem('chimini_banners', JSON.stringify(defaultBanners));
-  }
-
-  // 8. Featured Products Default (4 hand-picked IDs for homepage Best Sellers)
-  if (!localStorage.getItem('chimini_featured')) {
-    localStorage.setItem('chimini_featured', JSON.stringify(['prod_1', 'prod_2', 'prod_3', 'prod_4']));
+    } catch (e) {
+      console.error("Supabase sync error:", e);
+    }
+  } else {
+    console.warn("Supabase client not initialized. Using local defaults.");
   }
 }
-
-/* ==========================================================================
-   DOM RENDERING ENGINE
-   ========================================================================== */
 
 function renderStore() {
   // 1. Render Announcement Bar Carousel Slides
@@ -1362,3 +995,5 @@ function initCollectionsPage() {
   // ── Initial render ──
   applyFiltersAndSort();
 }
+
+

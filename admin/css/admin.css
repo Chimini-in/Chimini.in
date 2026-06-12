@@ -1,0 +1,182 @@
+/* admin.css - Admin Portal Styles */
+:root {
+  --admin-sidebar-width: 260px;
+  --admin-bg: #F4F7F6;
+  --admin-text: #333333;
+  --admin-sidebar-bg: #2E1E12;
+  --admin-sidebar-text: #F5EBE6;
+  --admin-border: #E0E0E0;
+  --admin-primary: #4D1B1B;
+}
+
+body.admin-body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans), sans-serif;
+  background-color: var(--admin-bg);
+  color: var(--admin-text);
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.admin-sidebar {
+  width: var(--admin-sidebar-width);
+  background-color: var(--admin-sidebar-bg);
+  color: var(--admin-sidebar-text);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+}
+
+.admin-logo {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 0 20px;
+}
+
+.admin-logo img {
+  height: 40px;
+  filter: brightness(0) invert(1);
+}
+
+.admin-nav {
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.admin-nav-item {
+  display: block;
+  padding: 15px 25px;
+  color: #B0A195;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  border-left: 3px solid transparent;
+}
+
+.admin-nav-item:hover, .admin-nav-item.active {
+  color: var(--admin-sidebar-text);
+  background-color: rgba(255,255,255,0.05);
+  border-left-color: var(--admin-primary);
+}
+
+.admin-logout {
+  padding: 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.admin-logout-btn {
+  width: 100%;
+  padding: 10px;
+  background: transparent;
+  border: 1px solid #B0A195;
+  color: #B0A195;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-logout-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--admin-sidebar-text);
+  border-color: var(--admin-sidebar-text);
+}
+
+.admin-main {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.admin-header {
+  height: 70px;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid var(--admin-border);
+  display: flex;
+  align-items: center;
+  padding: 0 30px;
+  justify-content: space-between;
+}
+
+.admin-content {
+  flex-grow: 1;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+.admin-card {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 25px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  margin-bottom: 25px;
+}
+
+.admin-card-title {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  color: var(--admin-primary);
+  border-bottom: 1px solid var(--admin-border);
+  padding-bottom: 10px;
+}
+
+/* Tables */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th, .admin-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-table th {
+  background-color: #F9F9F9;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: #666;
+}
+
+/* Forms */
+.admin-form-group {
+  margin-bottom: 20px;
+}
+
+.admin-form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.admin-form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--admin-border);
+  border-radius: 4px;
+}
+
+/* Modal */
+.admin-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.admin-modal {
+  background: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
