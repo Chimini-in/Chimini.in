@@ -9,10 +9,6 @@
 </head>
 <body>
 
-  <!-- Announcement Bar -->
-  <div class="announcement-bar" id="announcementBar">
-    <div class="announcement-slider" id="announcementSlider"></div>
-  </div>
 
   <!-- Header & Navigation -->
   <header id="mainHeader">
@@ -25,7 +21,7 @@
           </div>
         </div>
         <div class="brand-logo">
-          <a href="index.html" id="brandLogoText">CHIMINI</a>
+          <a href="index.html" id="brandLogoText"><img src="logo.png" alt="CHIMINI Logo" style="height: 35px; width: auto;"></a>
         </div>
         <div class="header-actions">
           <button class="header-icon-btn" aria-label="User Account" onclick="alert('Account system demo')">
@@ -53,14 +49,6 @@
   </header>
 
   <main>
-    <!-- Collections Page Hero -->
-    <section class="collections-page-hero">
-      <div class="collections-hero-content">
-        <span class="collections-hero-eyebrow">Artisan Fragrance Curations</span>
-        <h1 class="collections-hero-title">All Collections</h1>
-        <p class="collections-hero-desc">Explore our full range of luxury hand-poured soy candles, botanical diffusers, wax melts &amp; curated gift sets crafted with pure essential oils.</p>
-      </div>
-    </section>
 
     <!-- Catalog Section -->
     <section class="catalog-section">
@@ -223,7 +211,7 @@
 
     <div class="filter-drawer-footer">
       <button class="filter-clear-all-btn" id="clearFiltersBtn">Clear All</button>
-      <button class="btn-gold filter-apply-btn" onclick="document.getElementById('filterCloseBtn').click()">Apply Filters</button>
+      <button class="btn-accent filter-apply-btn" onclick="document.getElementById('filterCloseBtn').click()">Apply Filters</button>
     </div>
   </aside>
 
@@ -232,7 +220,7 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-info">
-          <div class="footer-info-logo" id="footerLogoText">CHIMINI</div>
+          <div class="footer-info-logo" id="footerLogoText"><img src="logo.png" alt="CHIMINI Logo" style="height: 40px; width: auto; filter: brightness(0) invert(1);"></div>
           <p class="footer-info-desc">Bespoke home scenting and natural luxury candles crafted with botanical purity. Making gift-giving an unforgettable ritual.</p>
           <div class="footer-socials">
             <a href="#" class="footer-social-icon" aria-label="Facebook">
@@ -304,7 +292,7 @@
           <span>Estimated Total</span>
           <span id="cartTotalValue">$0.00</span>
         </div>
-        <button class="btn-gold cart-checkout-btn" onclick="alert('Checkout initiated! Thank you for purchasing from CHIMINI.')">Proceed to Checkout</button>
+        <button class="btn-accent cart-checkout-btn" onclick="alert('Checkout initiated! Thank you for purchasing from CHIMINI.')">Proceed to Checkout</button>
       </div>
     </div>
   </div>
@@ -340,7 +328,7 @@
               <div class="admin-form-group"><label for="newProductPrice">Price ($)</label><input type="number" id="newProductPrice" class="admin-form-control" step="0.01" required></div>
               <div class="admin-form-group"><label for="newProductImage">Image URL</label><input type="text" id="newProductImage" class="admin-form-control" required></div>
               <div class="admin-form-group"><label for="newProductBadge">Badge (Optional)</label><input type="text" id="newProductBadge" class="admin-form-control"></div>
-              <button type="submit" class="btn-gold" style="width:100%;">Create Product</button>
+              <button type="submit" class="btn-accent" style="width:100%;">Create Product</button>
             </form>
           </div>
           <div class="admin-section" id="tabSettings">
@@ -349,7 +337,7 @@
               <div class="admin-form-group"><label for="announcement1">Announcement 1</label><input type="text" id="announcement1" class="admin-form-control"></div>
               <div class="admin-form-group"><label for="announcement2">Announcement 2</label><input type="text" id="announcement2" class="admin-form-control"></div>
               <div class="admin-form-group"><label for="announcement3">Announcement 3</label><input type="text" id="announcement3" class="admin-form-control"></div>
-              <button type="submit" class="btn-gold" style="width:100%;margin-top:20px;">Save Announcements</button>
+              <button type="submit" class="btn-accent" style="width:100%;margin-top:20px;">Save Announcements</button>
             </form>
           </div>
         </div>

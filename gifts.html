@@ -23,7 +23,7 @@
       transform: translate(-50%, -50%) scale(1.2);
     }
     .wrap-option.active {
-      box-shadow: 0 0 0 3px var(--color-ivory), 0 0 0 5px var(--color-gold);
+      box-shadow: 0 0 0 3px var(--color-ivory), 0 0 0 5px var(--color-accent);
     }
     @media (max-width: 992px) {
       .customization-layout {
@@ -35,12 +35,7 @@
 </head>
 <body>
 
-  <!-- 1. Top Announcement Bar -->
-  <div class="announcement-bar" id="announcementBar">
-    <div class="announcement-slider" id="announcementSlider">
-      <!-- Dynamic slides -->
-    </div>
-  </div>
+
 
   <!-- 2. Header & Navigation -->
   <header id="mainHeader">
@@ -54,7 +49,7 @@
         </div>
 
         <div class="brand-logo">
-          <a href="index.html" id="brandLogoText">CHIMINI</a>
+          <a href="index.html" id="brandLogoText"><img src="logo.png" alt="CHIMINI Logo" style="height: 35px; width: auto;"></a>
         </div>
 
         <div class="header-actions">
@@ -86,14 +81,7 @@
   </header>
 
   <main>
-    <!-- Page Hero Banner -->
-    <section class="page-hero-section" style="background: linear-gradient(rgba(46,30,18,0.5), rgba(46,30,18,0.5)), url('https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat; padding: 120px 0; text-align: center; color: var(--color-white);">
-      <div class="container">
-        <span class="hero-slide-subtitle" style="margin-bottom:12px; display:block;">Bespoke Gift-Giving Rituals</span>
-        <h1 class="hero-slide-title" style="font-size:3.2rem; margin-bottom:15px; line-height:1.2;">The Art of Giving</h1>
-        <p style="font-family: var(--font-sans); font-size:0.95rem; letter-spacing:0.1em; color:var(--color-beige); max-width:650px; margin: 0 auto; line-height:1.7;">Elevate your gift giving. Select from our pre-curated fragrance hampers or customize your wrapping and write a hand-written botanical card note.</p>
-      </div>
-    </section>
+
 
     <!-- Gifts catalog grid -->
     <section style="padding: 100px 0;">
@@ -123,9 +111,9 @@
             
             <!-- Wrapping Paper Selector -->
             <div style="margin-bottom: 30px;">
-              <h4 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 15px;">1. Select Luxury Wrapping Paper: <span id="selectedWrapName" style="color: var(--color-gold); font-weight: 600;">Linen Gold</span></h4>
+              <h4 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 15px;">1. Select Luxury Wrapping Paper: <span id="selectedWrapName" style="color: var(--color-accent); font-weight: 600;">Linen Gold</span></h4>
               <div class="wrap-selector-container" style="display: flex; gap: 15px;">
-                <button class="wrap-option active" data-wrap="Linen Gold" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--color-gold); background: #f0e2b6; position: relative;" aria-label="Linen Gold wrap"></button>
+                <button class="wrap-option active" data-wrap="Linen Gold" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--color-accent); background: #f0e2b6; position: relative;" aria-label="Linen Gold wrap"></button>
                 <button class="wrap-option" data-wrap="Crimson Velvet" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid transparent; background: #800020; position: relative;" aria-label="Crimson Velvet wrap"></button>
                 <button class="wrap-option" data-wrap="Forest Silk" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid transparent; background: #1b4d3e; position: relative;" aria-label="Forest Silk wrap"></button>
               </div>
@@ -137,7 +125,7 @@
               <textarea id="giftNoteInput" class="admin-form-control" rows="5" style="width: 100%; padding: 15px; border: 1px solid var(--color-border); font-family: var(--font-sans); font-size: 0.9rem; resize: none; color: var(--color-text-dark); background-color: var(--color-ivory);" placeholder="Write your premium greeting message here..."></textarea>
             </div>
             
-            <button class="btn-gold" style="width: 100%; margin-top: 30px;" onclick="alert('Bespoke custom packaging saved to your cart!')">Save Customization</button>
+            <button class="btn-accent" style="width: 100%; margin-top: 30px;" onclick="alert('Bespoke custom packaging saved to your cart!')">Save Customization</button>
           </div>
 
           <!-- Right Column: Card Preview -->
@@ -145,12 +133,12 @@
             <h4 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 25px; text-align: center; color: var(--color-text-muted);">Live Card Preview</h4>
             
             <!-- Virtual Greeting Card -->
-            <div class="gift-card-preview-card" style="width: 100%; max-width: 450px; aspect-ratio: 1.5; background: #FAF9F6; border: 2px solid var(--color-gold); padding: 35px; box-shadow: 0 15px 40px rgba(46,30,18,0.1); position: relative; border-radius: 4px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div class="gift-card-preview-card" style="width: 100%; max-width: 450px; aspect-ratio: 1.5; background: #FAF9F6; border: 2px solid var(--color-accent); padding: 35px; box-shadow: 0 15px 40px rgba(46,30,18,0.1); position: relative; border-radius: 4px; display: flex; flex-direction: column; justify-content: space-between;">
               <!-- Botanical Corner Accents -->
-              <div style="position: absolute; top: 10px; left: 10px; font-family: var(--font-serif); font-size: 1.2rem; color: var(--color-gold); opacity: 0.5;">❀</div>
-              <div style="position: absolute; bottom: 10px; right: 10px; font-family: var(--font-serif); font-size: 1.2rem; color: var(--color-gold); opacity: 0.5;">❀</div>
+              <div style="position: absolute; top: 10px; left: 10px; font-family: var(--font-serif); font-size: 1.2rem; color: var(--color-accent); opacity: 0.5;">❀</div>
+              <div style="position: absolute; bottom: 10px; right: 10px; font-family: var(--font-serif); font-size: 1.2rem; color: var(--color-accent); opacity: 0.5;">❀</div>
               
-              <div style="font-family: var(--font-serif); font-style: italic; color: var(--color-gold); font-size: 1.2rem; text-align: center; margin-bottom: 10px; letter-spacing: 0.05em;">A Gift For You</div>
+              <div style="font-family: var(--font-serif); font-style: italic; color: var(--color-accent); font-size: 1.2rem; text-align: center; margin-bottom: 10px; letter-spacing: 0.05em;">A Gift For You</div>
               <p id="giftCardNotePreview" style="font-family: var(--font-serif); font-style: italic; font-size: 1.1rem; text-align: center; line-height: 1.6; color: var(--color-primary-dark); flex-grow: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; max-height: 120px;">Your message will appear here...</p>
               <div style="text-align: center; font-size: 0.7rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--color-text-muted); border-top: 1px solid var(--color-border); padding-top: 15px;">CHIMINI LUXE FRAGRANCES</div>
             </div>
@@ -165,7 +153,7 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-info">
-          <div class="footer-info-logo" id="footerLogoText">CHIMINI</div>
+          <div class="footer-info-logo" id="footerLogoText"><img src="logo.png" alt="CHIMINI Logo" style="height: 40px; width: auto; filter: brightness(0) invert(1);"></div>
           <p class="footer-info-desc">Bespoke home scenting and natural luxury candles crafted with botanical purity. Making gift-giving an unforgettable ritual.</p>
           <div class="footer-socials">
             <a href="#" class="footer-social-icon" aria-label="Facebook">
@@ -249,7 +237,7 @@
           <span>Estimated Total</span>
           <span id="cartTotalValue">$0.00</span>
         </div>
-        <button class="btn-gold cart-checkout-btn" onclick="alert('Checkout initiated! Thank you for purchasing from CHIMINI.')">Proceed to Checkout</button>
+        <button class="btn-accent cart-checkout-btn" onclick="alert('Checkout initiated! Thank you for purchasing from CHIMINI.')">Proceed to Checkout</button>
       </div>
     </div>
   </div>
@@ -323,7 +311,7 @@
                 <textarea id="adminStoryDesc" class="admin-form-control" rows="3"></textarea>
               </div>
               
-              <button type="submit" class="btn-gold" style="width: 100%; margin-top: 20px;">Save Banner Setup</button>
+              <button type="submit" class="btn-accent" style="width: 100%; margin-top: 20px;">Save Banner Setup</button>
             </form>
           </div>
 
@@ -364,7 +352,7 @@
                 <label for="newProductBadge">Badge (Optional)</label>
                 <input type="text" id="newProductBadge" class="admin-form-control" placeholder="e.g. Best Seller">
               </div>
-              <button type="submit" class="btn-gold" style="width: 100%;">Create Product</button>
+              <button type="submit" class="btn-accent" style="width: 100%;">Create Product</button>
             </form>
           </div>
 
@@ -384,7 +372,7 @@
                 <label for="announcement3">Announcement Text 3</label>
                 <input type="text" id="announcement3" class="admin-form-control">
               </div>
-              <button type="submit" class="btn-gold" style="width: 100%; margin-top: 20px;">Save Announcements</button>
+              <button type="submit" class="btn-accent" style="width: 100%; margin-top: 20px;">Save Announcements</button>
             </form>
           </div>
         </div>

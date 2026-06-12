@@ -857,7 +857,7 @@ function renderCartItems() {
       <div class="cart-empty-state">
         <svg viewBox="0 0 24 24"><path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm7 17H5V8h14v12z"/></svg>
         <span class="cart-empty-text">Your cart is currently empty.</span>
-        <button class="btn-gold" onclick="document.getElementById('cartOverlay').classList.remove('open')">Continue Shopping</button>
+        <button class="btn-accent" onclick="document.getElementById('cartOverlay').classList.remove('open')">Continue Shopping</button>
       </div>
     `;
     if (cartFooter) cartFooter.style.display = 'none';
@@ -893,7 +893,7 @@ function renderCartItems() {
   // High-end Shipping calculation feedback
   if (subtotal >= 150) {
     if (cartShippingValue) {
-      cartShippingValue.innerHTML = '<strong style="color: var(--color-gold);">FREE SHIPPING</strong>';
+      cartShippingValue.innerHTML = '<strong style="color: var(--color-accent);">FREE SHIPPING</strong>';
     }
     if (cartTotalValue) cartTotalValue.textContent = `$${subtotal.toFixed(2)}`;
   } else {

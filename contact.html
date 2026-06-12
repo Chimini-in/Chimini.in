@@ -39,7 +39,7 @@
     }
     .contact-control:focus {
       outline: none;
-      border-color: var(--color-gold);
+      border-color: var(--color-accent);
       background-color: var(--color-white);
     }
     .contact-details-panel {
@@ -62,7 +62,7 @@
       height: 40px;
       border-radius: 50%;
       background: var(--color-beige);
-      color: var(--color-gold);
+      color: var(--color-accent);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -99,12 +99,7 @@
 </head>
 <body>
 
-  <!-- 1. Top Announcement Bar -->
-  <div class="announcement-bar" id="announcementBar">
-    <div class="announcement-slider" id="announcementSlider">
-      <!-- Dynamic slides -->
-    </div>
-  </div>
+
 
   <!-- 2. Header & Navigation -->
   <header id="mainHeader">
@@ -118,7 +113,7 @@
         </div>
 
         <div class="brand-logo">
-          <a href="index.html" id="brandLogoText">CHIMINI</a>
+          <a href="index.html" id="brandLogoText"><img src="logo.png" alt="CHIMINI Logo" style="height: 35px; width: auto;"></a>
         </div>
 
         <div class="header-actions">
@@ -150,14 +145,7 @@
   </header>
 
   <main>
-    <!-- Page Hero Banner -->
-    <section class="page-hero-section" style="background: linear-gradient(rgba(46,30,18,0.5), rgba(46,30,18,0.5)), url('https://images.unsplash.com/photo-1523293182086-7651a899d37f?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat; padding: 120px 0; text-align: center; color: var(--color-white);">
-      <div class="container">
-        <span class="hero-slide-subtitle" style="margin-bottom:12px; display:block;">Customer Care & Support</span>
-        <h1 class="hero-slide-title" style="font-size:3.2rem; margin-bottom:15px; line-height:1.2;">Get in Touch</h1>
-        <p style="font-family: var(--font-sans); font-size:0.95rem; letter-spacing:0.1em; color:var(--color-beige); max-width:650px; margin: 0 auto; line-height:1.7;">Our dedicated client concierge is available to assist you with order tracking, custom gifting designs, or product reviews.</p>
-      </div>
-    </section>
+
 
     <!-- Split Layout Contact Section -->
     <section style="padding: 100px 0;">
@@ -187,7 +175,7 @@
               </div>
               <div>
                 <h3 style="font-family: var(--font-serif); font-size: 1.2rem; margin-bottom: 5px;">Email Concierge</h3>
-                <p style="color: var(--color-text-muted); font-size: 0.9rem;"><a href="mailto:concierge@chiminiluxe.com" style="color: var(--color-gold); font-weight: 500;">concierge@chiminiluxe.com</a></p>
+                <p style="color: var(--color-text-muted); font-size: 0.9rem;"><a href="mailto:concierge@chiminiluxe.com" style="color: var(--color-accent); font-weight: 500;">concierge@chiminiluxe.com</a></p>
               </div>
             </div>
 
@@ -242,12 +230,12 @@
                 <textarea id="contactMessage" class="contact-control" rows="6" placeholder="Describe your request in detail..." required></textarea>
               </div>
 
-              <button type="submit" class="btn-gold" style="width: 100%;">Submit Concierge Request</button>
+              <button type="submit" class="btn-accent" style="width: 100%;">Submit Concierge Request</button>
             </form>
 
             <!-- Success message card (hidden by default) -->
             <div id="contactSuccess" style="display: none; text-align: center; padding: 40px 10px;">
-              <span style="font-size: 3.5rem; display: block; margin-bottom: 20px; color: var(--color-gold);">❀</span>
+              <span style="font-size: 3.5rem; display: block; margin-bottom: 20px; color: var(--color-accent);">❀</span>
               <h3 style="font-family: var(--font-serif); font-size: 1.8rem; margin-bottom: 15px; color: var(--color-primary-dark);">Request Received</h3>
               <p style="color: var(--color-text-muted); font-size: 1rem; line-height: 1.7; max-width: 400px; margin: 0 auto 25px;">Thank you, <strong class="sender-name" style="color: var(--color-primary-dark);">Guest</strong>! Your concierge request has been successfully dispatched. A specialist will review your details and respond within 24 hours.</p>
               <button class="btn-outline" onclick="location.reload()">Send Another Message</button>
@@ -265,7 +253,7 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-info">
-          <div class="footer-info-logo" id="footerLogoText">CHIMINI</div>
+          <div class="footer-info-logo" id="footerLogoText"><img src="logo.png" alt="CHIMINI Logo" style="height: 40px; width: auto; filter: brightness(0) invert(1);"></div>
           <p class="footer-info-desc">Bespoke home scenting and natural luxury candles crafted with botanical purity. Making gift-giving an unforgettable ritual.</p>
           <div class="footer-socials">
             <a href="#" class="footer-social-icon" aria-label="Facebook">
@@ -349,7 +337,7 @@
           <span>Estimated Total</span>
           <span id="cartTotalValue">$0.00</span>
         </div>
-        <button class="btn-gold cart-checkout-btn" onclick="alert('Checkout initiated! Thank you for purchasing from CHIMINI.')">Proceed to Checkout</button>
+        <button class="btn-accent cart-checkout-btn" onclick="alert('Checkout initiated! Thank you for purchasing from CHIMINI.')">Proceed to Checkout</button>
       </div>
     </div>
   </div>
@@ -423,7 +411,7 @@
                 <textarea id="adminStoryDesc" class="admin-form-control" rows="3"></textarea>
               </div>
               
-              <button type="submit" class="btn-gold" style="width: 100%; margin-top: 20px;">Save Banner Setup</button>
+              <button type="submit" class="btn-accent" style="width: 100%; margin-top: 20px;">Save Banner Setup</button>
             </form>
           </div>
 
@@ -464,7 +452,7 @@
                 <label for="newProductBadge">Badge (Optional)</label>
                 <input type="text" id="newProductBadge" class="admin-form-control" placeholder="e.g. Best Seller">
               </div>
-              <button type="submit" class="btn-gold" style="width: 100%;">Create Product</button>
+              <button type="submit" class="btn-accent" style="width: 100%;">Create Product</button>
             </form>
           </div>
 
@@ -484,7 +472,7 @@
                 <label for="announcement3">Announcement Text 3</label>
                 <input type="text" id="announcement3" class="admin-form-control">
               </div>
-              <button type="submit" class="btn-gold" style="width: 100%; margin-top: 20px;">Save Announcements</button>
+              <button type="submit" class="btn-accent" style="width: 100%; margin-top: 20px;">Save Announcements</button>
             </form>
           </div>
         </div>
