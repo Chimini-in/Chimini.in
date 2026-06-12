@@ -1574,6 +1574,50 @@ footer {
   text-decoration: underline;
 }
 
+.admin-featured-row td {
+  background-color: rgba(197, 160, 89, 0.05); /* very light gold */
+}
+
+.admin-featured-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background-color: var(--color-white);
+  transition: var(--transition-smooth);
+  user-select: none;
+}
+
+.admin-featured-toggle:hover {
+  border-color: var(--color-gold);
+}
+
+.admin-featured-checkbox {
+  cursor: pointer;
+}
+
+.admin-featured-checkbox:disabled {
+  cursor: not-allowed;
+}
+
+.admin-featured-toggle:has(.admin-featured-checkbox:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-featured-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-dark);
+}
+
+.admin-featured-checkbox:checked + .admin-featured-label {
+  color: var(--color-gold);
+}
+
 /* --- Responsive Adjustments --- */
 @media (max-width: 1100px) {
   .product-grid {

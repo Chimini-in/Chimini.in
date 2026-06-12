@@ -423,6 +423,11 @@ function initStoreData() {
     };
     localStorage.setItem('chimini_banners', JSON.stringify(defaultBanners));
   }
+
+  // 8. Featured Products Default (4 hand-picked IDs for homepage Best Sellers)
+  if (!localStorage.getItem('chimini_featured')) {
+    localStorage.setItem('chimini_featured', JSON.stringify(['prod_1', 'prod_2', 'prod_3', 'prod_4']));
+  }
 }
 
 /* ==========================================================================
@@ -464,23 +469,32 @@ function renderStore() {
     }
   }
 
-  // 3. Render Best Sellers Products
-  const products = JSON.parse(localStorage.getItem('chimini_products'));
+  // 3. Render Best Sellers Products (only the 4 manually featured products)
+  const allProducts   = JSON.parse(localStorage.getItem('chimini_products')) || [];
+  const featuredIds   = JSON.parse(localStorage.getItem('chimini_featured'))   || [];
+  const featuredProds = featuredIds
+    .map(id => allProducts.find(p => p.id === id))
+    .filter(Boolean)
+    .slice(0, 4);
   const productGrid = document.getElementById('productGrid');
-  if (productGrid && products) {
-    productGrid.innerHTML = products.map(prod => `
-      <article class="product-card" data-name="${prod.name.toLowerCase()}">
-        <div class="product-img-wrapper">
-          ${prod.badge ? `<span class="product-badge">${prod.badge}</span>` : ''}
-          <img src="${prod.image}" alt="${prod.name}" class="product-img" loading="lazy">
-        </div>
-        <div class="product-info">
-          <h3 class="product-name">${prod.name}</h3>
-          <span class="product-price">$${prod.price.toFixed(2)}</span>
-          <button class="product-btn" onclick="addToCart('${prod.id}')">Add to Cart</button>
-        </div>
-      </article>
-    `).join('');
+  if (productGrid) {
+    if (featuredProds.length === 0) {
+      productGrid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--color-text-muted);padding:40px 0;">No featured products selected. Choose up to 4 in the Admin panel.</p>`;
+    } else {
+      productGrid.innerHTML = featuredProds.map(prod => `
+        <article class="product-card" data-name="${prod.name.toLowerCase()}">
+          <div class="product-img-wrapper">
+            ${prod.badge ? `<span class="product-badge">${prod.badge}</span>` : ''}
+            <img src="${prod.image}" alt="${prod.name}" class="product-img" loading="lazy">
+          </div>
+          <div class="product-info">
+            <h3 class="product-name">${prod.name}</h3>
+            <span class="product-price">$${prod.price.toFixed(2)}</span>
+            <button class="product-btn" onclick="addToCart('${prod.id}')">Add to Cart</button>
+          </div>
+        </article>
+      `).join('');
+    }
   }
 
   // 3b. Render Gift Hampers (Gifts Page Specific)
@@ -1084,32 +1098,64 @@ function populateAdminForms() {
 }
 
 function renderAdminProductsTable() {
-  const products = JSON.parse(localStorage.getItem('chimini_products')) || [];
-  const tableBody = document.getElementById('adminProductsTableBody');
+  const products    = JSON.parse(localStorage.getItem('chimini_products')) || [];
+  const featuredIds = JSON.parse(localStorage.getItem('chimini_featured'))  || [];
+  const tableBody   = document.getElementById('adminProductsTableBody');
   if (!tableBody) return;
 
-  tableBody.innerHTML = products.map(prod => `
-    <tr>
-      <td><img src="${prod.image}" alt="${prod.name}" class="admin-thumbnail-small"></td>
-      <td><strong>${prod.name}</strong></td>
-      <td>$${prod.price.toFixed(2)}</td>
-      <td>
-        <button class="admin-action-btn-danger" onclick="deleteProductFromAdmin('${prod.id}')">Delete</button>
-      </td>
-    </tr>
-  `).join('');
+  tableBody.innerHTML = products.map(prod => {
+    const isFeatured = featuredIds.includes(prod.id);
+    const isDisabled = !isFeatured && featuredIds.length >= 4;
+    return `
+      <tr class="${isFeatured ? 'admin-featured-row' : ''}">
+        <td><img src="${prod.image}" alt="${prod.name}" class="admin-thumbnail-small"></td>
+        <td><strong>${prod.name}</strong><br><span style="font-size:0.75rem;color:var(--color-text-muted)">${prod.category}</span></td>
+        <td>$${prod.price.toFixed(2)}</td>
+        <td>
+          <label class="admin-featured-toggle" title="${isDisabled ? 'Max 4 featured products. Deselect another first.' : (isFeatured ? 'Remove from Best Sellers' : 'Add to Best Sellers')}">
+            <input type="checkbox"
+              ${isFeatured ? 'checked' : ''}
+              ${isDisabled ? 'disabled' : ''}
+              onchange="toggleFeaturedProduct('${prod.id}', this.checked)"
+              class="admin-featured-checkbox">
+            <span class="admin-featured-label">${isFeatured ? '★ Featured' : '☆ Feature'}</span>
+          </label>
+        </td>
+      </tr>`;
+  }).join('');
+
+  // Update featured count indicator
+  const countEl = document.getElementById('adminFeaturedCount');
+  if (countEl) countEl.textContent = `${featuredIds.length} / 4 featured`;
 }
 
+window.toggleFeaturedProduct = function(productId, isChecked) {
+  let featuredIds = JSON.parse(localStorage.getItem('chimini_featured')) || [];
+  if (isChecked) {
+    if (featuredIds.length >= 4) return; // Hard cap
+    if (!featuredIds.includes(productId)) featuredIds.push(productId);
+  } else {
+    featuredIds = featuredIds.filter(id => id !== productId);
+  }
+  localStorage.setItem('chimini_featured', JSON.stringify(featuredIds));
+  renderAdminProductsTable();
+  renderStore(); // Live-update homepage Best Sellers
+};
+
 window.deleteProductFromAdmin = function(productId) {
-  if (confirm('Are you sure you want to remove this product from the Best Sellers catalog?')) {
+  if (confirm('Are you sure you want to delete this product from the catalog?')) {
     let products = JSON.parse(localStorage.getItem('chimini_products')) || [];
     products = products.filter(p => p.id !== productId);
     localStorage.setItem('chimini_products', JSON.stringify(products));
-    
+    // Also remove from featured if it was there
+    let featuredIds = JSON.parse(localStorage.getItem('chimini_featured')) || [];
+    featuredIds = featuredIds.filter(id => id !== productId);
+    localStorage.setItem('chimini_featured', JSON.stringify(featuredIds));
     renderAdminProductsTable();
     renderStore();
   }
 };
+
 
 function initGiftsPage() {
   const giftNoteInput = document.getElementById('giftNoteInput');
