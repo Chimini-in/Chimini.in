@@ -93,21 +93,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       let tableRows = '';
       if (products) {
         products.forEach(p => {
-          tableRows += 
+          tableRows += `
             <tr>
-              <td><img src=" + (p.image_url || '') + " style="height:40px; border-radius:4px;"></td>
-              <td> + p.title + </td>
-              <td>$ + p.price + </td>
-              <td> + (p.availability ? 'In Stock' : 'Out of Stock') + </td>
+              <td><img src="${p.image_url || ''}" style="height:40px; border-radius:4px;"></td>
+              <td>${p.title}</td>
+              <td>$${p.price}</td>
+              <td>${p.availability ? 'In Stock' : 'Out of Stock'}</td>
               <td>
-                <button class="btn-accent edit-btn" data-id=" + p.id + " style="padding: 5px 10px; font-size: 0.8rem;">Edit</button>
+                <button class="btn-accent edit-btn" data-id="${p.id}" style="padding: 5px 10px; font-size: 0.8rem;">Edit</button>
               </td>
             </tr>
-          ;
+          `;
         });
       }
 
-      adminContent.innerHTML = 
+      adminContent.innerHTML = `
         <div class="admin-card">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h3 class="admin-card-title" style="margin:0; border:none; padding:0;">Products Management</h3>
@@ -124,18 +124,18 @@ document.addEventListener('DOMContentLoaded', async () => {
               </tr>
             </thead>
             <tbody>
-               + tableRows + 
+              ${tableRows}
             </tbody>
           </table>
         </div>
-      ;
+      `;
     } else {
-      adminContent.innerHTML = 
+      adminContent.innerHTML = `
         <div class="admin-card">
           <h3 class="admin-card-title">Module Pending</h3>
-          <p>The  + tabName +  module is currently being built.</p>
+          <p>The ${tabName} module is currently being built.</p>
         </div>
-      ;
+      `;
     }
   }
 
