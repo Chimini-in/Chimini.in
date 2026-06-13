@@ -2491,3 +2491,28 @@ footer {
   .catalog-toolbar-center { order: -1; flex: 0 0 100%; text-align: left; }
 }
 
+
+/* --- Brand Logo Responsive Size --- */
+.brand-logo-img {
+  height: 95px;
+  width: auto;
+  transition: height 0.3s ease;
+}
+
+@media (max-width: 1024px) {
+  .brand-logo-img {
+    height: 80px;
+  }
+}
+
+@media (max-width: 768px) {
+  .brand-logo-img {
+    height: 65px;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-logo-img {
+    height: 55px;
+  }
+}
