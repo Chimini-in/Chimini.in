@@ -28,45 +28,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.href = 'login.html';
   });
 
+      async function handleMigration() {
     const migrateDataBtn = document.getElementById('migrateDataBtn');
-  const migrateStatus = document.getElementById('migrateStatus');
+    const migrateStatus = document.getElementById('migrateStatus');
+    
+    if (!migrateDataBtn || !migrateStatus) return;
+    
+    migrateDataBtn.disabled = true;
+    migrateStatus.textContent = "Starting migration...";
+    migrateStatus.style.color = "blue";
 
-  if (migrateDataBtn) {
-    migrateDataBtn.addEventListener('click', async () => {
-      migrateDataBtn.disabled = true;
-      migrateStatus.textContent = "Starting migration...";
-      migrateStatus.style.color = "blue";
-
-      try {
-        const localProducts = JSON.parse(localStorage.getItem('chimini_products') || '[]');
-        if (localProducts.length > 0) {
-          migrateStatus.textContent = "Migrating " + localProducts.length + " products...";
-          
-          for (const p of localProducts) {
-            await supabaseClient.from('products').insert({
-              title: p.name,
-              price: p.price,
-              image_url: p.image,
-              category: p.category || 'Soy Candles',
-              fragrance: p.fragrance || 'Signature',
-              availability: p.availability === 'In Stock',
-              badges: p.badge || ''
-            });
-          }
-        }
+    try {
+      const localProducts = JSON.parse(localStorage.getItem('chimini_products') || '[]');
+      if (localProducts.length > 0) {
+        migrateStatus.textContent = "Migrating " + localProducts.length + " products...";
         
-        migrateStatus.textContent = "Migration complete! Products are now in Supabase.";
-        migrateStatus.style.color = "green";
-      } catch (err) {
-        migrateStatus.textContent = "Error: " + err.message;
-        migrateStatus.style.color = "red";
-      } finally {
-        migrateDataBtn.disabled = false;
+        for (const p of localProducts) {
+          await supabaseClient.from('products').insert({
+            id: p.id,
+            title: p.title,
+            description: p.description,
+            price: p.price,
+            image_url: p.image_url,
+            category: p.category || 'signature',
+            availability: p.availability !== false
+          });
+        }
+        migrateStatus.textContent = "Migration complete! " + localProducts.length + " products imported.";
+      } else {
+        migrateStatus.textContent = "No local products found to migrate.";
       }
-    });
+      migrateStatus.style.color = "green";
+    } catch (err) {
+      migrateStatus.textContent = "Error: " + err.message;
+      migrateStatus.style.color = "red";
+    } finally {
+      migrateDataBtn.disabled = false;
+    }
   }
 
-    // Dynamic Module Rendering
+  // Dynamic Module Rendering
   async function renderModule(tabName) {
     adminContent.innerHTML = '<div style="padding:40px; text-align:center;">Loading module...</div>';
     
@@ -83,10 +84,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
       ;
       // Re-attach listener
-      document.getElementById('migrateDataBtn').addEventListener('click', async () => {
-         // Migration logic handles inside the external module or re-defined here
-         // For brevity, we just trigger the global migrate function if we exported it
-      });
+      document.getElementById('migrateDataBtn').addEventListener('click', handleMigration);
     } else if (tabName === 'products') {
       // Products Module
       const { data: products } = await supabaseClient.from('products').select('*').order('created_at', { ascending: false });
@@ -161,5 +159,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 });
+
 
 
