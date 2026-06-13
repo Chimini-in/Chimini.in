@@ -72,9 +72,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     adminContent.innerHTML = '<div style="padding:40px; text-align:center;">Loading module...</div>';
     
     if (tabName === 'dashboard') {
-      adminContent.innerHTML = 
+      adminContent.innerHTML = `
         <div class="admin-card">
           <h3 class="admin-card-title">Welcome to CHIMINI Admin Portal</h3>
+          <p>Your Supabase integration is active. Use the sidebar to navigate through your store's management modules.</p>
           <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--admin-border);">
             <h4 style="margin-top:0;">Data Migration</h4>
             <p style="font-size: 0.9rem; color: #666;">Move your existing local products and settings into your Supabase database.</p>
@@ -82,7 +83,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div id="migrateStatus" style="margin-top: 10px; font-size: 0.9rem; font-weight: bold;"></div>
           </div>
         </div>
-      ;
+      `;
       // Re-attach listener
       document.getElementById('migrateDataBtn').addEventListener('click', handleMigration);
     } else if (tabName === 'products') {
@@ -138,7 +139,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Navigation Mock
+  // Sidebar Navigation
   navItems.forEach(item => {
     item.addEventListener('click', (e) => {
       e.preventDefault();
@@ -148,14 +149,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const tab = item.getAttribute('data-tab');
       pageTitle.textContent = item.textContent;
 
-      // Mock loading of content
-      adminContent.innerHTML = `
-        <div class="admin-card">
-          <h3 class="admin-card-title">${item.textContent} Management</h3>
-          <p>This module requires connection to the Supabase Database to function.</p>
-          <p style="color: #666; font-size: 0.9rem;">Once you configure your <code>config.js</code> with valid keys and create the necessary tables, this interface will allow full CRUD operations.</p>
-        </div>
-      `;
+      renderModule(tab);
     });
   });
 });
