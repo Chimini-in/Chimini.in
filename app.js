@@ -187,15 +187,9 @@ function renderStore() {
     // Promo Banner
     const promoBannerImg = document.getElementById('promoBannerImg');
     const promoBannerLink = document.getElementById('promoBannerLink');
-    const promoTagline = document.getElementById('promoTagline');
-    const promoTitle = document.getElementById('promoTitle');
-    const promoDesc = document.getElementById('promoDesc');
     
     if (promoBannerImg) promoBannerImg.src = banners.promoBanner.image;
     if (promoBannerLink) promoBannerLink.href = banners.promoBanner.link;
-    if (promoTagline) promoTagline.textContent = banners.promoBanner.tagline;
-    if (promoTitle) promoTitle.textContent = banners.promoBanner.title;
-    if (promoDesc) promoDesc.textContent = banners.promoBanner.desc;
 
     // Campaign Banner
     const campaignBannerImg = document.getElementById('campaignBannerImg');
@@ -211,13 +205,9 @@ function renderStore() {
     // Brand Story Banner
     const storyBannerImg = document.getElementById('storyBannerImg');
     const storyBannerLink = document.getElementById('storyBannerLink');
-    const storyTitle = document.getElementById('storyTitle');
-    const storyDesc = document.getElementById('storyDesc');
     
     if (storyBannerImg) storyBannerImg.src = banners.storyBanner.image;
     if (storyBannerLink) storyBannerLink.href = banners.storyBanner.link;
-    if (storyTitle) storyTitle.textContent = banners.storyBanner.title;
-    if (storyDesc) storyDesc.textContent = banners.storyBanner.desc;
   }
 
   // 7. Render Customer Testimonials
@@ -645,8 +635,6 @@ function initAdminDashboard() {
       banners.campaignBanner.link = document.getElementById('adminCampaignLink').value;
       
       banners.storyBanner.image = document.getElementById('adminStoryBannerUrl').value;
-      banners.storyBanner.title = document.getElementById('adminStoryTitle').value;
-      banners.storyBanner.desc = document.getElementById('adminStoryDesc').value;
 
       localStorage.setItem('chimini_hero_slides', JSON.stringify(heroSlides));
       localStorage.setItem('chimini_banners', JSON.stringify(banners));
@@ -719,8 +707,6 @@ function populateAdminForms() {
     document.getElementById('adminCampaignLink').value = banners.campaignBanner.link;
 
     document.getElementById('adminStoryBannerUrl').value = banners.storyBanner.image;
-    document.getElementById('adminStoryTitle').value = banners.storyBanner.title;
-    document.getElementById('adminStoryDesc').value = banners.storyBanner.desc;
   }
 }
 
