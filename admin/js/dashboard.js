@@ -254,18 +254,156 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     } else if (tabName === 'collections') {
       const cats = getLocalSetting('categories', []);
-      const cols = getLocalSetting('collections', []);
+      let cols = getLocalSetting('collections', []);
+
+      window.deleteCollection = async function(idx) {
+        if(confirm("Are you sure you want to delete this collection?")) {
+           cols.splice(idx, 1);
+           await saveSetting('collections', cols);
+           renderModule('collections');
+        }
+      }
+
+      window.editCollection = function(idx) {
+         const c = cols[idx];
+         document.getElementById('colIndex').value = idx;
+         document.getElementById('colTitle').value = c.title || '';
+         document.getElementById('colShortDesc').value = c.shortDescription || '';
+         document.getElementById('colFullDesc').value = c.fullDescription || '';
+         document.getElementById('colImage').value = c.image || '';
+         document.getElementById('colGallery').value = (c.gallery || []).join('\\n');
+         document.getElementById('colOriginalPrice').value = c.pricing?.original || '';
+         document.getElementById('colDiscount').value = c.pricing?.discount || '';
+         document.getElementById('colSalePrice').value = c.pricing?.sale || '';
+         document.getElementById('colOfferText').value = c.offerText || '';
+         document.getElementById('colOfferBadge').value = c.offerBadge || '';
+         document.getElementById('colInfoCare').value = c.info?.productCare || '';
+         document.getElementById('colInfoShipping').value = c.info?.shipping || '';
+         document.getElementById('colInfoReturns').value = c.info?.returns || '';
+         document.getElementById('colLinkForm').scrollIntoView();
+      }
+
+      window.saveCollectionForm = async function(e) {
+         e.preventDefault();
+         const idx = document.getElementById('colIndex').value;
+         
+         const galleryRaw = document.getElementById('colGallery').value;
+         const gallery = galleryRaw.split('\\n').map(s=>s.trim()).filter(s=>s!=='').slice(0,6);
+
+         const colData = {
+           title: document.getElementById('colTitle').value,
+           shortDescription: document.getElementById('colShortDesc').value,
+           fullDescription: document.getElementById('colFullDesc').value,
+           image: document.getElementById('colImage').value,
+           gallery: gallery,
+           pricing: {
+             original: document.getElementById('colOriginalPrice').value,
+             discount: document.getElementById('colDiscount').value,
+             sale: document.getElementById('colSalePrice').value,
+           },
+           offerText: document.getElementById('colOfferText').value,
+           offerBadge: document.getElementById('colOfferBadge').value,
+           info: {
+             productCare: document.getElementById('colInfoCare').value,
+             shipping: document.getElementById('colInfoShipping').value,
+             returns: document.getElementById('colInfoReturns').value
+           },
+           link: document.getElementById('colTitle').value.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+         };
+         
+         if (idx === "") {
+            cols.push(colData);
+         } else {
+            cols[parseInt(idx)] = colData;
+         }
+         await saveSetting('collections', cols);
+         renderModule('collections');
+      }
+
+      window.clearCollectionForm = function() {
+          document.getElementById('colForm').reset();
+          document.getElementById('colIndex').value = "";
+      }
+
+      let collectionsListHtml = cols.map((c, i) => `
+        <tr>
+          <td><img src="${c.image || ''}" style="height:40px; border-radius:4px;"></td>
+          <td>${c.title}</td>
+          <td>${c.pricing?.sale ? '$'+c.pricing.sale : '-'}</td>
+          <td>
+            <button class="btn-accent" onclick="editCollection(${i})" style="padding:5px 10px; font-size:0.8rem;">Edit</button>
+            <button class="btn-accent" onclick="deleteCollection(${i})" style="padding:5px 10px; font-size:0.8rem; background:#cc0000; border-color:#cc0000;">Delete</button>
+          </td>
+        </tr>
+      `).join('');
 
       adminContent.innerHTML = `
         <div class="admin-card" style="margin-bottom:20px;">
           <h3 class="admin-card-title">Shop by Fragrance Categories (JSON Editor)</h3>
-          <textarea id="categoriesInput" class="admin-input" style="height:200px; font-family:monospace;">${JSON.stringify(cats, null, 2)}</textarea>
+          <textarea id="categoriesInput" class="admin-input" style="height:150px; font-family:monospace;">${JSON.stringify(cats, null, 2)}</textarea>
           <button class="btn-accent" onclick="updateCategories()">Save Categories</button>
         </div>
-        <div class="admin-card">
-          <h3 class="admin-card-title">Featured Collections (JSON Editor)</h3>
-          <textarea id="collectionsInput" class="admin-input" style="height:200px; font-family:monospace;">${JSON.stringify(cols, null, 2)}</textarea>
-          <button class="btn-accent" onclick="updateCollections()">Save Collections</button>
+
+        <div class="admin-card" style="margin-bottom:20px;">
+          <h3 class="admin-card-title">Manage Featured Collections & Bundles</h3>
+          <table class="admin-table" style="margin-bottom:20px;">
+            <thead><tr><th>Image</th><th>Name</th><th>Sale Price</th><th>Actions</th></tr></thead>
+            <tbody>${collectionsListHtml}</tbody>
+          </table>
+
+          <h3 class="admin-card-title" style="margin-top:40px;" id="colLinkForm">Add / Edit Collection</h3>
+          <form id="colForm" onsubmit="saveCollectionForm(event)">
+            <input type="hidden" id="colIndex" value="">
+            
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+              <div class="admin-form-group">
+                <label>Collection Name</label>
+                <input type="text" id="colTitle" class="admin-form-control" required>
+              </div>
+              <div class="admin-form-group">
+                <label>Short Description</label>
+                <input type="text" id="colShortDesc" class="admin-form-control">
+              </div>
+            </div>
+
+            <div class="admin-form-group">
+              <label>Full Description (Rich Text/HTML supported)</label>
+              <textarea id="colFullDesc" class="admin-form-control" style="height:100px;"></textarea>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+              <div class="admin-form-group">
+                <label>Main Collection Image URL</label>
+                <input type="text" id="colImage" class="admin-form-control" required>
+              </div>
+              <div class="admin-form-group">
+                <label>Gallery Images (1 URL per line, max 6)</label>
+                <textarea id="colGallery" class="admin-form-control" style="height:100px;"></textarea>
+              </div>
+            </div>
+
+            <h4 style="margin-top:20px;">Pricing & Offers</h4>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px;">
+              <div class="admin-form-group"><label>Original Price</label><input type="number" step="0.01" id="colOriginalPrice" class="admin-form-control"></div>
+              <div class="admin-form-group"><label>Discount %</label><input type="number" id="colDiscount" class="admin-form-control"></div>
+              <div class="admin-form-group"><label>Sale Price</label><input type="number" step="0.01" id="colSalePrice" class="admin-form-control"></div>
+            </div>
+            
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+              <div class="admin-form-group"><label>Offer Card Text</label><input type="text" id="colOfferText" class="admin-form-control" placeholder="e.g. Flat 20% Off"></div>
+              <div class="admin-form-group"><label>Offer Badge Text</label><input type="text" id="colOfferBadge" class="admin-form-control" placeholder="e.g. Limited Edition"></div>
+            </div>
+
+            <h4 style="margin-top:20px;">Product Information Sections</h4>
+            <div class="admin-form-group"><label>Product Information & Care</label><textarea id="colInfoCare" class="admin-form-control" style="height:80px;"></textarea></div>
+            <div class="admin-form-group"><label>Shipping Information</label><textarea id="colInfoShipping" class="admin-form-control" style="height:80px;"></textarea></div>
+            <div class="admin-form-group"><label>Returns Information</label><textarea id="colInfoReturns" class="admin-form-control" style="height:80px;"></textarea></div>
+
+            <div style="margin-top:20px; display:flex; gap:10px;">
+              <button type="submit" class="btn-accent">Save Collection</button>
+              <button type="button" class="btn-accent" style="background:#666; border-color:#666;" onclick="clearCollectionForm()">Cancel / New</button>
+            </div>
+          </form>
         </div>
       `;
 

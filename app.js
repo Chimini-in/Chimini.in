@@ -212,8 +212,11 @@ function renderStore() {
   const collections = JSON.parse(localStorage.getItem('chimini_collections'));
   const collectionsGrid = document.getElementById('collectionsGrid');
   if (collectionsGrid && collections) {
-    collectionsGrid.innerHTML = collections.map(col => `
-      <a href="${col.link}" class="collection-card">
+    collectionsGrid.innerHTML = collections.map((col, index) => {
+      const isRich = (col.gallery && col.gallery.length > 0) || (col.pricing && col.pricing.sale);
+      const targetUrl = isRich ? `collection-detail.html?id=${index}` : (col.link || '#');
+      return `
+      <a href="${targetUrl}" class="collection-card">
         <img src="${col.image}" alt="${col.title}" class="collection-img" loading="lazy">
         <div class="collection-overlay">
           <h3 class="collection-title">${col.title}</h3>
@@ -223,7 +226,8 @@ function renderStore() {
           </span>
         </div>
       </a>
-    `).join('');
+      `;
+    }).join('');
   }
 
   // 8. Render Banners Setup

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CHIMINI | Collection Details</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .col-detail-container { max-width: 1200px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 50px; }
+    .col-gallery-main { width: 100%; aspect-ratio: 4/5; object-fit: cover; border-radius: 8px; margin-bottom: 15px; }
+    .col-gallery-thumbs { display: flex; gap: 10px; overflow-x: auto; }
+    .col-gallery-thumb { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 2px solid transparent; }
+    .col-gallery-thumb.active { border-color: var(--color-primary); }
+    .col-badges { display: flex; gap: 10px; margin-bottom: 15px; }
+    .col-badge { background: var(--color-primary); color: #fff; padding: 4px 10px; font-size: 0.8rem; text-transform: uppercase; border-radius: 20px; }
+    .col-title { font-family: var(--font-serif); font-size: 2.5rem; margin: 0 0 10px; color: var(--color-text); }
+    .col-price-block { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+    .col-price-sale { font-size: 1.8rem; font-weight: bold; color: var(--color-text); }
+    .col-price-orig { font-size: 1.2rem; text-decoration: line-through; color: #999; }
+    .col-price-discount { color: #cc0000; font-weight: bold; }
+    .col-desc-short { font-size: 1.1rem; line-height: 1.6; color: var(--color-text-muted); margin-bottom: 30px; }
+    .col-offer-text { padding: 15px; background: var(--color-beige); border-radius: 8px; font-weight: bold; text-align: center; margin-bottom: 30px; }
+    .col-btn-add { width: 100%; padding: 15px; font-size: 1.1rem; }
+    .col-desc-full { margin-top: 40px; line-height: 1.8; color: var(--color-text); border-top: 1px solid var(--color-border); padding-top: 30px; }
+    
+    /* Accordions */
+    .col-accordion { margin-top: 30px; border-top: 1px solid var(--color-border); }
+    .col-accordion-item { border-bottom: 1px solid var(--color-border); }
+    .col-accordion-header { width: 100%; text-align: left; background: none; border: none; padding: 20px 0; font-size: 1.1rem; font-family: var(--font-serif); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .col-accordion-content { padding: 0 0 20px; display: none; line-height: 1.6; color: var(--color-text-muted); }
+    .col-accordion-item.active .col-accordion-content { display: block; }
+    .col-accordion-item.active .col-accordion-header svg { transform: rotate(180deg); }
+
+    @media (max-width: 768px) {
+      .col-detail-container { grid-template-columns: 1fr; gap: 30px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="announcement-bar" id="announcementBar">
+    <div class="announcement-slider" id="announcementSlider"></div>
+  </div>
+
+  <!-- Header -->
+  <header id="mainHeader">
+    <div class="container">
+      <div class="header-main">
+        <div class="header-search"></div>
+        <div class="brand-logo">
+          <a href="index.html" id="brandLogoText"><img src="logo.png" alt="CHIMINI Logo" class="brand-logo-img"></a>
+        </div>
+        <div class="header-actions">
+          <button class="header-icon-btn" id="cartToggleBtn" aria-label="Open Shopping Cart">
+            <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.9 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            <span class="cart-count" id="cartBadgeCount">0</span>
+          </button>
+        </div>
+      </div>
+      <nav aria-label="Main Navigation">
+        <ul class="nav-menu" id="dynamicNavMenu"></ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="col-detail-container" id="colDetailContainer">
+      <div style="text-align: center; padding: 100px; grid-column: 1/-1;">Loading Collection Details...</div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer id="footer">
+    <div class="container" id="dynamicFooter"></div>
+  </footer>
+
+  <!-- Supabase & App JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module" src="config.js"></script>
+  <script type="module" src="app.js"></script>
+
+  <!-- Page Logic -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Small delay to ensure app.js has hydrated localStorage if needed
+      setTimeout(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const idx = urlParams.get('id');
+        const container = document.getElementById('colDetailContainer');
+        
+        const cols = JSON.parse(localStorage.getItem('chimini_collections')) || [];
+        const col = cols[idx];
+
+        if (!col) {
+          container.innerHTML = '<div style="text-align: center; padding: 100px; grid-column: 1/-1;"><h2>Collection Not Found</h2><a href="index.html" class="btn-primary">Return Home</a></div>';
+          return;
+        }
+
+        // Gallery prep
+        const mainImg = col.image;
+        let thumbsHtml = '';
+        if (col.gallery && col.gallery.length > 0) {
+           const allImgs = [mainImg, ...col.gallery];
+           thumbsHtml = allImgs.map((img, i) => `
+             <img src="${img}" class="col-gallery-thumb ${i===0?'active':''}" onclick="setMainImage(this, '${img}')">
+           `).join('');
+        }
+
+        // Badges
+        let badgeHtml = '';
+        if (col.offerBadge) badgeHtml += `<span class="col-badge">${col.offerBadge}</span>`;
+        if (col.pricing?.discount) badgeHtml += `<span class="col-badge" style="background:#cc0000;">${col.pricing.discount}% OFF</span>`;
+
+        // Pricing
+        let priceHtml = '';
+        if (col.pricing?.sale) {
+           priceHtml += `<span class="col-price-sale">$${col.pricing.sale}</span>`;
+           if (col.pricing.original) priceHtml += `<span class="col-price-orig">$${col.pricing.original}</span>`;
+        } else {
+           priceHtml += `<span class="col-price-sale">Pricing Unavailable</span>`;
+        }
+
+        // Offer
+        let offerHtml = col.offerText ? `<div class="col-offer-text">${col.offerText}</div>` : '';
+
+        // Accordions
+        let accordionsHtml = '';
+        const info = col.info || {};
+        if (info.productCare) accordionsHtml += `<div class="col-accordion-item"><button class="col-accordion-header" onclick="toggleAccordion(this)">Product Information & Care <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button><div class="col-accordion-content">${info.productCare}</div></div>`;
+        if (info.shipping) accordionsHtml += `<div class="col-accordion-item"><button class="col-accordion-header" onclick="toggleAccordion(this)">Shipping Information <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button><div class="col-accordion-content">${info.shipping}</div></div>`;
+        if (info.returns) accordionsHtml += `<div class="col-accordion-item"><button class="col-accordion-header" onclick="toggleAccordion(this)">Returns Information <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button><div class="col-accordion-content">${info.returns}</div></div>`;
+
+        container.innerHTML = `
+          <div class="col-left">
+            <img src="${mainImg}" class="col-gallery-main" id="mainGalleryImg">
+            <div class="col-gallery-thumbs">${thumbsHtml}</div>
+          </div>
+          <div class="col-right">
+            <div class="col-badges">${badgeHtml}</div>
+            <h1 class="col-title">${col.title}</h1>
+            <div class="col-price-block">${priceHtml}</div>
+            ${offerHtml}
+            <div class="col-desc-short">${col.shortDescription || ''}</div>
+            
+            <button class="btn-accent col-btn-add" onclick="alert('Added to Cart!')">Add to Cart</button>
+
+            ${col.fullDescription ? `<div class="col-desc-full">${col.fullDescription}</div>` : ''}
+
+            <div class="col-accordion">
+              ${accordionsHtml}
+            </div>
+          </div>
+        `;
+        
+        document.title = `CHIMINI | ${col.title}`;
+      }, 300);
+    });
+
+    function setMainImage(thumbEl, src) {
+      document.getElementById('mainGalleryImg').src = src;
+      document.querySelectorAll('.col-gallery-thumb').forEach(t => t.classList.remove('active'));
+      thumbEl.classList.add('active');
+    }
+
+    function toggleAccordion(btn) {
+      const item = btn.parentElement;
+      item.classList.toggle('active');
+    }
+  </script>
+</body>
+</html>
