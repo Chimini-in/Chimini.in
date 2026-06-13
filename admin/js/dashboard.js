@@ -256,6 +256,46 @@ document.addEventListener('DOMContentLoaded', async () => {
       const cats = getLocalSetting('categories', []);
       let cols = getLocalSetting('collections', []);
 
+      window.deleteCategory = async function(idx) {
+        if(confirm("Are you sure you want to delete this category?")) {
+           cats.splice(idx, 1);
+           await saveSetting('categories', cats);
+           renderModule('collections');
+        }
+      }
+
+      window.editCategory = function(idx) {
+         const c = cats[idx];
+         document.getElementById('catIndex').value = idx;
+         document.getElementById('catName').value = c.name || '';
+         document.getElementById('catImage').value = c.image || '';
+         document.getElementById('catLinkForm').scrollIntoView();
+      }
+
+      window.saveCategoryForm = async function(e) {
+         e.preventDefault();
+         const idx = document.getElementById('catIndex').value;
+         
+         const catData = {
+           name: document.getElementById('catName').value,
+           image: document.getElementById('catImage').value,
+           link: 'collections.html?category=' + encodeURIComponent(document.getElementById('catName').value)
+         };
+         
+         if (idx === "") {
+            cats.push(catData);
+         } else {
+            cats[parseInt(idx)] = catData;
+         }
+         await saveSetting('categories', cats);
+         renderModule('collections');
+      }
+
+      window.clearCategoryForm = function() {
+          document.getElementById('catForm').reset();
+          document.getElementById('catIndex').value = "";
+      }
+
       window.deleteCollection = async function(idx) {
         if(confirm("Are you sure you want to delete this collection?")) {
            cols.splice(idx, 1);
@@ -337,11 +377,43 @@ document.addEventListener('DOMContentLoaded', async () => {
         </tr>
       `).join('');
 
+      let categoriesListHtml = cats.map((c, i) => `
+        <tr>
+          <td><img src="${c.image || ''}" style="height:40px; border-radius:4px;"></td>
+          <td>${c.name}</td>
+          <td>
+            <button class="btn-accent" onclick="editCategory(${i})" style="padding:5px 10px; font-size:0.8rem;">Edit</button>
+            <button class="btn-accent" onclick="deleteCategory(${i})" style="padding:5px 10px; font-size:0.8rem; background:#cc0000; border-color:#cc0000;">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+
       adminContent.innerHTML = `
         <div class="admin-card" style="margin-bottom:20px;">
-          <h3 class="admin-card-title">Shop by Fragrance Categories (JSON Editor)</h3>
-          <textarea id="categoriesInput" class="admin-input" style="height:150px; font-family:monospace;">${JSON.stringify(cats, null, 2)}</textarea>
-          <button class="btn-accent" onclick="updateCategories()">Save Categories</button>
+          <h3 class="admin-card-title">Manage Fragrance Categories</h3>
+          <table class="admin-table" style="margin-bottom:20px;">
+            <thead><tr><th>Image</th><th>Name</th><th>Actions</th></tr></thead>
+            <tbody>${categoriesListHtml}</tbody>
+          </table>
+
+          <h3 class="admin-card-title" style="margin-top:20px;" id="catLinkForm">Add / Edit Category</h3>
+          <form id="catForm" onsubmit="saveCategoryForm(event)">
+            <input type="hidden" id="catIndex" value="">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+              <div class="admin-form-group">
+                <label>Category Name</label>
+                <input type="text" id="catName" class="admin-form-control" required>
+              </div>
+              <div class="admin-form-group">
+                <label>Image URL</label>
+                <input type="text" id="catImage" class="admin-form-control" required>
+              </div>
+            </div>
+            <div style="margin-top:15px; display:flex; gap:10px;">
+              <button type="submit" class="btn-accent">Save Category</button>
+              <button type="button" class="btn-accent" style="background:#666; border-color:#666;" onclick="clearCategoryForm()">Cancel / New</button>
+            </div>
+          </form>
         </div>
 
         <div class="admin-card" style="margin-bottom:20px;">
