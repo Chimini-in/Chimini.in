@@ -177,7 +177,7 @@ header.scrolled {
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
   align-items: center;
-  padding: 20px 0;
+  padding: 8px 0;
 }
 
 .header-search {
@@ -283,7 +283,7 @@ header.scrolled {
   display: flex;
   justify-content: center;
   list-style: none;
-  padding: 12px 0;
+  padding: 8px 0;
   border-top: 1px solid var(--color-border);
   gap: 40px;
 }
