@@ -72,20 +72,68 @@ document.addEventListener('DOMContentLoaded', async () => {
     adminContent.innerHTML = '<div style="padding:40px; text-align:center;">Loading module...</div>';
     
     if (tabName === 'dashboard') {
+      let productCount = 0;
+      try {
+        const { count } = await supabaseClient.from('products').select('*', { count: 'exact', head: true });
+        productCount = count || 0;
+      } catch (e) {
+        console.error("Error fetching product count:", e);
+      }
+
       adminContent.innerHTML = `
-        <div class="admin-card">
-          <h3 class="admin-card-title">Welcome to CHIMINI Admin Portal</h3>
-          <p>Your Supabase integration is active. Use the sidebar to navigate through your store's management modules.</p>
-          <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--admin-border);">
-            <h4 style="margin-top:0;">Data Migration</h4>
-            <p style="font-size: 0.9rem; color: #666;">Move your existing local products and settings into your Supabase database.</p>
-            <button id="migrateDataBtn" class="btn-accent" style="padding: 10px 20px;">Migrate Storefront Data to Supabase</button>
-            <div id="migrateStatus" style="margin-top: 10px; font-size: 0.9rem; font-weight: bold;"></div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+          <div class="admin-card" style="text-align: center; padding: 30px;">
+            <h3 style="margin: 0; font-size: 2.5rem; color: var(--text-dark);">${productCount}</h3>
+            <p style="margin: 5px 0 0; color: #666; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;">Total Products</p>
+          </div>
+          <div class="admin-card" style="text-align: center; padding: 30px;">
+            <h3 style="margin: 0; font-size: 2.5rem; color: var(--text-dark);">24</h3>
+            <p style="margin: 5px 0 0; color: #666; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;">Orders This Week</p>
+          </div>
+          <div class="admin-card" style="text-align: center; padding: 30px;">
+            <h3 style="margin: 0; font-size: 2.5rem; color: var(--text-dark);">$1,450</h3>
+            <p style="margin: 5px 0 0; color: #666; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;">Weekly Revenue</p>
+          </div>
+          <div class="admin-card" style="text-align: center; padding: 30px;">
+            <h3 style="margin: 0; font-size: 2.5rem; color: var(--text-dark);">142</h3>
+            <p style="margin: 5px 0 0; color: #666; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;">Active Customers</p>
           </div>
         </div>
+
+        <div class="admin-card">
+          <h3 class="admin-card-title">Recent Activity</h3>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Status</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>#ORD-1024</td>
+                <td>Priya Sharma</td>
+                <td><span style="background: #e8f5e9; color: #2e7d32; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">Processing</span></td>
+                <td>$45.00</td>
+              </tr>
+              <tr>
+                <td>#ORD-1023</td>
+                <td>Rahul Kumar</td>
+                <td><span style="background: #e3f2fd; color: #1565c0; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">Shipped</span></td>
+                <td>$120.00</td>
+              </tr>
+              <tr>
+                <td>#ORD-1022</td>
+                <td>Aisha Desai</td>
+                <td><span style="background: #f5f5f5; color: #616161; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">Delivered</span></td>
+                <td>$85.50</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       `;
-      // Re-attach listener
-      document.getElementById('migrateDataBtn').addEventListener('click', handleMigration);
     } else if (tabName === 'products') {
       // Products Module
       const { data: products } = await supabaseClient.from('products').select('*').order('created_at', { ascending: false });
