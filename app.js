@@ -225,15 +225,10 @@ function renderStore() {
   const testimonialsContainer = document.getElementById('testimonialsContainer');
   const testimonialsDots = document.getElementById('testimonialsDots');
   if (testimonialsContainer && testimonials) {
-    testimonialsContainer.innerHTML = testimonials.map(test => `
+    testimonialsContainer.innerHTML = testimonials.map((test, index) => `
       <div class="testimonial-card">
-        <div class="rating-stars">
-          ${Array.from({ length: test.rating }).map(() => `
-            <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-          `).join('')}
-        </div>
-        <p class="testimonial-text">"${test.text}"</p>
-        <span class="testimonial-author">â€” ${test.author}</span>
+        <p class="testimonial-text">${test.text}</p>
+        <span class="testimonial-author">&mdash; ${test.author}</span>
       </div>
     `).join('');
 
@@ -261,8 +256,7 @@ function initHeaderScroll() {
 }
 
 /* ==========================================================================
-   ANNOUNCEMENT BAR TRANSITIONS
-   ========================================================================== */
+    
 
 function initAnnouncementBar() {
   const slider = document.getElementById('announcementSlider');

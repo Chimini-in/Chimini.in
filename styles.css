@@ -732,241 +732,246 @@ header.scrolled {
   stroke-width: 2;
   transition: var(--transition-smooth);
 }
-
 .collection-card:hover .collection-link svg {
   transform: translateX(5px);
 }
 
 /* --- Promotional Offer Section --- */
 .promo-offer-section {
-  padding: 50px 0;
+  padding: 80px 0;
+  background-color: var(--color-white);
 }
 
-.promo-offer-banner {
-  display: block;
+.promo-split-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .promo-split-layout {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+.promo-split-content {
+  padding: 40px;
+}
+
+.promo-split-image {
   position: relative;
   width: 100%;
-  padding-bottom: 35%; /* Landscape banner aspect ratio */
-  background-color: var(--color-primary-dark);
+  padding-bottom: 120%; /* Portrait aspect ratio */
   overflow: hidden;
 }
 
-.promo-offer-img {
+.promo-split-image .promo-offer-img {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: var(--transition-slow);
+  transition: transform 0.8s ease;
 }
 
-.promo-offer-banner:hover .promo-offer-img {
-  transform: scale(1.02);
-}
-
-/* Custom interactive HTML fallback for promo-banner (Admin editable overlay option) */
-.promo-text-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 0 80px;
-  background: linear-gradient(to right, rgba(46, 30, 18, 0.8) 30%, rgba(46, 30, 18, 0));
-  color: var(--color-white);
-  z-index: 2;
-}
-
-.promo-content {
-  max-width: 500px;
+.promo-split-image:hover .promo-offer-img {
+  transform: scale(1.03);
 }
 
 .promo-tagline {
-  font-size: 0.95rem;
-  color: var(--color-accent);
-  letter-spacing: 0.2em;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  margin-bottom: 12px;
+  margin-bottom: 15px;
   display: block;
-  font-weight: 600;
 }
 
 .promo-title {
-  font-size: 2.8rem;
-  margin-bottom: 18px;
+  font-size: 2.5rem;
+  margin-bottom: 20px;
   line-height: 1.2;
+  color: var(--color-text-dark);
 }
 
 .promo-desc {
-  font-size: 0.95rem;
-  color: var(--color-border);
-  margin-bottom: 20px;
-  line-height: 1.5;
+  font-size: 1rem;
+  color: var(--color-text-muted);
+  margin-bottom: 30px;
+  line-height: 1.6;
 }
 
 /* --- Seasonal Campaign Banner --- */
 .seasonal-campaign-section {
-  padding: 50px 0;
+  padding: 100px 0;
+  background-color: var(--color-beige);
 }
 
-.campaign-banner {
-  display: block;
+.campaign-overlap-layout {
   position: relative;
   width: 100%;
-  padding-bottom: 28%; /* Widescreen promotional aspect ratio */
-  overflow: hidden;
-  background-color: var(--color-primary-dark);
+  padding-bottom: 50%;
+}
+
+@media (max-width: 768px) {
+  .campaign-overlap-layout {
+    padding-bottom: 100%;
+  }
 }
 
 .campaign-img {
   position: absolute;
   top: 0;
-  left: 0;
-  width: 100%;
+  right: 0;
+  width: 85%;
   height: 100%;
   object-fit: cover;
-  transition: var(--transition-slow);
 }
 
-.campaign-banner:hover .campaign-img {
-  transform: scale(1.02);
+@media (max-width: 768px) {
+  .campaign-img {
+    width: 100%;
+  }
 }
 
-/* Custom campaign interactive layout */
-.campaign-overlay-text {
+.campaign-overlap-card {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(46, 30, 18, 0.4);
-  color: var(--color-white);
-  text-align: center;
-  padding: 20px;
+  bottom: -40px;
+  left: 5%;
+  background: var(--color-white);
+  padding: 60px;
+  width: 450px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.04);
+  z-index: 2;
+}
+
+@media (max-width: 768px) {
+  .campaign-overlap-card {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    width: 90%;
+    margin: -60px auto 0;
+    padding: 40px 20px;
+    text-align: center;
+  }
 }
 
 .campaign-title-main {
-  font-size: 3.5rem;
-  font-weight: 400;
+  font-size: 2.2rem;
   margin-bottom: 10px;
+  color: var(--color-text-dark);
 }
 
 .campaign-subtitle-main {
-  font-size: 1rem;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  font-weight: 500;
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
 }
 
 /* --- Brand Story Section --- */
 .brand-story-section {
-  padding: 100px 0;
+  padding: 120px 0;
+  background-color: var(--color-white);
 }
 
-.brand-story-banner {
-  display: block;
+.brand-story-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .brand-story-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+.brand-story-image-wrap {
   position: relative;
   width: 100%;
-  padding-bottom: 40%;
+  padding-bottom: 130%; /* Portrait */
   overflow: hidden;
-  background-color: var(--color-beige);
 }
 
-.brand-story-img {
+.brand-story-image-wrap .brand-story-img {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: var(--transition-slow);
 }
 
-.brand-story-banner:hover .brand-story-img {
-  transform: scale(1.02);
+.brand-story-content {
+  padding-right: 40px;
 }
 
-.brand-story-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 8%;
-  background: linear-gradient(to left, rgba(245, 235, 230, 0.9) 35%, rgba(245, 235, 230, 0.5) 60%, rgba(245, 235, 230, 0));
-}
-
-.brand-story-card {
-  background-color: var(--color-white);
-  padding: 50px;
-  max-width: 520px;
-  box-shadow: 0 10px 40px rgba(46, 30, 18, 0.05);
+@media (max-width: 768px) {
+  .brand-story-content {
+    padding-right: 0;
+    text-align: center;
+  }
 }
 
 .story-subtitle {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--color-accent);
-  margin-bottom: 15px;
+  color: var(--color-text-muted);
+  margin-bottom: 20px;
   display: block;
-  font-weight: 600;
 }
 
 .story-title {
-  font-size: 2.2rem;
-  margin-bottom: 20px;
+  font-size: 2.5rem;
+  margin-bottom: 30px;
   line-height: 1.3;
+  color: var(--color-text-dark);
 }
 
 .story-text {
-  font-size: 0.9rem;
+  font-size: 1.05rem;
   color: var(--color-text-muted);
-  line-height: 1.7;
-  margin-bottom: 25px;
+  line-height: 1.8;
+  margin-bottom: 40px;
 }
 
 /* --- Customer Testimonials --- */
 .testimonials-section {
   background-color: var(--color-beige);
-  padding: 100px 0;
-  position: relative;
-  overflow: hidden;
+  padding: 120px 0;
 }
 
 .testimonials-wrapper {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   position: relative;
-  height: 250px;
+  height: auto;
+  min-height: 250px;
+  overflow: hidden;
 }
 
 .testimonials-container {
   display: flex;
   width: 100%;
   height: 100%;
-  transition: transform 0.5s ease-in-out;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .testimonial-card {
   min-width: 100%;
-  height: 100%;
+  padding: 0 40px;
+  text-align: center;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
   justify-content: center;
-  padding: 0 40px;
+  align-items: center;
 }
 
 .rating-stars {
@@ -983,39 +988,49 @@ header.scrolled {
 
 .testimonial-text {
   font-family: var(--font-serif);
-  font-size: 1.3rem;
+  font-size: 1.6rem;
   font-style: italic;
-  margin-bottom: 20px;
-  line-height: 1.5;
+  line-height: 1.6;
   color: var(--color-text-dark);
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.testimonial-text::before {
+  content: '"';
+  display: block;
+  font-size: 5rem;
+  color: rgba(46, 30, 18, 0.1);
+  line-height: 0.5;
+  margin-bottom: -10px;
+  font-family: serif;
 }
 
 .testimonial-author {
   font-size: 0.85rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  font-weight: 600;
   color: var(--color-text-muted);
 }
 
 .testimonials-dots {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  margin-top: 30px;
+  gap: 15px;
+  margin-top: 50px;
 }
 
 .testimonial-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: rgba(46, 30, 18, 0.2);
+  width: 35px;
+  height: 2px;
+  background-color: rgba(46, 30, 18, 0.3);
   transition: var(--transition-smooth);
+  cursor: pointer;
+  border-radius: 0;
 }
 
 .testimonial-dot.active {
   background-color: var(--color-primary-dark);
-  transform: scale(1.3);
 }
 
 /* --- Footer --- */
