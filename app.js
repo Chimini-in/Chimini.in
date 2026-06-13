@@ -34,7 +34,6 @@ async function initStoreData() {
       // Fetch Products
       const { data: products } = await supabaseClient.from('products').select('*');
       if (products && products.length > 0) {
-        // Map Supabase schema to local app schema to maintain compatibility
         const mappedProducts = products.map(p => ({
           id: p.id,
           name: p.title,
@@ -48,16 +47,12 @@ async function initStoreData() {
         localStorage.setItem('chimini_products', JSON.stringify(mappedProducts));
       }
 
-      // Fetch Hero Banner
-      const { data: heroSettings } = await supabaseClient.from('settings').select('setting_value').eq('setting_key', 'hero_banner').single();
-      if (heroSettings) {
-        localStorage.setItem('chimini_hero_slides', JSON.stringify([heroSettings.setting_value]));
-      }
-
-      // Fetch Announcements
-      const { data: annSettings } = await supabaseClient.from('settings').select('setting_value').eq('setting_key', 'announcements').single();
-      if (annSettings) {
-        localStorage.setItem('chimini_announcements', JSON.stringify(annSettings.setting_value));
+      // Fetch all dynamic settings
+      const { data: allSettings } = await supabaseClient.from('settings').select('*');
+      if (allSettings && allSettings.length > 0) {
+        allSettings.forEach(row => {
+          localStorage.setItem('chimini_' + row.setting_key, JSON.stringify(row.setting_value));
+        });
       }
     } catch (e) {
       console.error("Supabase sync error:", e);
@@ -68,7 +63,76 @@ async function initStoreData() {
 }
 
 function renderStore() {
-  // 1. Render Announcement Bar Carousel Slides
+  // 1. Render Header Nav
+  const navMenu = document.getElementById('dynamicNavMenu');
+  const navLinks = JSON.parse(localStorage.getItem('chimini_nav_links')) || [
+    { label: 'Home', href: 'index.html' },
+    { label: 'Collections', href: 'collections.html' },
+    { label: 'Gifts', href: 'gifts.html' },
+    { label: 'About', href: 'about.html' },
+    { label: 'Contact', href: 'contact.html' }
+  ];
+  if (navMenu) {
+    const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+    navMenu.innerHTML = navLinks.map(link => `
+      <li class="nav-item ${currentPath === link.href ? 'active' : ''}"><a href="${link.href}">${link.label}</a></li>
+    `).join('');
+  }
+
+  // 2. Render Footer
+  const footerContainer = document.getElementById('dynamicFooter');
+  const footerContent = JSON.parse(localStorage.getItem('chimini_footer_content')) || {
+    about: 'Crafting ambient luxury with organic botanicals. Elevate your space with our signature hand-poured soy candles.',
+    quickLinks: [
+      { label: 'Shop All', href: 'collections.html' },
+      { label: 'Our Story', href: 'about.html' },
+      { label: 'Gift Hampers', href: 'gifts.html' },
+      { label: 'Contact Us', href: 'contact.html' },
+      { label: 'Admin Portal', href: 'admin/login.html' }
+    ],
+    customerCare: [
+      { label: 'Shipping & Returns', href: '#' },
+      { label: 'Candle Care Guide', href: '#' },
+      { label: 'FAQ', href: '#' },
+      { label: 'Terms of Service', href: '#' },
+      { label: 'Privacy Policy', href: '#' }
+    ]
+  };
+  if (footerContainer) {
+    footerContainer.innerHTML = `
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h3 class="footer-brand">CHIMINI</h3>
+          <p class="footer-desc">${footerContent.about}</p>
+        </div>
+        <div class="footer-col">
+          <h4 class="footer-heading">Quick Links</h4>
+          <ul class="footer-links">
+            ${footerContent.quickLinks.map(l => `<li><a href="${l.href}">${l.label}</a></li>`).join('')}
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4 class="footer-heading">Customer Care</h4>
+          <ul class="footer-links">
+            ${footerContent.customerCare.map(l => `<li><a href="${l.href}">${l.label}</a></li>`).join('')}
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4 class="footer-heading">Newsletter</h4>
+          <p class="footer-desc" style="margin-bottom: 15px;">Subscribe to receive updates, access to exclusive deals, and more.</p>
+          <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Subscribed to Chimini Newsletter!');">
+            <input type="email" placeholder="Enter your email address" class="newsletter-input" required>
+            <button type="submit" class="btn-primary" style="width:100%; margin-top:10px;">Subscribe</button>
+          </form>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; ${new Date().getFullYear()} CHIMINI. All rights reserved.</p>
+      </div>
+    `;
+  }
+
+  // 3. Render Announcement Bar Carousel Slides
   const announcements = JSON.parse(localStorage.getItem('chimini_announcements'));
   const announcementSlider = document.getElementById('announcementSlider');
   if (announcementSlider && announcements) {
@@ -77,7 +141,7 @@ function renderStore() {
     `).join('');
   }
 
-  // 2. Render Hero Slider Banners
+  // 4. Render Hero Slider Banners
   const heroSlides = JSON.parse(localStorage.getItem('chimini_hero_slides'));
   const heroSlider = document.getElementById('heroSlider');
   const heroSliderDots = document.getElementById('heroSliderDots');
@@ -102,7 +166,7 @@ function renderStore() {
     }
   }
 
-  // 3. Render Best Sellers Products (only the 4 manually featured products)
+  // 5. Render Best Sellers Products
   const allProducts   = JSON.parse(localStorage.getItem('chimini_products')) || [];
   const featuredIds   = JSON.parse(localStorage.getItem('chimini_featured'))   || [];
   const featuredProds = featuredIds
@@ -130,26 +194,7 @@ function renderStore() {
     }
   }
 
-  // 3b. Render Gift Hampers (Gifts Page Specific)
-  const gifts = JSON.parse(localStorage.getItem('chimini_gifts'));
-  const giftsGrid = document.getElementById('giftsGrid');
-  if (giftsGrid && gifts) {
-    giftsGrid.innerHTML = gifts.map(gift => `
-      <article class="product-card" data-name="${gift.name.toLowerCase()}">
-        <div class="product-img-wrapper">
-          ${gift.badge ? `<span class="product-badge">${gift.badge}</span>` : ''}
-          <img src="${gift.image}" alt="${gift.name}" class="product-img" loading="lazy">
-        </div>
-        <div class="product-info">
-          <h3 class="product-name">${gift.name}</h3>
-          <span class="product-price">$${gift.price.toFixed(2)}</span>
-          <button class="product-btn" onclick="addToCart('${gift.id}')">Add to Cart</button>
-        </div>
-      </article>
-    `).join('');
-  }
-
-  // 4. Render Shop by Fragrance / Category
+  // 6. Render Shop by Fragrance / Category
   const categories = JSON.parse(localStorage.getItem('chimini_categories'));
   const fragranceList = document.getElementById('fragranceList');
   if (fragranceList && categories) {
@@ -163,7 +208,7 @@ function renderStore() {
     `).join('');
   }
 
-  // 5. Render Featured Collections
+  // 7. Render Featured Collections
   const collections = JSON.parse(localStorage.getItem('chimini_collections'));
   const collectionsGrid = document.getElementById('collectionsGrid');
   if (collectionsGrid && collections) {
@@ -181,36 +226,30 @@ function renderStore() {
     `).join('');
   }
 
-  // 6. Render Banners Setup
+  // 8. Render Banners Setup
   const banners = JSON.parse(localStorage.getItem('chimini_banners'));
   if (banners) {
-    // Promo Banner
     const promoBannerImg = document.getElementById('promoBannerImg');
     const promoBannerLink = document.getElementById('promoBannerLink');
-    
     if (promoBannerImg) promoBannerImg.src = banners.promoBanner.image;
     if (promoBannerLink) promoBannerLink.href = banners.promoBanner.link;
 
-    // Campaign Banner
     const campaignBannerImg = document.getElementById('campaignBannerImg');
     const campaignBannerLink = document.getElementById('campaignBannerLink');
     const campaignTitle = document.getElementById('campaignTitle');
     const campaignSubtitle = document.getElementById('campaignSubtitle');
-    
     if (campaignBannerImg) campaignBannerImg.src = banners.campaignBanner.image;
     if (campaignBannerLink) campaignBannerLink.href = banners.campaignBanner.link;
-    if (campaignTitle) campaignTitle.textContent = banners.campaignBanner.title;
-    if (campaignSubtitle) campaignSubtitle.textContent = banners.campaignBanner.subtitle;
+    if (campaignTitle && banners.campaignBanner.title) campaignTitle.textContent = banners.campaignBanner.title;
+    if (campaignSubtitle && banners.campaignBanner.subtitle) campaignSubtitle.textContent = banners.campaignBanner.subtitle;
 
-    // Brand Story Banner
     const storyBannerImg = document.getElementById('storyBannerImg');
     const storyBannerLink = document.getElementById('storyBannerLink');
-    
     if (storyBannerImg) storyBannerImg.src = banners.storyBanner.image;
     if (storyBannerLink) storyBannerLink.href = banners.storyBanner.link;
   }
 
-  // 7. Render Customer Testimonials
+  // 9. Render Customer Testimonials
   const testimonials = JSON.parse(localStorage.getItem('chimini_testimonials'));
   const testimonialsContainer = document.getElementById('testimonialsContainer');
   const testimonialsDots = document.getElementById('testimonialsDots');
@@ -227,6 +266,25 @@ function renderStore() {
         <button class="testimonial-dot ${index === 0 ? 'active' : ''}" data-testimonial="${index}" aria-label="Go to testimonial ${index + 1}"></button>
       `).join('');
     }
+  }
+
+  // 10. Render Gift Hampers (Gifts Page Specific)
+  const gifts = JSON.parse(localStorage.getItem('chimini_gifts'));
+  const giftsGrid = document.getElementById('giftsGrid');
+  if (giftsGrid && gifts) {
+    giftsGrid.innerHTML = gifts.map(gift => `
+      <article class="product-card" data-name="${gift.name.toLowerCase()}">
+        <div class="product-img-wrapper">
+          ${gift.badge ? `<span class="product-badge">${gift.badge}</span>` : ''}
+          <img src="${gift.image}" alt="${gift.name}" class="product-img" loading="lazy">
+        </div>
+        <div class="product-info">
+          <h3 class="product-name">${gift.name}</h3>
+          <span class="product-price">$${gift.price.toFixed(2)}</span>
+          <button class="product-btn" onclick="addToCart('${gift.id}')">Add to Cart</button>
+        </div>
+      </article>
+    `).join('');
   }
 }
 
