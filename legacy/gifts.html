@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CHIMINI - The Art of Giving. Explore custom luxury gift wrappers, premium hampers, and personalized botanical greeting cards.">
+  <title>CHIMINI | Luxury Gifting & Hampers</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .wrap-option::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--color-white);
+      transition: var(--transition-smooth);
+    }
+    .wrap-option.active::after {
+      transform: translate(-50%, -50%) scale(1.2);
+    }
+    .wrap-option.active {
+      box-shadow: 0 0 0 3px var(--color-ivory), 0 0 0 5px var(--color-accent);
+    }
+    @media (max-width: 992px) {
+      .customization-layout {
+        grid-template-columns: 1fr !important;
+        gap: 30px !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+
+
+  <!-- 2. Header & Navigation -->
+  <header id="mainHeader">
+    <div class="container">
+      <div class="header-main">
+        <div class="header-search">
+          <div class="search-input-wrapper">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="text" placeholder="Search fragrances..." id="searchInput" aria-label="Search fragrances">
+          </div>
+        </div>
+
+        <div class="brand-logo">
+          <a href="index.html" id="brandLogoText"><img src="logo.png" alt="CHIMINI Logo" class="brand-logo-img"></a>
+        </div>
+
+        <div class="header-actions">
+          <button class="header-icon-btn" aria-label="User Account" onclick="alert('Account system demo: Logged in as Guest')">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+          </button>
+          
+          <button class="header-icon-btn" aria-label="Wishlist" onclick="alert('Wishlist demo: 0 items added')">
+            <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          </button>
+
+          <button class="header-icon-btn" id="cartToggleBtn" aria-label="Open Shopping Cart">
+            <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.9 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            <span class="cart-count" id="cartBadgeCount">0</span>
+          </button>
+        </div>
+      </div>
+
+      <nav aria-label="Main Navigation">
+        <ul class="nav-menu" id="dynamicNavMenu"></ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+
+    <!-- Gifts catalog grid -->
+    <section style="padding: 100px 0;">
+      <div class="container">
+        <div class="text-center">
+          <h2 class="section-title">Curated Hampers & Gift Boxes</h2>
+          <p class="section-subtitle">Exquisite curations prepared with premium packaging and satin ribbons</p>
+        </div>
+        <div class="product-grid" id="giftsGrid">
+          <!-- Rendered dynamically by app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Gift Customization and Greeting Card Preview -->
+    <section class="gift-customization-section" style="background-color: var(--color-beige); padding: 100px 0; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
+      <div class="container">
+        <div class="text-center">
+          <h2 class="section-title">Bespoke Customization</h2>
+          <p class="section-subtitle">Select luxury wraps and compose a personal card message</p>
+        </div>
+
+        <div class="customization-layout" style="display: grid; grid-template-columns: 1fr 1fr; gap: 50px; margin-top: 40px; align-items: start;">
+          <!-- Left Column: Settings -->
+          <div class="custom-settings-panel" style="background: var(--color-white); border: 1px solid var(--color-border); padding: 40px; box-shadow: 0 10px 30px var(--color-shadow);">
+            <h3 style="font-family: var(--font-serif); font-size: 1.5rem; margin-bottom: 25px; border-bottom: 1px solid var(--color-border); padding-bottom: 15px;">Hamper Personalization</h3>
+            
+            <!-- Wrapping Paper Selector -->
+            <div style="margin-bottom: 30px;">
+              <h4 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 15px;">1. Select Luxury Wrapping Paper: <span id="selectedWrapName" style="color: var(--color-accent); font-weight: 600;">Linen Gold</span></h4>
+              <div class="wrap-selector-container" style="display: flex; gap: 15px;">
+                <button class="wrap-option active" data-wrap="Linen Gold" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--color-accent); background: #f0e2b6; position: relative;" aria-label="Linen Gold wrap"></button>
+                <button class="wrap-option" data-wrap="Crimson Velvet" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid transparent; background: #800020; position: relative;" aria-label="Crimson Velvet wrap"></button>
+                <button class="wrap-option" data-wrap="Forest Silk" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid transparent; background: #1b4d3e; position: relative;" aria-label="Forest Silk wrap"></button>
+              </div>
+            </div>
+
+            <!-- Greeting Card Message -->
+            <div>
+              <h4 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 15px;">2. Personal Greeting Card Message:</h4>
+              <textarea id="giftNoteInput" class="admin-form-control" rows="5" style="width: 100%; padding: 15px; border: 1px solid var(--color-border); font-family: var(--font-sans); font-size: 0.9rem; resize: none; color: var(--color-text-dark); background-color: var(--color-ivory);" placeholder="Write your premium greeting message here..."></textarea>
+            </div>
+            
+            <button class="btn-accent" style="width: 100%; margin-top: 30px;" onclick="alert('Bespoke custom packaging saved to your cart!')">Save Customization</button>
+          </div>
+
+          <!-- Right Column: Card Preview -->
+          <div class="custom-preview-panel" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+            <h4 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 25px; text-align: center; color: var(--color-text-muted);">Live Card Preview</h4>
+            
+            <!-- Virtual Greeting Card -->
+            <div class="gift-card-preview-card" style="width: 100%; max-width: 450px; aspect-ratio: 1.5; background: #FAF9F6; border: 2px solid var(--color-accent); padding: 35px; box-shadow: 0 15px 40px rgba(46,30,18,0.1); position: relative; border-radius: 4px; display: flex; flex-direction: column; justify-content: space-between;">
+              <!-- Botanical Corner Accents -->
+              <div style="position: absolute; top: 10px; left: 10px; font-family: var(--font-serif); font-size: 1.2rem; color: var(--color-accent); opacity: 0.5;">❀</div>
+              <div style="position: absolute; bottom: 10px; right: 10px; font-family: var(--font-serif); font-size: 1.2rem; color: var(--color-accent); opacity: 0.5;">❀</div>
+              
+              <div style="font-family: var(--font-serif); font-style: italic; color: var(--color-accent); font-size: 1.2rem; text-align: center; margin-bottom: 10px; letter-spacing: 0.05em;">A Gift For You</div>
+              <p id="giftCardNotePreview" style="font-family: var(--font-serif); font-style: italic; font-size: 1.1rem; text-align: center; line-height: 1.6; color: var(--color-primary-dark); flex-grow: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; max-height: 120px;">Your message will appear here...</p>
+              <div style="text-align: center; font-size: 0.7rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--color-text-muted); border-top: 1px solid var(--color-border); padding-top: 15px;">CHIMINI LUXE FRAGRANCES</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer id="footer">
+    <div class="container" id="dynamicFooter"></div>
+  </footer>
+
+  <!-- 12. Slide-Out Cart Drawer -->
+  <div class="cart-overlay" id="cartOverlay">
+    <div class="cart-drawer">
+      <div class="cart-header">
+        <h2>Shopping Cart</h2>
+        <button class="cart-close-btn" id="cartCloseBtn" aria-label="Close Cart">
+          <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
+      
+      <div class="cart-body" id="cartBody">
+        <!-- Rendered dynamically -->
+      </div>
+      
+      <div class="cart-footer" id="cartFooter">
+        <div class="cart-summary-line">
+          <span>Shipping</span>
+          <span id="cartShippingValue">Calculated at next step</span>
+        </div>
+        <div class="cart-summary-line cart-summary-total">
+          <span>Estimated Total</span>
+          <span id="cartTotalValue">$0.00</span>
+        </div>
+        <button class="btn-accent cart-checkout-btn" onclick="alert('Checkout initiated! Thank you for purchasing from CHIMINI.')">Proceed to Checkout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 13. Admin Control Panel Modal -->
+  <div class="admin-overlay" id="adminOverlay">
+    <div class="admin-modal">
+      <div class="admin-header">
+        <h2>CHIMINI Brand Management Portal</h2>
+        <button class="admin-close-btn" id="adminCloseBtn" aria-label="Close Admin Portal">
+          <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
+      
+      <div class="admin-layout">
+        <div class="admin-sidebar">
+          <button class="admin-tab-btn active" data-tab="tabBanners">Banners & Hero</button>
+          <button class="admin-tab-btn" data-tab="tabProducts">Best Sellers</button>
+          <button class="admin-tab-btn" data-tab="tabSettings">Announcement Bar</button>
+        </div>
+        
+        <div class="admin-main-content">
+          <!-- Banners & Hero Tab -->
+          <div class="admin-section active" id="tabBanners">
+            <h3>Custom Graphics & Banners</h3>
+            <form id="adminBannersForm">
+              <div class="admin-form-group">
+                <label for="adminHeroImage">Hero Carousel Slide 1 Image URL</label>
+                <input type="text" id="adminHeroImage" class="admin-form-control" placeholder="https://...">
+              </div>
+              <div class="admin-form-group">
+                <label for="adminHeroTitle">Hero Slide 1 Title Overlay</label>
+                <input type="text" id="adminHeroTitle" class="admin-form-control" placeholder="Enter title...">
+              </div>
+              <div class="admin-form-group">
+                <label for="adminHeroUrl">Hero Slide 1 Clickable Redirect URL</label>
+                <input type="text" id="adminHeroUrl" class="admin-form-control" placeholder="#bestSellers">
+              </div>
+              <hr style="margin: 25px 0; border: none; border-top: 1px solid var(--color-border);">
+              
+              <div class="admin-form-group">
+                <label for="adminPromoBannerUrl">Promotional Offer Banner Image URL</label>
+                <input type="text" id="adminPromoBannerUrl" class="admin-form-control">
+              </div>
+              <div class="admin-form-group">
+                <label for="adminPromoLink">Promotional Offer Redirect Link</label>
+                <input type="text" id="adminPromoLink" class="admin-form-control">
+              </div>
+              <hr style="margin: 25px 0; border: none; border-top: 1px solid var(--color-border);">
+              
+              <div class="admin-form-group">
+                <label for="adminCampaignBannerUrl">Seasonal Campaign Banner Image URL</label>
+                <input type="text" id="adminCampaignBannerUrl" class="admin-form-control">
+              </div>
+              <div class="admin-form-group">
+                <label for="adminCampaignLink">Seasonal Campaign Redirect Link</label>
+                <input type="text" id="adminCampaignLink" class="admin-form-control">
+              </div>
+              <hr style="margin: 25px 0; border: none; border-top: 1px solid var(--color-border);">
+              
+              <div class="admin-form-group">
+                <label for="adminStoryBannerUrl">Brand Story Banner Image URL</label>
+                <input type="text" id="adminStoryBannerUrl" class="admin-form-control">
+              </div>
+              
+              
+              <button type="submit" class="btn-accent" style="width: 100%; margin-top: 20px;">Save Banner Setup</button>
+            </form>
+          </div>
+
+          <!-- Products Tab -->
+          <div class="admin-section" id="tabProducts">
+            <h3>Manage Best Sellers Grid</h3>
+            <div style="overflow-x: auto; margin-bottom: 30px;">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="adminProductsTableBody">
+                  <!-- Dynamic rows -->
+                </tbody>
+              </table>
+            </div>
+            
+            <h3>Add New Product</h3>
+            <form id="adminAddProductForm">
+              <div class="admin-form-group">
+                <label for="newProductName">Product Name</label>
+                <input type="text" id="newProductName" class="admin-form-control" placeholder="e.g. Saffron & Sandalwood Candle" required>
+              </div>
+              <div class="admin-form-group">
+                <label for="newProductPrice">Price ($)</label>
+                <input type="number" id="newProductPrice" class="admin-form-control" placeholder="e.g. 45" step="0.01" required>
+              </div>
+              <div class="admin-form-group">
+                <label for="newProductImage">Image URL</label>
+                <input type="text" id="newProductImage" class="admin-form-control" placeholder="https://..." required>
+              </div>
+              <div class="admin-form-group">
+                <label for="newProductBadge">Badge (Optional)</label>
+                <input type="text" id="newProductBadge" class="admin-form-control" placeholder="e.g. Best Seller">
+              </div>
+              <button type="submit" class="btn-accent" style="width: 100%;">Create Product</button>
+            </form>
+          </div>
+
+          <!-- Announcement Bar Tab -->
+          <div class="admin-section" id="tabSettings">
+            <h3>Store Announcements</h3>
+            <form id="adminAnnouncementsForm">
+              <div class="admin-form-group">
+                <label for="announcement1">Announcement Text 1</label>
+                <input type="text" id="announcement1" class="admin-form-control">
+              </div>
+              <div class="admin-form-group">
+                <label for="announcement2">Announcement Text 2</label>
+                <input type="text" id="announcement2" class="admin-form-control">
+              </div>
+              <div class="admin-form-group">
+                <label for="announcement3">Announcement Text 3</label>
+                <input type="text" id="announcement3" class="admin-form-control">
+              </div>
+              <button type="submit" class="btn-accent" style="width: 100%; margin-top: 20px;">Save Announcements</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module" src="config.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

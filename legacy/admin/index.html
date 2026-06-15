@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CHIMINI Admin | Dashboard</title>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin-body">
+
+  <aside class="admin-sidebar">
+    <div class="admin-logo">
+      <img src="../logo.png" alt="CHIMINI Logo">
+    </div>
+    
+    <nav class="admin-nav">
+      <a href="#" class="admin-nav-item active" data-tab="dashboard">Dashboard</a>
+      <a href="#" class="admin-nav-item" data-tab="products">Products</a>
+      <a href="#" class="admin-nav-item" data-tab="collections">Collections</a>
+      <a href="#" class="admin-nav-item" data-tab="homepage">Homepage & Banners</a>
+      <a href="#" class="admin-nav-item" data-tab="best_sellers">Best Sellers</a>
+      <a href="#" class="admin-nav-item" data-tab="gifts">Gift Hampers</a>
+      <a href="#" class="admin-nav-item" data-tab="orders">Orders</a>
+      <a href="#" class="admin-nav-item" data-tab="customers">Customers</a>
+      <a href="#" class="admin-nav-item" data-tab="coupons">Coupons</a>
+      <a href="#" class="admin-nav-item" data-tab="settings">Settings</a>
+    </nav>
+
+    <div class="admin-logout">
+      <button id="logoutBtn" class="admin-logout-btn">Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+    <header class="admin-header">
+      <h2 style="margin: 0; font-family: var(--font-serif); color: var(--admin-primary);" id="pageTitle">Dashboard</h2>
+      <div style="font-size: 0.9rem; color: #666;" id="adminEmail">Loading...</div>
+    </header>
+
+    <div class="admin-content" id="adminContent">
+      <!-- Dynamic Content loaded via JS -->
+      <div class="admin-card">
+        <h3 class="admin-card-title">Welcome to CHIMINI Admin Portal</h3>
+        <p>Your Supabase integration is active. Use the sidebar to navigate through your store's management modules.</p>
+        <p style="display:none;"></p>
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--admin-border);">
+          <h4 style="margin-top:0;">Data Migration</h4>
+          <p style="font-size: 0.9rem; color: #666;">Move your existing local products and settings into your Supabase database.</p>
+          <button id="migrateDataBtn" class="btn-accent" style="padding: 10px 20px;">Migrate Storefront Data to Supabase</button>
+          <div id="migrateStatus" style="margin-top: 10px; font-size: 0.9rem; font-weight: bold;"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module" src="js/dashboard.js"></script>
+</body>
+</html>

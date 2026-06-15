@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="CHIMINI Collections — Browse our full range of luxury hand-poured soy candles, reed diffusers, wax melts, and botanical gift sets.">
+  <title>CHIMINI | Collections</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+
+  <!-- Header & Navigation -->
+  <header id="mainHeader">
+    <div class="container">
+      <div class="header-main">
+        <div class="header-search">
+          <div class="search-input-wrapper">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+            </svg>
+            <input type="text" placeholder="Search fragrances..." id="searchInput" aria-label="Search fragrances">
+          </div>
+        </div>
+        <div class="brand-logo">
+          <a href="index.html" id="brandLogoText"><img src="logo.png" alt="CHIMINI Logo"
+              class="brand-logo-img"></a>
+        </div>
+        <div class="header-actions">
+          <button class="header-icon-btn" aria-label="User Account" onclick="alert('Account system demo')">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
+            </svg>
+          </button>
+          <button class="header-icon-btn" aria-label="Wishlist" onclick="alert('Wishlist demo')">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
+          </button>
+          <button class="header-icon-btn" id="cartToggleBtn" aria-label="Open Shopping Cart">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.9 2 1.99 2 2-.9 2-2-.9-2-2-2z" />
+            </svg>
+            <span class="cart-count" id="cartBadgeCount">0</span>
+          </button>
+        </div>
+      </div>
+      <nav aria-label="Main Navigation">
+        <ul class="nav-menu" id="dynamicNavMenu"></ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Catalog Section -->
+    <section class="catalog-section">
+      <div class="catalog-container">
+
+        <!-- ── TOOLBAR ── -->
+        <div class="catalog-toolbar" id="catalogToolbar">
+
+          <!-- Left: Grid view toggles -->
+          <div class="catalog-toolbar-left">
+            <div class="view-toggles" role="group" aria-label="Grid view">
+              <button class="view-btn active" id="view4Btn" aria-label="4-column grid" title="4 columns">
+                <!-- 4-grid icon -->
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <rect x="1" y="1" width="8" height="8" rx="1" />
+                  <rect x="11" y="1" width="8" height="8" rx="1" />
+                  <rect x="1" y="11" width="8" height="8" rx="1" />
+                  <rect x="11" y="11" width="8" height="8" rx="1" />
+                </svg>
+              </button>
+              <button class="view-btn" id="view3Btn" aria-label="3-column grid" title="3 columns">
+                <!-- 3-grid icon -->
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <rect x="1" y="1" width="5" height="18" rx="1" />
+                  <rect x="7.5" y="1" width="5" height="18" rx="1" />
+                  <rect x="14" y="1" width="5" height="18" rx="1" />
+                </svg>
+              </button>
+              <button class="view-btn" id="view2Btn" aria-label="2-column grid" title="2 columns">
+                <!-- 2-grid icon -->
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <rect x="1" y="1" width="8" height="18" rx="1" />
+                  <rect x="11" y="1" width="8" height="18" rx="1" />
+                </svg>
+              </button>
+              <button class="view-btn" id="viewListBtn" aria-label="List view" title="List">
+                <!-- list icon -->
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <rect x="1" y="2" width="18" height="3" rx="1" />
+                  <rect x="1" y="8.5" width="18" height="3" rx="1" />
+                  <rect x="1" y="15" width="18" height="3" rx="1" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Center: Product Count -->
+          <div class="catalog-toolbar-center">
+            <span class="catalog-count" id="catalogCount">20 products</span>
+          </div>
+
+          <!-- Right: Sort by + Filter -->
+          <div class="catalog-toolbar-right">
+            <div class="sort-wrapper">
+              <span class="sort-label">Sort by</span>
+              <svg class="sort-chevron" viewBox="0 0 24 24">
+                <path d="M7 10l5 5 5-5z" />
+              </svg>
+              <select id="catalogSortSelect" class="sort-select-hidden" aria-label="Sort products">
+                <option value="featured">Featured</option>
+                <option value="new-arrivals">New Arrivals</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="best-selling">Best Selling</option>
+              </select>
+            </div>
+
+            <div class="toolbar-divider"></div>
+
+            <button class="filter-toggle-btn" id="filterToggleBtn" aria-label="Open Filters">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M4.25 5.61C6.27 8.2 10 13 10 13v6c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-6s3.72-4.8 5.74-7.39A.998.998 0 0 0 18.95 4H5.04a1 1 0 0 0-.79 1.61z" />
+              </svg>
+              Filter
+            </button>
+          </div>
+        </div>
+
+        <!-- ── PRODUCT GRID ── -->
+        <div class="catalog-grid" id="catalogGrid">
+          <!-- Rendered by JS -->
+        </div>
+
+      </div><!-- /.catalog-container -->
+    </section>
+  </main>
+
+  <!-- ══ FILTER DRAWER (slides in from right) ══ -->
+  <div class="filter-overlay" id="filterOverlay"></div>
+  <aside class="filter-drawer" id="filterPanel" aria-label="Product Filters">
+    <div class="filter-drawer-header">
+      <h2>Filter</h2>
+      <button class="filter-close-btn" id="filterCloseBtn" aria-label="Close Filters">
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="filter-drawer-body">
+
+      <!-- Category -->
+      <div class="filter-section">
+        <button class="filter-section-header">
+          <span>Category</span>
+          <svg class="filter-chevron" viewBox="0 0 24 24">
+            <path d="M7 10l5 5 5-5z" />
+          </svg>
+        </button>
+        <div class="filter-section-body">
+          <label class="filter-option"><input type="checkbox" class="filter-checkbox" data-filter="category"
+              value="Soy Candles"><span>Soy Candles</span></label>
+          <label class="filter-option"><input type="checkbox" class="filter-checkbox" data-filter="category"
+              value="Pillar Candles"><span>Pillar Candles</span></label>
+          <label class="filter-option"><input type="checkbox" class="filter-checkbox" data-filter="category"
+              value="Reed Diffusers"><span>Reed Diffusers</span></label>
+          <label class="filter-option"><input type="checkbox" class="filter-checkbox" data-filter="category"
+              value="Wax Melts"><span>Wax Melts</span></label>
+          <label class="filter-option"><input type="checkbox" class="filter-checkbox" data-filter="category"
+              value="Room Mists"><span>Room Mists</span></label>
+          <label class="filter-option"><input type="checkbox" class="filter-checkbox" data-filter="category"
+              value="Bath &amp; Body"><span>Bath &amp; Body</span></label>
+          <label class="filter-option"><input type="checkbox" class="filter-checkbox" data-filter="category"
+              value="Travel Size"><span>Travel Size</span></label>
+        </div>
+      </div>
+
+      <!-- Fragrance -->
+      <div class="filter-section">
+        <button class="filter-section-header">
+          <span>Fragrance</span>
+          <svg class="filter-chevron" viewBox="0 0 24 24">
+            <path d="M7 10l5 5 5-5z" />
+          </svg>
+        </button>
+        <div class="filter-section-body">
+          <label class="filter-option"><input type="checkbox" class="filter-checkbox" data-filter="fragrance"
+              value="Velvet Rose"><span>Velvet Rose</span></label>
+          <label class="filter-option"><input type="checkbox" class="filter-checkbox" data-filter="fragrance"
+              value="White Jasmine"><span>White Jasmine</span></label>
+          <label class="filter-option"><input type="checkbox" class="filter-checkbox" data-filter="fragrance"
+              value="Sandalwood"><span>Sandalwood</span></label>
+          <label class="filter-option"><input type="checkbox" class="filter-checkbox" data-filter="fragrance"
+              value="Lemon Citrus"><span>Lemon Citrus</span></label>
+          <label class="filter-option"><input type="checkbox" class="filter-checkbox" data-filter="fragrance"
+              value="Blueberry Fig"><span>Blueberry Fig</span></label>
+        </div>
+      </div>
+
+      <!-- Price Range -->
+      <div class="filter-section">
+        <button class="filter-section-header">
+          <span>Price Range</span>
+          <svg class="filter-chevron" viewBox="0 0 24 24">
+            <path d="M7 10l5 5 5-5z" />
+          </svg>
+        </button>
+        <div class="filter-section-body">
+          <div class="price-range-display">
+            <span id="priceMinLabel">$0</span>
+            <span>—</span>
+            <span id="priceMaxLabel">$999</span>
+          </div>
+          <div class="price-range-inputs">
+            <div class="price-range-slider-row">
+              <label class="price-range-sublabel">Min</label>
+              <input type="range" id="priceRangeMin" class="price-slider" min="0" max="999" value="0" step="5">
+            </div>
+            <div class="price-range-slider-row">
+              <label class="price-range-sublabel">Max</label>
+              <input type="range" id="priceRangeMax" class="price-slider" min="0" max="999" value="999" step="5">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Availability -->
+      <div class="filter-section">
+        <button class="filter-section-header">
+          <span>Availability</span>
+          <svg class="filter-chevron" viewBox="0 0 24 24">
+            <path d="M7 10l5 5 5-5z" />
+          </svg>
+        </button>
+        <div class="filter-section-body">
+          <label class="filter-option"><input type="checkbox" class="filter-checkbox" data-filter="availability"
+              value="In Stock"><span>In Stock</span></label>
+          <label class="filter-option"><input type="checkbox" class="filter-checkbox" data-filter="availability"
+              value="Low Stock"><span>Low Stock</span></label>
+          <label class="filter-option"><input type="checkbox" class="filter-checkbox" data-filter="availability"
+              value="Out of Stock"><span>Out of Stock</span></label>
+        </div>
+      </div>
+
+    </div><!-- /.filter-drawer-body -->
+
+    <div class="filter-drawer-footer">
+      <button class="filter-clear-all-btn" id="clearFiltersBtn">Clear All</button>
+      <button class="btn-accent filter-apply-btn" onclick="document.getElementById('filterCloseBtn').click()">Apply
+        Filters</button>
+    </div>
+  </aside>
+
+  <!-- Footer -->
+  <footer id="footer">
+    <div class="container" id="dynamicFooter"></div>
+  </footer>
+
+  <!-- Cart Drawer -->
+  <div class="cart-overlay" id="cartOverlay">
+    <div class="cart-drawer">
+      <div class="cart-header">
+        <h2>Shopping Cart</h2>
+        <button class="cart-close-btn" id="cartCloseBtn" aria-label="Close Cart">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+          </svg>
+        </button>
+      </div>
+      <div class="cart-body" id="cartBody"></div>
+      <div class="cart-footer" id="cartFooter">
+        <div class="cart-summary-line">
+          <span>Shipping</span>
+          <span id="cartShippingValue">Calculated at next step</span>
+        </div>
+        <div class="cart-summary-line cart-summary-total">
+          <span>Estimated Total</span>
+          <span id="cartTotalValue">$0.00</span>
+        </div>
+        <button class="btn-accent cart-checkout-btn"
+          onclick="alert('Checkout initiated! Thank you for purchasing from CHIMINI.')">Proceed to Checkout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Modal -->
+  <div class="admin-overlay" id="adminOverlay">
+    <div class="admin-modal">
+      <div class="admin-header">
+        <h2>CHIMINI Brand Management Portal</h2>
+        <button class="admin-close-btn" id="adminCloseBtn" aria-label="Close Admin Portal">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+          </svg>
+        </button>
+      </div>
+      <div class="admin-layout">
+        <div class="admin-sidebar">
+          <button class="admin-tab-btn active" data-tab="tabBanners">Banners &amp; Hero</button>
+          <button class="admin-tab-btn" data-tab="tabProducts">Best Sellers</button>
+          <button class="admin-tab-btn" data-tab="tabSettings">Announcement Bar</button>
+        </div>
+        <div class="admin-main-content">
+          <div class="admin-section active" id="tabBanners">
+            <h3>Custom Graphics &amp; Banners</h3>
+            <p style="color:var(--color-text-muted);font-size:0.85rem;">Banner settings apply to the Homepage.</p>
+          </div>
+          <div class="admin-section" id="tabProducts">
+            <h3>Manage Best Sellers Grid</h3>
+            <div style="overflow-x: auto; margin-bottom: 30px;">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="adminProductsTableBody"></tbody>
+              </table>
+            </div>
+            <h3>Add New Product</h3>
+            <form id="adminAddProductForm">
+              <div class="admin-form-group"><label for="newProductName">Product Name</label><input type="text"
+                  id="newProductName" class="admin-form-control" required></div>
+              <div class="admin-form-group"><label for="newProductPrice">Price ($)</label><input type="number"
+                  id="newProductPrice" class="admin-form-control" step="0.01" required></div>
+              <div class="admin-form-group"><label for="newProductImage">Image URL</label><input type="text"
+                  id="newProductImage" class="admin-form-control" required></div>
+              <div class="admin-form-group"><label for="newProductBadge">Badge (Optional)</label><input type="text"
+                  id="newProductBadge" class="admin-form-control"></div>
+              <button type="submit" class="btn-accent" style="width:100%;">Create Product</button>
+            </form>
+          </div>
+          <div class="admin-section" id="tabSettings">
+            <h3>Store Announcements</h3>
+            <form id="adminAnnouncementsForm">
+              <div class="admin-form-group"><label for="announcement1">Announcement 1</label><input type="text"
+                  id="announcement1" class="admin-form-control"></div>
+              <div class="admin-form-group"><label for="announcement2">Announcement 2</label><input type="text"
+                  id="announcement2" class="admin-form-control"></div>
+              <div class="admin-form-group"><label for="announcement3">Announcement 3</label><input type="text"
+                  id="announcement3" class="admin-form-control"></div>
+              <button type="submit" class="btn-accent" style="width:100%;margin-top:20px;">Save Announcements</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module" src="config.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+
+</html>
