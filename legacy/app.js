@@ -107,6 +107,7 @@ let storeState = {
   currentTestimonialIndex: 0,
   adminSettings: JSON.parse(localStorage.getItem("chimini_admin_settings")) || JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),
   shopLayout: "grid-3",
+  shopSort: "default",
   priceMin: null,
   priceMax: null
 };
@@ -1367,9 +1368,14 @@ function renderShopPage() {
         <div class="product-count" id="catalog-product-count">0 products found</div>
         
         <div class="catalog-controls">
-          <button class="sort-icon-btn" id="shop-sort-btn" aria-label="Sort products" data-sort="default" title="Sort: Featured">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="4" y1="5" x2="20" y2="5"></line><line x1="4" y1="12" x2="14" y2="12"></line><line x1="4" y1="19" x2="8" y2="19"></line></svg>
-          </button>
+          <select id="shop-sort" class="shop-sort-select" aria-label="Sort products">
+            <option value="default">Featured</option>
+            <option value="newest">Newest</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="name-az">Name: A&#8211;Z</option>
+            <option value="name-za">Name: Z&#8211;A</option>
+          </select>
           
           <button class="btn btn-secondary filter-toggle-btn" id="filter-drawer-toggle">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
@@ -1413,28 +1419,13 @@ function renderShopPage() {
       filterToggle.addEventListener("click", () => openDrawer(filterDrawer));
     }
     
-    // Bind sort icon button — cycles: default → price-low → price-high → default
-    const sortBtn = document.getElementById("shop-sort-btn");
-    if (sortBtn) {
-      sortBtn.addEventListener("click", () => {
-        const current = sortBtn.getAttribute("data-sort");
-        let next, title, svgPath;
-        if (current === "default") {
-          next = "price-low";
-          title = "Sort: Price Low \u2192 High";
-          svgPath = '<line x1="4" y1="5" x2="20" y2="5"></line><line x1="4" y1="12" x2="20" y2="12"></line><polyline points="16 16 20 19 16 22"></polyline>';
-        } else if (current === "price-low") {
-          next = "price-high";
-          title = "Sort: Price High \u2192 Low";
-          svgPath = '<line x1="4" y1="5" x2="20" y2="5"></line><line x1="4" y1="12" x2="20" y2="12"></line><polyline points="20 22 16 19 20 16"></polyline>';
-        } else {
-          next = "default";
-          title = "Sort: Featured";
-          svgPath = '<line x1="4" y1="5" x2="20" y2="5"></line><line x1="4" y1="12" x2="14" y2="12"></line><line x1="4" y1="19" x2="8" y2="19"></line>';
-        }
-        sortBtn.setAttribute("data-sort", next);
-        sortBtn.setAttribute("title", title);
-        sortBtn.querySelector("svg").innerHTML = svgPath;
+    // Bind sort dropdown — saves selection to storeState.shopSort for persistence across filters
+    const sortSelect = document.getElementById("shop-sort");
+    if (sortSelect) {
+      // Restore previously selected sort option
+      sortSelect.value = storeState.shopSort || "default";
+      sortSelect.addEventListener("change", () => {
+        storeState.shopSort = sortSelect.value;
         renderShopProducts();
       });
     }
@@ -1505,14 +1496,27 @@ function renderShopProducts() {
     countEl.textContent = `${products.length} product${products.length !== 1 ? 's' : ''} found`;
   }
   
-  // Sort products — state stored on sort icon button's data-sort attribute
-  const sortBtn = document.getElementById("shop-sort-btn");
-  const sortBy = sortBtn ? sortBtn.getAttribute("data-sort") : "default";
-  if (sortBy === "price-low") {
+  // Sync the sort dropdown UI to match persisted state
+  const sortSelectEl = document.getElementById("shop-sort");
+  if (sortSelectEl) {
+    sortSelectEl.value = storeState.shopSort || "default";
+  }
+
+  // Sort products using storeState.shopSort (persists across filter apply/reset)
+  const sortBy = storeState.shopSort || "default";
+  const originalOrder = storeState.adminSettings.products.map(p => p.id);
+  if (sortBy === "newest") {
+    products.sort((a, b) => originalOrder.indexOf(b.id) - originalOrder.indexOf(a.id));
+  } else if (sortBy === "price-low") {
     products.sort((a, b) => a.price - b.price);
   } else if (sortBy === "price-high") {
     products.sort((a, b) => b.price - a.price);
+  } else if (sortBy === "name-az") {
+    products.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (sortBy === "name-za") {
+    products.sort((a, b) => b.name.localeCompare(a.name));
   }
+  // "default" (Featured) keeps the original admin-defined product order
   
   if (products.length === 0) {
     grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 60px 0; color: var(--text-secondary); font-family: var(--font-serif); font-size: 1.2rem;">No products match your filter selections.</div>`;
