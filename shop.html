@@ -175,6 +175,48 @@
     </div>
   </div>
 
+  <!-- Filter Drawer -->
+  <div id="filter-drawer" class="drawer filter-drawer" aria-hidden="true">
+    <div class="drawer-header">
+      <h2>Filter Products</h2>
+      <button class="close-drawer-btn" id="close-filter-btn" aria-label="Close Filters">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="drawer-content">
+      <!-- Category Filter -->
+      <div class="filter-section">
+        <h3>Categories</h3>
+        <div class="filter-categories-list">
+          <button class="filter-btn active" data-cat="all">All Fragrances</button>
+          <button class="filter-btn" data-cat="candles">Candles</button>
+          <button class="filter-btn" data-cat="gifts">Gifts</button>
+          <button class="filter-btn" data-cat="signature">Signature</button>
+          <button class="filter-btn" data-cat="eco">Eco</button>
+        </div>
+      </div>
+      
+      <!-- Price Range Filter -->
+      <div class="filter-section">
+        <h3>Price Range</h3>
+        <div class="price-range-inputs">
+          <div class="price-input-group">
+            <label for="price-min">Min Price ($)</label>
+            <input type="number" id="price-min" placeholder="0.00" min="0" step="0.01">
+          </div>
+          <div class="price-input-group">
+            <label for="price-max">Max Price ($)</label>
+            <input type="number" id="price-max" placeholder="100.00" min="0" step="0.01">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="btn btn-secondary btn-block" id="filter-reset-btn">Reset Filters</button>
+      <button class="btn btn-primary btn-block" id="filter-apply-btn">Apply Filters</button>
+    </div>
+  </div>
+
   <!-- Admin Panel Drawer -->
   <div id="admin-drawer" class="drawer admin-drawer" aria-hidden="true">
     <div class="drawer-header">

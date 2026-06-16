@@ -105,7 +105,10 @@ let storeState = {
   searchQuery: "",
   activeCategory: "all",
   currentTestimonialIndex: 0,
-  adminSettings: JSON.parse(localStorage.getItem("lumiere_admin_settings")) || JSON.parse(JSON.stringify(DEFAULT_SETTINGS))
+  adminSettings: JSON.parse(localStorage.getItem("lumiere_admin_settings")) || JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),
+  shopLayout: "grid-3",
+  priceMin: null,
+  priceMax: null
 };
 
 // Autoplay intervals
@@ -614,6 +617,13 @@ function closeAllDrawers() {
   DOM.wishlistDrawer.setAttribute("aria-hidden", "true");
   DOM.adminDrawer.classList.remove("active");
   DOM.adminDrawer.setAttribute("aria-hidden", "true");
+  
+  const filterDrawer = document.getElementById("filter-drawer");
+  if (filterDrawer) {
+    filterDrawer.classList.remove("active");
+    filterDrawer.setAttribute("aria-hidden", "true");
+  }
+  
   DOM.drawerOverlay.classList.remove("active");
   document.body.style.overflow = "";
 }
@@ -1219,6 +1229,52 @@ function bindEvents() {
       window.location.href = `shop.html?category=${cat || 'all'}`;
     });
   });
+
+  // Filter Drawer events
+  const closeFilterBtn = document.getElementById("close-filter-btn");
+  if (closeFilterBtn) {
+    closeFilterBtn.addEventListener("click", closeAllDrawers);
+  }
+  
+  const filterBtns = document.querySelectorAll(".filter-btn");
+  filterBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      filterBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      storeState.activeCategory = btn.getAttribute("data-cat");
+    });
+  });
+  
+  const filterApplyBtn = document.getElementById("filter-apply-btn");
+  if (filterApplyBtn) {
+    filterApplyBtn.addEventListener("click", () => {
+      const minVal = document.getElementById("price-min").value;
+      const maxVal = document.getElementById("price-max").value;
+      storeState.priceMin = minVal ? parseFloat(minVal) : null;
+      storeState.priceMax = maxVal ? parseFloat(maxVal) : null;
+      closeAllDrawers();
+      renderShopProducts();
+    });
+  }
+  
+  const filterResetBtn = document.getElementById("filter-reset-btn");
+  if (filterResetBtn) {
+    filterResetBtn.addEventListener("click", () => {
+      const minInput = document.getElementById("price-min");
+      const maxInput = document.getElementById("price-max");
+      if (minInput) minInput.value = "";
+      if (maxInput) maxInput.value = "";
+      storeState.priceMin = null;
+      storeState.priceMax = null;
+      storeState.activeCategory = "all";
+      filterBtns.forEach(b => {
+        if (b.getAttribute("data-cat") === "all") b.classList.add("active");
+        else b.classList.remove("active");
+      });
+      closeAllDrawers();
+      renderShopProducts();
+    });
+  }
 }
 
 // --- 8. INITIALIZE STOREFRONT ---
@@ -1284,48 +1340,83 @@ function renderShopPage() {
     storeState.shopInitialized = true;
   }
   
-  if (!container.innerHTML.trim() || !container.querySelector(".shop-layout-wrapper")) {
+  if (!container.innerHTML.trim() || !container.querySelector(".catalog-toolbar")) {
     container.innerHTML = `
       <section class="subpage-hero">
         <h1 class="subpage-title">The Atelier Shop</h1>
         <p class="subpage-subtitle">Immersive botanical fragrances hand-poured in luxury vessels</p>
       </section>
-      <div class="shop-layout-wrapper section-container">
-        <aside class="shop-sidebar">
-          <div class="sidebar-section">
-            <h3 class="sidebar-title">Categories</h3>
-            <ul class="sidebar-categories">
-              <li class="sidebar-cat-item ${storeState.activeCategory === 'all' ? 'active' : ''}" data-cat="all">All Fragrances</li>
-              <li class="sidebar-cat-item ${storeState.activeCategory === 'candles' ? 'active' : ''}" data-cat="candles">Candles</li>
-              <li class="sidebar-cat-item ${storeState.activeCategory === 'gifts' ? 'active' : ''}" data-cat="gifts">Gifts</li>
-              <li class="sidebar-cat-item ${storeState.activeCategory === 'signature' ? 'active' : ''}" data-cat="signature">Signature</li>
-              <li class="sidebar-cat-item ${storeState.activeCategory === 'eco' ? 'active' : ''}" data-cat="eco">Eco</li>
-            </ul>
-          </div>
-          <div class="sidebar-section">
-            <h3 class="sidebar-title">Sort By</h3>
+      
+      <!-- Catalog Toolbar -->
+      <div class="catalog-toolbar section-container">
+        <div class="layout-switchers">
+          <button class="layout-btn ${storeState.shopLayout === 'grid-2' ? 'active' : ''}" id="layout-grid-2" aria-label="2 Column Grid">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="18" rx="1"></rect><rect x="14" y="3" width="7" height="18" rx="1"></rect></svg>
+          </button>
+          <button class="layout-btn ${storeState.shopLayout === 'grid-3' ? 'active' : ''}" id="layout-grid-3" aria-label="3 Column Grid">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="5" height="18" rx="0.5"></rect><rect x="9.5" y="3" width="5" height="18" rx="0.5"></rect><rect x="17" y="3" width="5" height="18" rx="0.5"></rect></svg>
+          </button>
+          <button class="layout-btn ${storeState.shopLayout === 'grid-4' ? 'active' : ''}" id="layout-grid-4" aria-label="4 Column Grid">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="3.5" height="18" rx="0.5"></rect><rect x="7.5" y="3" width="3.5" height="18" rx="0.5"></rect><rect x="13" y="3" width="3.5" height="18" rx="0.5"></rect><rect x="18.5" y="3" width="3.5" height="18" rx="0.5"></rect></svg>
+          </button>
+          <button class="layout-btn ${storeState.shopLayout === 'list' ? 'active' : ''}" id="layout-list" aria-label="List View">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+        </div>
+        
+        <div class="product-count" id="catalog-product-count">0 products found</div>
+        
+        <div class="catalog-controls">
+          <div class="sort-control">
+            <span class="control-label">Sort by:</span>
             <select id="shop-sort" class="shop-sort-select">
               <option value="default">Featured</option>
               <option value="price-low">Price: Low to High</option>
               <option value="price-high">Price: High to Low</option>
             </select>
           </div>
-        </aside>
-        <main class="shop-main">
-          <div class="shop-products-grid" id="shop-products-grid"></div>
+          
+          <button class="btn btn-secondary filter-toggle-btn" id="filter-drawer-toggle">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+            <span>Filter</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="catalog-layout section-container">
+        <main class="catalog-main">
+          <div class="shop-products-grid ${storeState.shopLayout}" id="shop-products-grid"></div>
         </main>
       </div>
     `;
     
-    // Bind sidebar categories
-    container.querySelectorAll(".sidebar-cat-item").forEach(item => {
-      item.addEventListener("click", () => {
-        storeState.activeCategory = item.getAttribute("data-cat");
-        container.querySelectorAll(".sidebar-cat-item").forEach(li => li.classList.remove("active"));
-        item.classList.add("active");
-        renderShopProducts();
-      });
-    });
+    // Bind layout buttons
+    const bindLayout = (btnId, layoutName) => {
+      const btn = document.getElementById(btnId);
+      if (btn) {
+        btn.addEventListener("click", () => {
+          storeState.shopLayout = layoutName;
+          container.querySelectorAll(".layout-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          const grid = document.getElementById("shop-products-grid");
+          if (grid) {
+            grid.className = `shop-products-grid ${layoutName}`;
+          }
+          renderShopProducts();
+        });
+      }
+    };
+    bindLayout("layout-grid-2", "grid-2");
+    bindLayout("layout-grid-3", "grid-3");
+    bindLayout("layout-grid-4", "grid-4");
+    bindLayout("layout-list", "list");
+    
+    // Bind filter toggle
+    const filterToggle = document.getElementById("filter-drawer-toggle");
+    const filterDrawer = document.getElementById("filter-drawer");
+    if (filterToggle && filterDrawer) {
+      filterToggle.addEventListener("click", () => openDrawer(filterDrawer));
+    }
     
     // Bind sort event
     const sortSelect = document.getElementById("shop-sort");
@@ -1339,6 +1430,36 @@ function renderShopPage() {
   renderShopProducts();
 }
 
+function getScentSwatches(productName) {
+  const name = productName.toLowerCase();
+  if (name.includes("jasmine")) {
+    return [
+      { color: "#FDFDFD", name: "Jasmine Blossom" },
+      { color: "#8B5A2B", name: "Oakwood Base" }
+    ];
+  } else if (name.includes("sandalwood")) {
+    return [
+      { color: "#C19A6B", name: "Sandalwood Essence" },
+      { color: "#FFBF00", name: "Warm Amber" }
+    ];
+  } else if (name.includes("rose") || name.includes("oud")) {
+    return [
+      { color: "#B80F0A", name: "Velvet Rose" },
+      { color: "#2E1A0C", name: "Rich Oud" }
+    ];
+  } else if (name.includes("fig") || name.includes("honey")) {
+    return [
+      { color: "#6F2DA8", name: "Wild Fig" },
+      { color: "#FFC000", name: "Organic Honey" }
+    ];
+  } else {
+    return [
+      { color: "#C5A880", name: "Signature Gold" },
+      { color: "#F5F2EB", name: "Ivory Wax" }
+    ];
+  }
+}
+
 function renderShopProducts() {
   const grid = document.getElementById("shop-products-grid");
   if (!grid) return;
@@ -1346,15 +1467,29 @@ function renderShopProducts() {
   
   let products = storeState.adminSettings.products;
   
-  // Filter by category
+  // Apply search query filter
+  if (storeState.searchQuery && storeState.searchQuery.trim() !== "") {
+    const q = storeState.searchQuery.toLowerCase();
+    products = products.filter(p => p.name.toLowerCase().includes(q));
+  }
+  
+  // Apply category tag filter
   if (storeState.activeCategory !== "all") {
     products = products.filter(p => p.category === storeState.activeCategory);
   }
   
-  // Filter by search query if any
-  if (storeState.searchQuery && storeState.searchQuery.trim() !== "") {
-    const q = storeState.searchQuery.toLowerCase();
-    products = products.filter(p => p.name.toLowerCase().includes(q));
+  // Apply price filter
+  if (storeState.priceMin !== null) {
+    products = products.filter(p => p.price >= storeState.priceMin);
+  }
+  if (storeState.priceMax !== null) {
+    products = products.filter(p => p.price <= storeState.priceMax);
+  }
+  
+  // Update count in middle toolbar
+  const countEl = document.getElementById("catalog-product-count");
+  if (countEl) {
+    countEl.textContent = `${products.length} product${products.length !== 1 ? 's' : ''} found`;
   }
   
   // Sort products
@@ -1367,27 +1502,81 @@ function renderShopProducts() {
   }
   
   if (products.length === 0) {
-    grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 60px 0; color: var(--text-secondary); font-family: var(--font-serif); font-size: 1.2rem;">No products found.</div>`;
+    grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 60px 0; color: var(--text-secondary); font-family: var(--font-serif); font-size: 1.2rem;">No products match your filter selections.</div>`;
     return;
   }
   
-  products.forEach(product => {
+  products.forEach((product, index) => {
     const isWishlisted = storeState.wishlist.includes(product.id);
+    
+    // Luxury catalog elements (Inspired by reference)
+    // 1. Dynamic premium tags/badges
+    let badgeText = "BEST SELLER";
+    if (product.price > 30) badgeText = "LIMITED EDITION";
+    else if (product.category === "gifts") badgeText = "CURATED GIFT";
+    else if (index === 1) badgeText = "FAST MOVING";
+    
+    // 2. Crossed out price & discount (if even index)
+    const isDiscounted = (index % 2 === 0);
+    const originalPrice = isDiscounted ? Number(product.price * 1.25).toFixed(2) : null;
+    const discountText = isDiscounted ? "20% OFF" : null;
+    
+    // 3. Scent notes color swatches
+    const swatches = getScentSwatches(product.name);
+    let swatchesHtml = `<div class="scent-swatches">`;
+    swatches.forEach(s => {
+      swatchesHtml += `<span class="swatch-dot" style="background-color: ${s.color};" title="${s.name}"></span>`;
+    });
+    swatchesHtml += `</div>`;
+    
     const card = document.createElement("div");
     card.className = "product-card animate-slide-up";
-    card.innerHTML = `
-      <div class="product-image-wrapper">
-        <img src="${product.image}" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
-        <button class="wishlist-toggle-btn ${isWishlisted ? "active" : ""}" data-id="${product.id}" aria-label="Add to Wishlist">
-          <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-        </button>
-      </div>
-      <div class="product-info">
-        <h3 class="product-name">${product.name}</h3>
-        <p class="product-price">$${Number(product.price).toFixed(2)}</p>
-        <button class="btn btn-primary product-card-btn add-to-cart-btn" data-id="${product.id}">Add to Cart</button>
-      </div>
-    `;
+    
+    if (storeState.shopLayout === "list") {
+      // List view premium horizontal layout
+      card.innerHTML = `
+        <div class="product-image-wrapper">
+          <span class="product-badge">${badgeText}</span>
+          <img src="${product.image}" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
+          <button class="wishlist-toggle-btn ${isWishlisted ? "active" : ""}" data-id="${product.id}" aria-label="Add to Wishlist">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          </button>
+        </div>
+        <div class="product-info">
+          <div class="product-details-text">
+            <h3 class="product-name" style="margin-bottom: 5px;">${product.name}</h3>
+            ${swatchesHtml}
+          </div>
+          <div class="product-price-action">
+            <div class="product-price-wrapper">
+              <span class="current-price">$${Number(product.price).toFixed(2)}</span>
+              ${isDiscounted ? `<span class="original-price" style="text-decoration: line-through;">$${originalPrice}</span> <span class="discount-badge">${discountText}</span>` : ''}
+            </div>
+            <button class="btn btn-primary add-to-cart-btn" data-id="${product.id}" style="padding: 10px 24px;">Add to Cart</button>
+          </div>
+        </div>
+      `;
+    } else {
+      // Grid view layouts
+      card.innerHTML = `
+        <div class="product-image-wrapper">
+          <span class="product-badge">${badgeText}</span>
+          <img src="${product.image}" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
+          <button class="wishlist-toggle-btn ${isWishlisted ? "active" : ""}" data-id="${product.id}" aria-label="Add to Wishlist">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          </button>
+        </div>
+        <div class="product-info">
+          <h3 class="product-name">${product.name}</h3>
+          <div class="product-price-wrapper">
+            <span class="current-price">$${Number(product.price).toFixed(2)}</span>
+            ${isDiscounted ? `<span class="original-price" style="text-decoration: line-through;">$${originalPrice}</span> <span class="discount-badge">${discountText}</span>` : ''}
+          </div>
+          ${swatchesHtml}
+          <button class="btn btn-primary product-card-btn add-to-cart-btn" data-id="${product.id}" style="margin-top: 15px;">Add to Cart</button>
+        </div>
+      `;
+    }
     
     card.querySelector(".wishlist-toggle-btn").addEventListener("click", (e) => {
       e.stopPropagation();

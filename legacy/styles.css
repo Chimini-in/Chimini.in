@@ -2088,3 +2088,428 @@ section.full-width-banner-section {
   padding: 16px;
   font-size: 0.85rem;
 }
+
+/* ==========================================================================
+   18. ECOMMERCE CATALOG & FILTER DRAWER SYSTEM
+   ========================================================================== */
+
+/* Toolbar & Layout Switchers */
+.catalog-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 40px;
+  border-top: 1px solid rgba(197, 168, 128, 0.15);
+  border-bottom: 1px solid rgba(197, 168, 128, 0.15);
+  margin-bottom: 40px;
+  background-color: var(--bg-primary);
+}
+
+.layout-switchers {
+  display: flex;
+  gap: 8px;
+}
+
+.layout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(197, 168, 128, 0.2);
+  color: var(--text-secondary);
+  background: transparent;
+  transition: all var(--transition-fast);
+}
+
+.layout-btn:hover,
+.layout-btn.active {
+  color: var(--text-primary);
+  border-color: var(--text-primary);
+  background-color: var(--bg-secondary);
+}
+
+.layout-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.product-count {
+  font-size: 0.85rem;
+  font-family: var(--font-sans);
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.catalog-controls {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.sort-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.control-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.shop-sort-select {
+  padding: 8px 16px;
+  border: 1px solid rgba(197, 168, 128, 0.25);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  outline: none;
+  transition: border var(--transition-fast);
+}
+
+.shop-sort-select:focus {
+  border-color: var(--accent);
+}
+
+.filter-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: 1px solid var(--text-primary);
+  background-color: transparent;
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
+}
+
+.filter-toggle-btn:hover {
+  background-color: var(--text-primary);
+  color: var(--bg-primary);
+}
+
+.filter-toggle-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* Premium Layout Modifier Options */
+.shop-products-grid {
+  display: grid;
+  gap: 30px;
+  transition: all var(--transition-medium);
+}
+
+.shop-products-grid.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.shop-products-grid.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.shop-products-grid.grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Premium List Layout Styling */
+.shop-products-grid.list {
+  grid-template-columns: 1fr;
+  gap: 25px;
+}
+
+.shop-products-grid.list .product-card {
+  flex-direction: row;
+  align-items: center;
+  text-align: left;
+  padding: 20px;
+  gap: 35px;
+}
+
+.shop-products-grid.list .product-image-wrapper {
+  width: 180px;
+  height: 180px;
+  flex-shrink: 0;
+  aspect-ratio: 1 / 1;
+}
+
+.shop-products-grid.list .product-info {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  flex-grow: 1;
+  padding: 0;
+  text-align: left;
+  gap: 30px;
+}
+
+.shop-products-grid.list .product-details-text {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-grow: 1;
+}
+
+.shop-products-grid.list .product-price-action {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  flex-shrink: 0;
+}
+
+.shop-products-grid.list .product-price-wrapper {
+  justify-content: flex-start;
+  margin-bottom: 0;
+}
+
+/* Luxury Card Accents (Badges, Swatches, Pricing Details) */
+.product-badge {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background-color: var(--dark-charcoal);
+  color: var(--bg-primary);
+  font-family: var(--font-serif);
+  font-size: 0.7rem;
+  font-style: italic;
+  letter-spacing: 0.05em;
+  padding: 6px 14px;
+  z-index: 4;
+}
+
+.product-price-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.current-price {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.original-price {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  text-decoration: line-through;
+}
+
+.discount-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #1B5E20; /* Luxury deep green discount tag */
+  background-color: #E8F5E9;
+  padding: 2px 8px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border-radius: 0;
+}
+
+.scent-swatches {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.shop-products-grid.list .scent-swatches {
+  justify-content: flex-start;
+  margin: 4px 0 0 0;
+}
+
+.swatch-dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1px solid rgba(44, 30, 20, 0.15);
+  display: inline-block;
+  cursor: pointer;
+  position: relative;
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+
+.swatch-dot:hover {
+  transform: scale(1.3);
+  border-color: var(--accent);
+}
+
+/* Collapsible Filter Drawer Details */
+.filter-drawer {
+  background-color: var(--bg-primary);
+  border-left: 1px solid rgba(197, 168, 128, 0.2);
+}
+
+.filter-section {
+  margin-bottom: 35px;
+  border-bottom: 1px solid rgba(197, 168, 128, 0.1);
+  padding-bottom: 30px;
+}
+
+.filter-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.filter-section h3 {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  color: var(--text-primary);
+  margin-bottom: 18px;
+}
+
+.filter-categories-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filter-btn {
+  padding: 8px 18px;
+  border: 1px solid rgba(197, 168, 128, 0.2);
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+  background-color: var(--text-primary);
+  color: var(--bg-primary);
+  border-color: var(--text-primary);
+}
+
+.price-range-inputs {
+  display: flex;
+  gap: 15px;
+}
+
+.price-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.price-input-group label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.price-input-group input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid rgba(197, 168, 128, 0.25);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  outline: none;
+  transition: border var(--transition-fast);
+}
+
+.price-input-group input:focus {
+  border-color: var(--accent);
+}
+
+/* Media Queries Override for Catalog Components */
+@media (max-width: 992px) {
+  .shop-products-grid.grid-4 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .catalog-toolbar {
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .catalog-controls {
+    width: 100%;
+    justify-content: space-between;
+    gap: 15px;
+  }
+
+  .sort-control {
+    flex-grow: 1;
+  }
+  
+  .shop-sort-select {
+    width: 100%;
+  }
+
+  .shop-products-grid.grid-4,
+  .shop-products-grid.grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .shop-products-grid.list .product-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .shop-products-grid.list .product-image-wrapper {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+  }
+
+  .shop-products-grid.list .product-info {
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    align-items: center;
+  }
+
+  .shop-products-grid.list .product-details-text {
+    align-items: center;
+  }
+
+  .shop-products-grid.list .scent-swatches {
+    justify-content: center;
+  }
+
+  .shop-products-grid.list .product-price-action {
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+  }
+
+  .shop-products-grid.list .product-price-wrapper {
+    justify-content: center;
+  }
+
+  .shop-products-grid.list .add-to-cart-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .shop-products-grid.grid-4,
+  .shop-products-grid.grid-3,
+  .shop-products-grid.grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
