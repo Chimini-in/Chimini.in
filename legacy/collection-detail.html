@@ -115,8 +115,8 @@
         // Pricing
         let priceHtml = '';
         if (col.pricing?.sale) {
-           priceHtml += `<span class="col-price-sale">$${col.pricing.sale}</span>`;
-           if (col.pricing.original) priceHtml += `<span class="col-price-orig">$${col.pricing.original}</span>`;
+           priceHtml += `<span class="col-price-sale">₹${col.pricing.sale}</span>`;
+           if (col.pricing.original) priceHtml += `<span class="col-price-orig">₹${col.pricing.original}</span>`;
         } else {
            priceHtml += `<span class="col-price-sale">Pricing Unavailable</span>`;
         }

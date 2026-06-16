@@ -4,7 +4,7 @@
 
 // --- 1. DEFAULT LUXURY CONTENT (MOCK DATA) ---
 const DEFAULT_SETTINGS = {
-  announcementText: "Complimentary shipping on orders over $100 • Use code LUXE15 for 15% off",
+  announcementText: "Complimentary shipping on orders over ₹100 • Use code LUXE15 for 15% off",
   heroBanner: {
     image: "assets/hero_banner_1.png",
     link: "#best-sellers"
@@ -227,7 +227,7 @@ function renderBestSellers() {
       </div>
       <div class="product-info">
         <h3 class="product-name">${product.name}</h3>
-        <p class="product-price">$${Number(product.price).toFixed(2)}</p>
+        <p class="product-price">₹${Number(product.price).toFixed(2)}</p>
         <button class="btn btn-primary product-card-btn add-to-cart-btn" data-id="${product.id}">Add to Cart</button>
       </div>
     `;
@@ -448,7 +448,7 @@ function renderCart() {
         document.getElementById("best-sellers").scrollIntoView({ behavior: "smooth" });
       });
     }
-    DOM.cartSubtotal.textContent = "$0.00";
+    DOM.cartSubtotal.textContent = "₹0.00";
     DOM.cartCount.textContent = "0";
     return;
   }
@@ -467,7 +467,7 @@ function renderCart() {
       </div>
       <div class="cart-item-details">
         <span class="cart-item-name">${item.name}</span>
-        <span class="cart-item-price">$${Number(item.price).toFixed(2)}</span>
+        <span class="cart-item-price">₹${Number(item.price).toFixed(2)}</span>
         <div class="cart-item-quantity">
           <button class="qty-btn dec-qty" data-id="${item.id}">-</button>
           <span class="qty-val">${item.quantity}</span>
@@ -485,7 +485,7 @@ function renderCart() {
     DOM.cartItemsContainer.appendChild(itemEl);
   });
   
-  DOM.cartSubtotal.textContent = `$${subtotal.toFixed(2)}`;
+  DOM.cartSubtotal.textContent = `₹${subtotal.toFixed(2)}`;
   DOM.cartCount.textContent = totalItemsCount.toString();
 }
 
@@ -562,7 +562,7 @@ function renderWishlist() {
       </div>
       <div class="wishlist-item-details">
         <h3 class="wishlist-item-name">${product.name}</h3>
-        <span class="wishlist-item-price">$${Number(product.price).toFixed(2)}</span>
+        <span class="wishlist-item-price">₹${Number(product.price).toFixed(2)}</span>
         <div class="wishlist-item-actions">
           <span class="wishlist-add-to-cart" data-id="${product.id}">Add to Cart</span>
           <span class="wishlist-remove" data-id="${product.id}">Remove</span>
@@ -760,7 +760,7 @@ function renderAdminProductsList() {
         <input type="text" class="prod-name-val" value="${prod.name}" data-index="${index}">
       </div>
       <div class="admin-form-group">
-        <label>Price ($)</label>
+        <label>Price (₹)</label>
         <input type="number" step="0.01" class="prod-price-val" value="${prod.price}" data-index="${index}">
       </div>
       <div class="admin-form-group">
@@ -1566,8 +1566,8 @@ function renderShopProducts() {
           </div>
           <div class="product-price-action">
             <div class="product-price-wrapper">
-              <span class="current-price">$${Number(product.price).toFixed(2)}</span>
-              ${isDiscounted ? `<span class="original-price" style="text-decoration: line-through;">$${originalPrice}</span> <span class="discount-badge">${discountText}</span>` : ''}
+              <span class="current-price">₹${Number(product.price).toFixed(2)}</span>
+              ${isDiscounted ? `<span class="original-price" style="text-decoration: line-through;">₹${originalPrice}</span> <span class="discount-badge">${discountText}</span>` : ''}
             </div>
             <button class="btn btn-primary add-to-cart-btn" data-id="${product.id}" style="padding: 10px 24px;">Add to Cart</button>
           </div>
@@ -1586,8 +1586,8 @@ function renderShopProducts() {
         <div class="product-info">
           <h3 class="product-name">${product.name}</h3>
           <div class="product-price-wrapper">
-            <span class="current-price">$${Number(product.price).toFixed(2)}</span>
-            ${isDiscounted ? `<span class="original-price" style="text-decoration: line-through;">$${originalPrice}</span> <span class="discount-badge">${discountText}</span>` : ''}
+            <span class="current-price">₹${Number(product.price).toFixed(2)}</span>
+            ${isDiscounted ? `<span class="original-price" style="text-decoration: line-through;">₹${originalPrice}</span> <span class="discount-badge">${discountText}</span>` : ''}
           </div>
           ${swatchesHtml}
           <button class="btn btn-primary product-card-btn add-to-cart-btn" data-id="${product.id}" style="margin-top: 15px;">Add to Cart</button>
@@ -1708,7 +1708,7 @@ function renderGiftsPage() {
       </div>
       <div class="product-info">
         <h3 class="product-name">${product.name}</h3>
-        <p class="product-price">$${Number(product.price).toFixed(2)}</p>
+        <p class="product-price">₹${Number(product.price).toFixed(2)}</p>
         <button class="btn btn-primary product-card-btn add-to-cart-btn" data-id="${product.id}">Add to Cart</button>
       </div>
     `;
