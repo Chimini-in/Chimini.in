@@ -210,9 +210,8 @@ img {
 
 /* --- 5. HEADER & NAVIGATION --- */
 .sticky-header-container {
-  position: sticky;
-  top: 0;
-  z-index: 1005; /* Floats above general content, below drawers */
+  position: relative; /* Restored to relative so it scrolls out of view naturally */
+  z-index: 1005;
   width: 100%;
 }
 
@@ -223,12 +222,6 @@ img {
   z-index: 1001;
   transition: all var(--transition-medium);
   width: 100%;
-}
-
-.main-header.sticky {
-  box-shadow: var(--shadow-sm);
-  background-color: rgba(250, 249, 246, 0.97);
-  backdrop-filter: blur(8px);
 }
 
 .header-top {

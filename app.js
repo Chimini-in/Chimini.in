@@ -1073,9 +1073,7 @@ function bindEvents() {
         if (targetId) {
           const el = document.getElementById(targetId);
           if (el) {
-            const stickyContainer = document.querySelector(".sticky-header-container");
-            const headerHeight = stickyContainer ? stickyContainer.offsetHeight : (DOM.mainHeader ? DOM.mainHeader.offsetHeight : 0);
-            const yOffset = -headerHeight;
+            const yOffset = -15; // Clean spacer padding at top of viewport for static header
             const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
             window.scrollTo({ top: y, behavior: 'smooth' });
           }
@@ -1148,16 +1146,7 @@ function bindEvents() {
   if (DOM.adminSaveBtn) DOM.adminSaveBtn.addEventListener("click", saveAdminSettings);
   if (DOM.adminResetBtn) DOM.adminResetBtn.addEventListener("click", resetAdminSettings);
   
-  // Sticky header class trigger on scroll
-  window.addEventListener("scroll", () => {
-    if (window.scrollY > 50) {
-      DOM.mainHeader.classList.add("sticky");
-      document.body.classList.add("has-sticky-header");
-    } else {
-      DOM.mainHeader.classList.remove("sticky");
-      document.body.classList.remove("has-sticky-header");
-    }
-  });
+  // Sticky header trigger removed (header is static)
 
   // Footer Category clicks
   const footerLinks = document.querySelectorAll(".footer-cat-link");
