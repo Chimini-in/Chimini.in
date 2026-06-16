@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LUMIÈRE LUXURY ECOMMERCE JAVASCRIPT
+   CHIMINI LUXURY ECOMMERCE JAVASCRIPT
    ========================================================================== */
 
 // --- 1. DEFAULT LUXURY CONTENT (MOCK DATA) ---
@@ -72,9 +72,9 @@ const DEFAULT_SETTINGS = {
     image2: "assets/hero_banner_1.png"
   },
   contact: {
-    email: "concierge@lumiere.com",
+    email: "concierge@chimini.com",
     phone: "+33 (0) 1 45 67 89 00",
-    address: "48 Rue de la Lumière, Paris"
+    address: "48 Rue de la CHIMINI, Paris"
   },
   testimonials: [
     {
@@ -86,7 +86,7 @@ const DEFAULT_SETTINGS = {
     {
       id: "test-2",
       rating: 5,
-      text: "I purchased the Artisan Gift Hamper for a friend, and she was blown away by the presentation and fragrance. Lumière is my go-to gifting brand.",
+      text: "I purchased the Artisan Gift Hamper for a friend, and she was blown away by the presentation and fragrance. CHIMINI is my go-to gifting brand.",
       author: "Sebastian Thorne"
     },
     {
@@ -100,12 +100,12 @@ const DEFAULT_SETTINGS = {
 
 // --- 2. APPLICATION STATE ---
 let storeState = {
-  cart: JSON.parse(localStorage.getItem("lumiere_cart")) || [],
-  wishlist: JSON.parse(localStorage.getItem("lumiere_wishlist")) || [],
+  cart: JSON.parse(localStorage.getItem("chimini_cart")) || [],
+  wishlist: JSON.parse(localStorage.getItem("chimini_wishlist")) || [],
   searchQuery: "",
   activeCategory: "all",
   currentTestimonialIndex: 0,
-  adminSettings: JSON.parse(localStorage.getItem("lumiere_admin_settings")) || JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),
+  adminSettings: JSON.parse(localStorage.getItem("chimini_admin_settings")) || JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),
   shopLayout: "grid-3",
   priceMin: null,
   priceMax: null
@@ -177,7 +177,7 @@ function renderHeroBanner() {
   const hero = storeState.adminSettings.heroBanner;
   DOM.heroBanner.innerHTML = `
     <a href="${hero.link || '#'}">
-      <img src="${hero.image}" alt="LUMIÈRE Luxury Candles Banner" onerror="this.src='assets/hero_banner_1.png'">
+      <img src="${hero.image}" alt="CHIMINI Luxury Candles Banner" onerror="this.src='assets/hero_banner_1.png'">
     </a>
   `;
 }
@@ -508,7 +508,7 @@ function addToCart(productId) {
   }
   
   // Save & update
-  localStorage.setItem("lumiere_cart", JSON.stringify(storeState.cart));
+  localStorage.setItem("chimini_cart", JSON.stringify(storeState.cart));
   renderCart();
   showToast(`Added ${product.name} to Cart`);
   openDrawer(DOM.cartDrawer);
@@ -523,14 +523,14 @@ function changeCartQty(productId, delta) {
   if (item.quantity <= 0) {
     removeCartItem(productId);
   } else {
-    localStorage.setItem("lumiere_cart", JSON.stringify(storeState.cart));
+    localStorage.setItem("chimini_cart", JSON.stringify(storeState.cart));
     renderCart();
   }
 }
 
 function removeCartItem(productId) {
   storeState.cart = storeState.cart.filter(item => item.id !== productId);
-  localStorage.setItem("lumiere_cart", JSON.stringify(storeState.cart));
+  localStorage.setItem("chimini_cart", JSON.stringify(storeState.cart));
   renderCart();
 }
 
@@ -596,7 +596,7 @@ function toggleWishlist(productId) {
     showToast(`Saved to Wishlist`);
   }
   
-  localStorage.setItem("lumiere_wishlist", JSON.stringify(storeState.wishlist));
+  localStorage.setItem("chimini_wishlist", JSON.stringify(storeState.wishlist));
   renderWishlist();
   renderBestSellers(); // Re-render to update card heart state
 }
@@ -1053,7 +1053,7 @@ function saveAdminSettings() {
   
   // Write to store state & local storage
   storeState.adminSettings = settings;
-  localStorage.setItem("lumiere_admin_settings", JSON.stringify(settings));
+  localStorage.setItem("chimini_admin_settings", JSON.stringify(settings));
   
   // Close drawers & refresh page renderers
   closeAllDrawers();
@@ -1064,14 +1064,14 @@ function saveAdminSettings() {
 // Reset customizer defaults
 function resetAdminSettings() {
   if (confirm("Are you sure you want to restore the default luxury layout? All customized images and text will be cleared.")) {
-    localStorage.removeItem("lumiere_admin_settings");
+    localStorage.removeItem("chimini_admin_settings");
     storeState.adminSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
     
     // Clear cart and wishlist
     storeState.cart = [];
     storeState.wishlist = [];
-    localStorage.removeItem("lumiere_cart");
-    localStorage.removeItem("lumiere_wishlist");
+    localStorage.removeItem("chimini_cart");
+    localStorage.removeItem("chimini_wishlist");
     
     closeAllDrawers();
     initStore();
@@ -1101,9 +1101,9 @@ function bindEvents() {
   // Checkout simulation
   if (DOM.checkoutBtn) {
     DOM.checkoutBtn.addEventListener("click", () => {
-      alert("Thank you for choosing LUMIÈRE. Checkout simulation complete.");
+      alert("Thank you for choosing CHIMINI. Checkout simulation complete.");
       storeState.cart = [];
-      localStorage.removeItem("lumiere_cart");
+      localStorage.removeItem("chimini_cart");
       renderCart();
       closeAllDrawers();
     });
@@ -1793,7 +1793,7 @@ function renderContactPage() {
         <h2 class="contact-col-heading">Atelier Details</h2>
         <div class="contact-detail-item">
           <h3>General Inquiry</h3>
-          <p>${contact.email || 'concierge@lumiere.com'}</p>
+          <p>${contact.email || 'concierge@chimini.com'}</p>
         </div>
         <div class="contact-detail-item">
           <h3>Concierge Phone</h3>
@@ -1802,11 +1802,11 @@ function renderContactPage() {
         </div>
         <div class="contact-detail-item">
           <h3>Atelier Location</h3>
-          <p>${contact.address || '48 Rue de la Lumière, Paris'}</p>
+          <p>${contact.address || '48 Rue de la CHIMINI, Paris'}</p>
         </div>
         <div class="contact-detail-item">
           <h3>Corporate & Events Gifting</h3>
-          <p>partners@lumiere.com</p>
+          <p>partners@chimini.com</p>
         </div>
       </div>
 
