@@ -1073,7 +1073,9 @@ function bindEvents() {
         if (targetId) {
           const el = document.getElementById(targetId);
           if (el) {
-            const yOffset = -DOM.mainHeader.offsetHeight;
+            const stickyContainer = document.querySelector(".sticky-header-container");
+            const headerHeight = stickyContainer ? stickyContainer.offsetHeight : (DOM.mainHeader ? DOM.mainHeader.offsetHeight : 0);
+            const yOffset = -headerHeight;
             const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
             window.scrollTo({ top: y, behavior: 'smooth' });
           }

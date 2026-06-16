@@ -209,6 +209,13 @@ img {
 }
 
 /* --- 5. HEADER & NAVIGATION --- */
+.sticky-header-container {
+  position: sticky;
+  top: 0;
+  z-index: 1005; /* Floats above general content, below drawers */
+  width: 100%;
+}
+
 .main-header {
   background-color: var(--bg-primary);
   border-bottom: 1px solid rgba(197, 168, 128, 0.25);
@@ -219,8 +226,6 @@ img {
 }
 
 .main-header.sticky {
-  position: fixed;
-  top: 0;
   box-shadow: var(--shadow-sm);
   background-color: rgba(250, 249, 246, 0.97);
   backdrop-filter: blur(8px);
@@ -385,9 +390,9 @@ img {
   transform-origin: left;
 }
 
-/* Spacer for sticky header in content */
+/* Spacer for sticky header in content is no longer needed since sticky container stays in the flow */
 body.has-sticky-header {
-  padding-top: var(--header-height);
+  padding-top: 0;
 }
 
 /* --- 6. HERO CAROUSEL BANNER --- */

@@ -16,57 +16,60 @@
 </head>
 <body>
 
-  <!-- 1. Top Announcement Bar -->
-  <div id="announcement-bar" class="announcement-bar">
-    <div class="announcement-container">
-      <span id="announcement-text">Complimentary shipping on orders over $100 • Use code LUXE15 for 15% off</span>
+  <!-- Sticky Header Wrapper -->
+  <div class="sticky-header-container">
+    <!-- 1. Top Announcement Bar -->
+    <div id="announcement-bar" class="announcement-bar">
+      <div class="announcement-container">
+        <span id="announcement-text">Complimentary shipping on orders over $100 • Use code LUXE15 for 15% off</span>
+      </div>
     </div>
-  </div>
 
-  <!-- 2. Header & Navigation -->
-  <header id="main-header" class="main-header">
-    <div class="header-top">
-      <!-- Search Bar -->
-      <div class="header-search">
-        <div class="search-input-wrapper">
-          <svg class="icon search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <input type="text" id="search-input" placeholder="Search fragrances, candles..." aria-label="Search products">
+    <!-- 2. Header & Navigation -->
+    <header id="main-header" class="main-header">
+      <div class="header-top">
+        <!-- Search Bar -->
+        <div class="header-search">
+          <div class="search-input-wrapper">
+            <svg class="icon search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="search-input" placeholder="Search fragrances, candles..." aria-label="Search products">
+          </div>
+        </div>
+        
+        <!-- Brand Logo -->
+        <div class="header-logo">
+          <a href="#" class="logo-link">LUMIÈRE</a>
+        </div>
+        
+        <!-- User Actions -->
+        <div class="header-actions">
+          <button class="action-btn" id="account-btn" aria-label="Account">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          </button>
+          <button class="action-btn" id="wishlist-btn" aria-label="Wishlist">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            <span class="badge" id="wishlist-count">0</span>
+          </button>
+          <button class="action-btn" id="cart-btn" aria-label="Cart">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            <span class="badge" id="cart-count">0</span>
+          </button>
         </div>
       </div>
       
-      <!-- Brand Logo -->
-      <div class="header-logo">
-        <a href="#" class="logo-link">LUMIÈRE</a>
-      </div>
-      
-      <!-- User Actions -->
-      <div class="header-actions">
-        <button class="action-btn" id="account-btn" aria-label="Account">
-          <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-        </button>
-        <button class="action-btn" id="wishlist-btn" aria-label="Wishlist">
-          <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-          <span class="badge" id="wishlist-count">0</span>
-        </button>
-        <button class="action-btn" id="cart-btn" aria-label="Cart">
-          <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-          <span class="badge" id="cart-count">0</span>
-        </button>
-      </div>
-    </div>
-    
-    <!-- Navigation Menu -->
-    <nav class="main-navigation">
-      <ul class="nav-links">
-        <li><a href="#" class="nav-link active" data-category="all">Home</a></li>
-        <li><a href="#best-sellers" class="nav-link" data-category="candles">Shop</a></li>
-        <li><a href="#featured-collections" class="nav-link" data-category="collections">Collections</a></li>
-        <li><a href="#featured-collections" class="nav-link" data-category="gifts">Gifts</a></li>
-        <li><a href="#brand-story" class="nav-link">About Us</a></li>
-        <li><a href="#main-footer" class="nav-link">Contact Us</a></li>
-      </ul>
-    </nav>
-  </header>
+      <!-- Navigation Menu -->
+      <nav class="main-navigation">
+        <ul class="nav-links">
+          <li><a href="#" class="nav-link active" data-category="all">Home</a></li>
+          <li><a href="#best-sellers" class="nav-link" data-category="candles">Shop</a></li>
+          <li><a href="#featured-collections" class="nav-link" data-category="collections">Collections</a></li>
+          <li><a href="#featured-collections" class="nav-link" data-category="gifts">Gifts</a></li>
+          <li><a href="#brand-story" class="nav-link">About Us</a></li>
+          <li><a href="#main-footer" class="nav-link">Contact Us</a></li>
+        </ul>
+      </nav>
+    </header>
+  </div>
 
   <main class="storefront-content">
     
