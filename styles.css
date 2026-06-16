@@ -302,6 +302,14 @@ img {
   color: var(--accent);
 }
 
+.logo-img {
+  max-height: 50px;
+  width: auto;
+  display: inline-block;
+  vertical-align: middle;
+  mix-blend-mode: multiply; /* Blend white background out on ivory header */
+}
+
 /* Actions (Right) */
 .header-actions {
   display: flex;
@@ -914,6 +922,15 @@ section.full-width-banner-section {
   margin-bottom: 20px;
   display: inline-block;
   letter-spacing: 0.1em;
+}
+
+.footer-logo-img {
+  max-height: 45px;
+  width: auto;
+  display: inline-block;
+  vertical-align: middle;
+  filter: invert(1); /* Invert colors so dark logo turns light on dark background */
+  mix-blend-mode: screen; /* Blend out black background leaving light text */
 }
 
 .brand-info .footer-desc {
