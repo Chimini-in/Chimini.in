@@ -715,7 +715,7 @@ function renderAdminProductsList() {
         <input type="number" step="0.01" class="prod-price-val" value="${prod.price}" data-index="${index}">
       </div>
       <div class="admin-form-group">
-        <label>Image URL / Base64</label>
+        <label>Image URL / Base64 (Recommended: 1000x1000 px)</label>
         <input type="text" class="prod-image-val" value="${prod.image}" data-index="${index}">
         <input type="file" class="prod-file-val admin-file-input" accept="image/*" data-index="${index}">
       </div>
@@ -818,7 +818,7 @@ function renderAdminCollectionsList() {
         <input type="text" class="coll-name-val" value="${coll.name}" data-index="${index}">
       </div>
       <div class="admin-form-group">
-        <label>Image URL / Base64</label>
+        <label>Image URL / Base64 (Recommended: 1000x1000 px)</label>
         <input type="text" class="coll-image-val" value="${coll.image}" data-index="${index}">
         <input type="file" class="coll-file-val admin-file-input" accept="image/*" data-index="${index}">
       </div>

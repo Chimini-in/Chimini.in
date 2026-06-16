@@ -489,7 +489,7 @@ body.has-sticky-header {
 .product-image-wrapper {
   position: relative;
   width: 100%;
-  padding-top: 120%; /* 4:5 Aspect Ratio */
+  aspect-ratio: 1 / 1; /* Forced Square 1:1 Aspect Ratio (1000x1000px) */
   overflow: hidden;
   background-color: var(--bg-secondary);
 }
@@ -667,7 +667,7 @@ body.has-sticky-header {
 .collection-card {
   position: relative;
   width: 100%;
-  padding-top: 65%; /* Horizontal rectangular format */
+  aspect-ratio: 1 / 1; /* Forced Square 1:1 Aspect Ratio (1000x1000px) */
   overflow: hidden;
   cursor: pointer;
   background-color: var(--bg-secondary);
@@ -742,12 +742,33 @@ body.has-sticky-header {
   width: 100%;
 }
 
-.full-width-banner-section img {
+/* Force standard dimensions using aspect-ratio */
+.hero-banner a,
+.hero-banner img {
   width: 100%;
-  height: auto;
+  aspect-ratio: 1920 / 800; /* Standard: 1920x800 px */
   object-fit: cover;
-  transition: transform var(--transition-slow);
   display: block;
+}
+
+.products-ads-banner a,
+.products-ads-banner img {
+  width: 100%;
+  aspect-ratio: 1920 / 600; /* Standard: 1920x600 px */
+  object-fit: cover;
+  display: block;
+}
+
+.brand-story-banner a,
+.brand-story-banner img {
+  width: 100%;
+  aspect-ratio: 1920 / 700; /* Standard: 1920x700 px */
+  object-fit: cover;
+  display: block;
+}
+
+.full-width-banner-section img {
+  transition: transform var(--transition-slow);
 }
 
 .full-width-banner-section:hover img {
@@ -1476,9 +1497,20 @@ section.full-width-banner-section {
   }
 
   /* Hero slide settings */
-  .hero-section {
-    height: 60vh;
-    min-height: 380px;
+  /* Responsive Banner Heights for legibility on mobile */
+  .hero-banner a,
+  .hero-banner img {
+    aspect-ratio: 16 / 10 !important;
+  }
+  
+  .products-ads-banner a,
+  .products-ads-banner img {
+    aspect-ratio: 16 / 8 !important;
+  }
+  
+  .brand-story-banner a,
+  .brand-story-banner img {
+    aspect-ratio: 16 / 9 !important;
   }
 
   /* Grid layout modifications */
@@ -1501,7 +1533,7 @@ section.full-width-banner-section {
   }
   
   .collection-card {
-    padding-top: 55%;
+    aspect-ratio: 1 / 1;
   }
 
   .collection-overlay {
@@ -1573,7 +1605,7 @@ section.full-width-banner-section {
   }
 
   .product-image-wrapper {
-    padding-top: 100%; /* Square aspect for single col mobile products */
+    aspect-ratio: 1 / 1;
   }
 
   .announcement-bar {
