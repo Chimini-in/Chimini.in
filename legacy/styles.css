@@ -2098,7 +2098,8 @@ section.full-width-banner-section {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 40px;
+  position: relative;
+  padding: 20px 40px;
   border-top: 1px solid rgba(197, 168, 128, 0.15);
   border-bottom: 1px solid rgba(197, 168, 128, 0.15);
   margin-bottom: 40px;
@@ -2135,11 +2136,48 @@ section.full-width-banner-section {
 }
 
 .product-count {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 0.85rem;
   font-family: var(--font-sans);
   color: var(--text-secondary);
   letter-spacing: 0.05em;
   font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Clean Sort Icon Button */
+.sort-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(197, 168, 128, 0.2);
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.sort-icon-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-primary);
+  background-color: var(--bg-secondary);
+}
+
+.sort-icon-btn[data-sort="price-low"],
+.sort-icon-btn[data-sort="price-high"] {
+  color: var(--text-primary);
+  border-color: var(--accent);
+  background-color: var(--bg-secondary);
+}
+
+.sort-icon-btn svg {
+  width: 18px;
+  height: 18px;
 }
 
 .catalog-controls {

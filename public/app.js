@@ -1367,14 +1367,9 @@ function renderShopPage() {
         <div class="product-count" id="catalog-product-count">0 products found</div>
         
         <div class="catalog-controls">
-          <div class="sort-control">
-            <span class="control-label">Sort by:</span>
-            <select id="shop-sort" class="shop-sort-select">
-              <option value="default">Featured</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-            </select>
-          </div>
+          <button class="sort-icon-btn" id="shop-sort-btn" aria-label="Sort products" data-sort="default" title="Sort: Featured">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="4" y1="5" x2="20" y2="5"></line><line x1="4" y1="12" x2="14" y2="12"></line><line x1="4" y1="19" x2="8" y2="19"></line></svg>
+          </button>
           
           <button class="btn btn-secondary filter-toggle-btn" id="filter-drawer-toggle">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
@@ -1418,10 +1413,28 @@ function renderShopPage() {
       filterToggle.addEventListener("click", () => openDrawer(filterDrawer));
     }
     
-    // Bind sort event
-    const sortSelect = document.getElementById("shop-sort");
-    if (sortSelect) {
-      sortSelect.addEventListener("change", () => {
+    // Bind sort icon button — cycles: default → price-low → price-high → default
+    const sortBtn = document.getElementById("shop-sort-btn");
+    if (sortBtn) {
+      sortBtn.addEventListener("click", () => {
+        const current = sortBtn.getAttribute("data-sort");
+        let next, title, svgPath;
+        if (current === "default") {
+          next = "price-low";
+          title = "Sort: Price Low \u2192 High";
+          svgPath = '<line x1="4" y1="5" x2="20" y2="5"></line><line x1="4" y1="12" x2="20" y2="12"></line><polyline points="16 16 20 19 16 22"></polyline>';
+        } else if (current === "price-low") {
+          next = "price-high";
+          title = "Sort: Price High \u2192 Low";
+          svgPath = '<line x1="4" y1="5" x2="20" y2="5"></line><line x1="4" y1="12" x2="20" y2="12"></line><polyline points="20 22 16 19 20 16"></polyline>';
+        } else {
+          next = "default";
+          title = "Sort: Featured";
+          svgPath = '<line x1="4" y1="5" x2="20" y2="5"></line><line x1="4" y1="12" x2="14" y2="12"></line><line x1="4" y1="19" x2="8" y2="19"></line>';
+        }
+        sortBtn.setAttribute("data-sort", next);
+        sortBtn.setAttribute("title", title);
+        sortBtn.querySelector("svg").innerHTML = svgPath;
         renderShopProducts();
       });
     }
@@ -1492,9 +1505,9 @@ function renderShopProducts() {
     countEl.textContent = `${products.length} product${products.length !== 1 ? 's' : ''} found`;
   }
   
-  // Sort products
-  const sortSelect = document.getElementById("shop-sort");
-  const sortBy = sortSelect ? sortSelect.value : "default";
+  // Sort products — state stored on sort icon button's data-sort attribute
+  const sortBtn = document.getElementById("shop-sort-btn");
+  const sortBy = sortBtn ? sortBtn.getAttribute("data-sort") : "default";
   if (sortBy === "price-low") {
     products.sort((a, b) => a.price - b.price);
   } else if (sortBy === "price-high") {
