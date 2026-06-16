@@ -231,21 +231,13 @@ img {
   backdrop-filter: blur(8px);
 }
 
-.main-header.sticky .header-top {
-  padding: 15px 40px;
-}
-
-.main-header.sticky .main-navigation {
-  padding: 10px 0;
-}
-
 .header-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 25px 40px;
+  padding: 12px 40px; /* Reduced vertical padding for a compact layout */
   transition: padding var(--transition-medium);
 }
 
@@ -303,17 +295,11 @@ img {
 }
 
 .logo-img {
-  max-height: 75px; /* Increased size for better visibility */
+  max-height: 65px; /* Consistent size at all times (Desktop) */
   width: auto;
   display: inline-block;
   vertical-align: middle;
   mix-blend-mode: multiply; /* Blend white background out on ivory header */
-  transition: max-height var(--transition-medium); /* Smooth size shrink on scroll */
-}
-
-/* Shrink logo when header becomes sticky on scroll */
-.main-header.sticky .logo-img {
-  max-height: 50px;
 }
 
 /* Actions (Right) */
@@ -359,7 +345,7 @@ img {
 
 /* Navigation below Header Top */
 .main-navigation {
-  padding: 15px 0 20px;
+  padding: 8px 0 10px; /* Reduced vertical padding for a compact layout */
   text-align: center;
   border-top: 1px solid rgba(197, 168, 128, 0.1);
   transition: all var(--transition-medium);
@@ -1494,13 +1480,8 @@ section.full-width-banner-section {
     margin-bottom: 35px;
   }
 
-  /* Sticky header settings */
-  .main-header.sticky .header-top {
-    padding: 10px 20px;
-  }
-  
   .header-top {
-    padding: 15px 20px;
+    padding: 10px 20px; /* Consistent compact padding */
   }
 
   .logo-link {
@@ -1508,11 +1489,7 @@ section.full-width-banner-section {
   }
 
   .logo-img {
-    max-height: 55px; /* Slightly smaller on mobile screens */
-  }
-
-  .main-header.sticky .logo-img {
-    max-height: 45px; /* Shrunk size when mobile header is sticky */
+    max-height: 50px; /* Consistent size at all times (Mobile) */
   }
 
   .header-search {
