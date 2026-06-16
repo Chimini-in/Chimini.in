@@ -303,11 +303,17 @@ img {
 }
 
 .logo-img {
-  max-height: 50px;
+  max-height: 75px; /* Increased size for better visibility */
   width: auto;
   display: inline-block;
   vertical-align: middle;
   mix-blend-mode: multiply; /* Blend white background out on ivory header */
+  transition: max-height var(--transition-medium); /* Smooth size shrink on scroll */
+}
+
+/* Shrink logo when header becomes sticky on scroll */
+.main-header.sticky .logo-img {
+  max-height: 50px;
 }
 
 /* Actions (Right) */
@@ -1499,6 +1505,14 @@ section.full-width-banner-section {
 
   .logo-link {
     font-size: 1.8rem;
+  }
+
+  .logo-img {
+    max-height: 55px; /* Slightly smaller on mobile screens */
+  }
+
+  .main-header.sticky .logo-img {
+    max-height: 45px; /* Shrunk size when mobile header is sticky */
   }
 
   .header-search {
