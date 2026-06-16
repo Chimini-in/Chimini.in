@@ -64,6 +64,18 @@ const DEFAULT_SETTINGS = {
     image: "assets/story_banner.png",
     link: "#brand-story-banner"
   },
+  about: {
+    title: "A Quest for Olfactory Purity",
+    desc1: "CHIMINI was born out of a desire to create clean-burning home scent products that elevate daily spaces without compromising on health or ecological sustainability. Frustrated by chemical soot and synthetic fragrances, we spent years testing natural botanical waxes and organic essential oil profiles.",
+    desc2: "We choose to focus strictly on pure soy, botanical oils, and natural cotton wicks. The result is a slow, soot-free burn that gently releases complex scent notes throughout your room.",
+    image1: "assets/story_banner.png",
+    image2: "assets/hero_banner_1.png"
+  },
+  contact: {
+    email: "concierge@lumiere.com",
+    phone: "+33 (0) 1 45 67 89 00",
+    address: "48 Rue de la Lumière, Paris"
+  },
   testimonials: [
     {
       id: "test-1",
@@ -644,6 +656,30 @@ function initAdminFields() {
   const storyLink = document.getElementById("admin-brand-story-banner-link");
   if (storyUrl) storyUrl.value = settings.storyBanner.image;
   if (storyLink) storyLink.value = settings.storyBanner.link;
+
+  // Set About Us fields
+  const aboutTitle = document.getElementById("admin-about-title");
+  const aboutDesc1 = document.getElementById("admin-about-desc1");
+  const aboutDesc2 = document.getElementById("admin-about-desc2");
+  const aboutImg1 = document.getElementById("admin-about-img1");
+  const aboutImg2 = document.getElementById("admin-about-img2");
+  if (settings.about) {
+    if (aboutTitle) aboutTitle.value = settings.about.title || "";
+    if (aboutDesc1) aboutDesc1.value = settings.about.desc1 || "";
+    if (aboutDesc2) aboutDesc2.value = settings.about.desc2 || "";
+    if (aboutImg1) aboutImg1.value = settings.about.image1 || "";
+    if (aboutImg2) aboutImg2.value = settings.about.image2 || "";
+  }
+
+  // Set Contact Us fields
+  const contactEmail = document.getElementById("admin-contact-email");
+  const contactPhone = document.getElementById("admin-contact-phone");
+  const contactAddress = document.getElementById("admin-contact-address");
+  if (settings.contact) {
+    if (contactEmail) contactEmail.value = settings.contact.email || "";
+    if (contactPhone) contactPhone.value = settings.contact.phone || "";
+    if (contactAddress) contactAddress.value = settings.contact.address || "";
+  }
   
   // Render sub-lists
   renderAdminProductsList();
@@ -661,7 +697,9 @@ function setupAdminImageUploads() {
     { fileId: "admin-hero-banner-file", textId: "admin-hero-banner-url" },
     { fileId: "admin-ads-banner-1-file", textId: "admin-ads-banner-1-url" },
     { fileId: "admin-ads-banner-2-file", textId: "admin-ads-banner-2-url" },
-    { fileId: "admin-brand-story-banner-file", textId: "admin-brand-story-banner-url" }
+    { fileId: "admin-brand-story-banner-file", textId: "admin-brand-story-banner-url" },
+    { fileId: "admin-about-img1-file", textId: "admin-about-img1" },
+    { fileId: "admin-about-img2-file", textId: "admin-about-img2" }
   ];
   
   fileHooks.forEach(hook => {
@@ -922,6 +960,30 @@ function saveAdminSettings() {
     link: document.getElementById("admin-brand-story-banner-link").value
   };
   
+  // Save About Us Page settings
+  const aboutTitleInput = document.getElementById("admin-about-title");
+  const aboutDesc1Input = document.getElementById("admin-about-desc1");
+  const aboutDesc2Input = document.getElementById("admin-about-desc2");
+  const aboutImg1Input = document.getElementById("admin-about-img1");
+  const aboutImg2Input = document.getElementById("admin-about-img2");
+  
+  if (!settings.about) settings.about = {};
+  if (aboutTitleInput) settings.about.title = aboutTitleInput.value;
+  if (aboutDesc1Input) settings.about.desc1 = aboutDesc1Input.value;
+  if (aboutDesc2Input) settings.about.desc2 = aboutDesc2Input.value;
+  if (aboutImg1Input) settings.about.image1 = aboutImg1Input.value;
+  if (aboutImg2Input) settings.about.image2 = aboutImg2Input.value;
+  
+  // Save Contact Us Page settings
+  const contactEmailInput = document.getElementById("admin-contact-email");
+  const contactPhoneInput = document.getElementById("admin-contact-phone");
+  const contactAddressInput = document.getElementById("admin-contact-address");
+  
+  if (!settings.contact) settings.contact = {};
+  if (contactEmailInput) settings.contact.email = contactEmailInput.value;
+  if (contactPhoneInput) settings.contact.phone = contactPhoneInput.value;
+  if (contactAddressInput) settings.contact.address = contactAddressInput.value;
+  
   // Save Products List
   const prodCards = document.querySelectorAll("#admin-products-list .admin-card");
   const updatedProducts = [];
@@ -1148,17 +1210,13 @@ function bindEvents() {
   
   // Sticky header trigger removed (header is static)
 
-  // Footer Category clicks
+  // Footer Category clicks - redirect to Shop page with category filter
   const footerLinks = document.querySelectorAll(".footer-cat-link");
   footerLinks.forEach(link => {
     link.addEventListener("click", (e) => {
       e.preventDefault();
       const cat = link.getAttribute("data-category");
-      storeState.activeCategory = cat || "all";
-      storeState.searchQuery = "";
-      if (DOM.searchInput) DOM.searchInput.value = "";
-      renderBestSellers();
-      document.getElementById("best-sellers").scrollIntoView({ behavior: "smooth" });
+      window.location.href = `shop.html?category=${cat || 'all'}`;
     });
   });
 }
@@ -1176,8 +1234,433 @@ function initStore() {
   renderCart();
   renderWishlist();
   
+  // Render subpage contents if containers exist
+  renderPageContent();
+  
+  // Highlight active link in header
+  highlightActiveNav();
+  
   // Start carousel auto-scrolls
   startTestimonialsAutoplay();
+}
+
+// --- 9. SUBPAGE DYNAMIC RENDERERS ---
+
+function highlightActiveNav() {
+  const path = window.location.pathname.toLowerCase();
+  const navLinks = document.querySelectorAll(".nav-links a");
+  navLinks.forEach(link => {
+    const href = link.getAttribute("href").toLowerCase();
+    
+    // Normalize paths to ignore directories and extensions
+    const hrefBase = href.replace(".html", "").split("/").pop();
+    const pathBase = path.replace(".html", "").split("/").pop();
+    
+    if (pathBase === hrefBase || (pathBase === "" && hrefBase === "index") || (!pathBase && hrefBase === "index")) {
+      link.classList.add("active");
+    } else {
+      link.classList.remove("active");
+    }
+  });
+}
+
+function renderPageContent() {
+  renderShopPage();
+  renderCollectionsPage();
+  renderGiftsPage();
+  renderAboutPage();
+  renderContactPage();
+}
+
+function renderShopPage() {
+  const container = document.getElementById("shop-page-container");
+  if (!container) return;
+  
+  // Parse URL parameters for initial category filter
+  const params = new URLSearchParams(window.location.search);
+  const catQuery = params.get("category");
+  if (catQuery && !storeState.shopInitialized) {
+    storeState.activeCategory = catQuery.toLowerCase();
+    storeState.shopInitialized = true;
+  }
+  
+  if (!container.innerHTML.trim() || !container.querySelector(".shop-layout-wrapper")) {
+    container.innerHTML = `
+      <section class="subpage-hero">
+        <h1 class="subpage-title">The Atelier Shop</h1>
+        <p class="subpage-subtitle">Immersive botanical fragrances hand-poured in luxury vessels</p>
+      </section>
+      <div class="shop-layout-wrapper section-container">
+        <aside class="shop-sidebar">
+          <div class="sidebar-section">
+            <h3 class="sidebar-title">Categories</h3>
+            <ul class="sidebar-categories">
+              <li class="sidebar-cat-item ${storeState.activeCategory === 'all' ? 'active' : ''}" data-cat="all">All Fragrances</li>
+              <li class="sidebar-cat-item ${storeState.activeCategory === 'candles' ? 'active' : ''}" data-cat="candles">Candles</li>
+              <li class="sidebar-cat-item ${storeState.activeCategory === 'gifts' ? 'active' : ''}" data-cat="gifts">Gifts</li>
+              <li class="sidebar-cat-item ${storeState.activeCategory === 'signature' ? 'active' : ''}" data-cat="signature">Signature</li>
+              <li class="sidebar-cat-item ${storeState.activeCategory === 'eco' ? 'active' : ''}" data-cat="eco">Eco</li>
+            </ul>
+          </div>
+          <div class="sidebar-section">
+            <h3 class="sidebar-title">Sort By</h3>
+            <select id="shop-sort" class="shop-sort-select">
+              <option value="default">Featured</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+            </select>
+          </div>
+        </aside>
+        <main class="shop-main">
+          <div class="shop-products-grid" id="shop-products-grid"></div>
+        </main>
+      </div>
+    `;
+    
+    // Bind sidebar categories
+    container.querySelectorAll(".sidebar-cat-item").forEach(item => {
+      item.addEventListener("click", () => {
+        storeState.activeCategory = item.getAttribute("data-cat");
+        container.querySelectorAll(".sidebar-cat-item").forEach(li => li.classList.remove("active"));
+        item.classList.add("active");
+        renderShopProducts();
+      });
+    });
+    
+    // Bind sort event
+    const sortSelect = document.getElementById("shop-sort");
+    if (sortSelect) {
+      sortSelect.addEventListener("change", () => {
+        renderShopProducts();
+      });
+    }
+  }
+  
+  renderShopProducts();
+}
+
+function renderShopProducts() {
+  const grid = document.getElementById("shop-products-grid");
+  if (!grid) return;
+  grid.innerHTML = "";
+  
+  let products = storeState.adminSettings.products;
+  
+  // Filter by category
+  if (storeState.activeCategory !== "all") {
+    products = products.filter(p => p.category === storeState.activeCategory);
+  }
+  
+  // Filter by search query if any
+  if (storeState.searchQuery && storeState.searchQuery.trim() !== "") {
+    const q = storeState.searchQuery.toLowerCase();
+    products = products.filter(p => p.name.toLowerCase().includes(q));
+  }
+  
+  // Sort products
+  const sortSelect = document.getElementById("shop-sort");
+  const sortBy = sortSelect ? sortSelect.value : "default";
+  if (sortBy === "price-low") {
+    products.sort((a, b) => a.price - b.price);
+  } else if (sortBy === "price-high") {
+    products.sort((a, b) => b.price - a.price);
+  }
+  
+  if (products.length === 0) {
+    grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 60px 0; color: var(--text-secondary); font-family: var(--font-serif); font-size: 1.2rem;">No products found.</div>`;
+    return;
+  }
+  
+  products.forEach(product => {
+    const isWishlisted = storeState.wishlist.includes(product.id);
+    const card = document.createElement("div");
+    card.className = "product-card animate-slide-up";
+    card.innerHTML = `
+      <div class="product-image-wrapper">
+        <img src="${product.image}" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
+        <button class="wishlist-toggle-btn ${isWishlisted ? "active" : ""}" data-id="${product.id}" aria-label="Add to Wishlist">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        </button>
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">${product.name}</h3>
+        <p class="product-price">$${Number(product.price).toFixed(2)}</p>
+        <button class="btn btn-primary product-card-btn add-to-cart-btn" data-id="${product.id}">Add to Cart</button>
+      </div>
+    `;
+    
+    card.querySelector(".wishlist-toggle-btn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleWishlist(product.id);
+    });
+    card.querySelector(".add-to-cart-btn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      addToCart(product.id);
+    });
+    
+    grid.appendChild(card);
+  });
+}
+
+function renderCollectionsPage() {
+  const container = document.getElementById("collections-page-container");
+  if (!container) return;
+  
+  const collections = storeState.adminSettings.collections;
+  
+  container.innerHTML = `
+    <section class="subpage-hero">
+      <h1 class="subpage-title">Curated Collections</h1>
+      <p class="subpage-subtitle">Aesthetic scents and vessels designed for every mood and season</p>
+    </section>
+    <div class="collections-page-grid section-container" id="collections-page-grid"></div>
+  `;
+  
+  const grid = document.getElementById("collections-page-grid");
+  if (!grid) return;
+  
+  collections.forEach(coll => {
+    const card = document.createElement("div");
+    card.className = "collection-page-card animate-slide-up";
+    card.innerHTML = `
+      <div class="collection-page-card-image">
+        <img src="${coll.image}" alt="${coll.name}" onerror="this.src='assets/campaign_banner.png'">
+      </div>
+      <div class="collection-page-card-content">
+        <h3 class="collection-page-card-title">${coll.name}</h3>
+        <p class="collection-page-card-desc">Exquisite fragrance notes meticulously blended to elevate your luxury home ambiance.</p>
+        <a href="shop.html?category=all" class="btn btn-secondary collection-page-card-btn">Explore Collection</a>
+      </div>
+    `;
+    
+    card.querySelector(".collection-page-card-btn").addEventListener("click", (e) => {
+      e.preventDefault();
+      if (coll.link && coll.link.startsWith('#')) {
+        window.location.href = `shop.html?category=all`;
+      } else if (coll.link) {
+        window.location.href = coll.link;
+      } else {
+        window.location.href = `shop.html?category=all`;
+      }
+    });
+    
+    grid.appendChild(card);
+  });
+}
+
+function renderGiftsPage() {
+  const container = document.getElementById("gifts-page-container");
+  if (!container) return;
+  
+  container.innerHTML = `
+    <section class="subpage-hero">
+      <h1 class="subpage-title">The Art of Gifting</h1>
+      <p class="subpage-subtitle">Meticulously curated gift sets and custom aromatic assortments for your loved ones</p>
+    </section>
+    
+    <div class="gift-features section-container">
+      <div class="gift-feature-item">
+        <h3>Bespoke Wrapping</h3>
+        <p>Every gift order is hand-wrapped in our signature textured boxes with linen ribbon.</p>
+      </div>
+      <div class="gift-feature-item">
+        <h3>Personalized Note</h3>
+        <p>Include a handwritten calligraphy message printed on heavyweight cotton paper.</p>
+      </div>
+      <div class="gift-feature-item">
+        <h3>Concierge Delivery</h3>
+        <p>White-glove premium shipping option with custom schedule availability.</p>
+      </div>
+    </div>
+
+    <div class="gifts-grid section-container">
+      <h2 class="section-title">Signature Gift Hampers</h2>
+      <div class="products-grid" id="gifts-products-grid"></div>
+    </div>
+  `;
+  
+  const grid = document.getElementById("gifts-products-grid");
+  if (!grid) return;
+  
+  const products = storeState.adminSettings.products.filter(p => p.category === 'gifts');
+  
+  if (products.length === 0) {
+    grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 60px 0; color: var(--text-secondary); font-family: var(--font-serif); font-size: 1.2rem;">Our luxury gift sets are currently fully booked. Please check back soon.</div>`;
+    return;
+  }
+  
+  products.forEach(product => {
+    const isWishlisted = storeState.wishlist.includes(product.id);
+    const card = document.createElement("div");
+    card.className = "product-card animate-slide-up";
+    card.innerHTML = `
+      <div class="product-image-wrapper">
+        <img src="${product.image}" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
+        <button class="wishlist-toggle-btn ${isWishlisted ? "active" : ""}" data-id="${product.id}" aria-label="Add to Wishlist">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        </button>
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">${product.name}</h3>
+        <p class="product-price">$${Number(product.price).toFixed(2)}</p>
+        <button class="btn btn-primary product-card-btn add-to-cart-btn" data-id="${product.id}">Add to Cart</button>
+      </div>
+    `;
+    
+    card.querySelector(".wishlist-toggle-btn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleWishlist(product.id);
+    });
+    card.querySelector(".add-to-cart-btn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      addToCart(product.id);
+    });
+    
+    grid.appendChild(card);
+  });
+}
+
+function renderAboutPage() {
+  const container = document.getElementById("about-page-container");
+  if (!container) return;
+  
+  const about = storeState.adminSettings.about || {};
+  
+  container.innerHTML = `
+    <section class="subpage-hero">
+      <h1 class="subpage-title">${about.title || 'A Quest for Olfactory Purity'}</h1>
+      <p class="subpage-subtitle">The story of CHIMINI's clean-burning luxury scents</p>
+    </section>
+    
+    <div class="about-story-section section-container">
+      <div class="about-story-grid">
+        <div class="about-story-text animate-slide-up">
+          <h2 class="about-section-heading">Our Origin</h2>
+          <p class="about-paragraph">${about.desc1 || ''}</p>
+          <p class="about-paragraph">${about.desc2 || ''}</p>
+        </div>
+        <div class="about-story-image animate-slide-up">
+          <img src="${about.image1 || 'assets/story_banner.png'}" alt="Handcrafted Soy Candle Scenting" onerror="this.src='assets/story_banner.png'">
+        </div>
+      </div>
+    </div>
+
+    <div class="about-quote-banner">
+      <div class="section-container">
+        <blockquote class="about-quote">
+          "A scent is an invisible architecture, shaping the quiet spaces of our memories."
+        </blockquote>
+        <span class="about-quote-author">— Harshida, Founder of CHIMINI</span>
+      </div>
+    </div>
+
+    <div class="about-story-section section-container">
+      <div class="about-story-grid reverse">
+        <div class="about-story-image animate-slide-up">
+          <img src="${about.image2 || 'assets/hero_banner_1.png'}" alt="Crafting Scented Elements" onerror="this.src='assets/hero_banner_1.png'">
+        </div>
+        <div class="about-story-text animate-slide-up">
+          <h2 class="about-section-heading">Our Craft & Philosophy</h2>
+          <p class="about-paragraph">Each batch is mixed and poured in micro-runs at our Parisian atelier. We trace our ingredients back to their botanical sources: organic soy from local family farms, wild-harvested absolute oils, and lead-free cotton fibers.</p>
+          <p class="about-paragraph">Sustainability isn't a badge we wear; it is the fundamental core of our design process. Every single container is engineered for secondary lifetime usage as a premium storage jar, vase, or decorative luxury organizer.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="about-values section-container">
+      <h2 class="section-title">Core Principles</h2>
+      <div class="values-grid">
+        <div class="value-card">
+          <h3>Soot-Free Purity</h3>
+          <p>Strictly lead-free and chemical-free botanical elements.</p>
+        </div>
+        <div class="value-card">
+          <h3>Artisanal Integrity</h3>
+          <p>Micro-batch production ensures peak scent throw control.</p>
+        </div>
+        <div class="value-card">
+          <h3>Lifetime Vessels</h3>
+          <p>Refillable or repurposable containers that last forever.</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderContactPage() {
+  const container = document.getElementById("contact-page-container");
+  if (!container) return;
+  
+  const contact = storeState.adminSettings.contact || {};
+  
+  container.innerHTML = `
+    <section class="subpage-hero">
+      <h1 class="subpage-title">Client Concierge</h1>
+      <p class="subpage-subtitle">We are here to assist with custom orders, corporate gifts, or scent inquiries</p>
+    </section>
+
+    <div class="contact-layout section-container">
+      <div class="contact-details-col animate-slide-up">
+        <h2 class="contact-col-heading">Atelier Details</h2>
+        <div class="contact-detail-item">
+          <h3>General Inquiry</h3>
+          <p>${contact.email || 'concierge@lumiere.com'}</p>
+        </div>
+        <div class="contact-detail-item">
+          <h3>Concierge Phone</h3>
+          <p>${contact.phone || '+33 (0) 1 45 67 89 00'}</p>
+          <span class="contact-detail-hours">Mon - Fri, 9:00 AM - 6:00 PM CET</span>
+        </div>
+        <div class="contact-detail-item">
+          <h3>Atelier Location</h3>
+          <p>${contact.address || '48 Rue de la Lumière, Paris'}</p>
+        </div>
+        <div class="contact-detail-item">
+          <h3>Corporate & Events Gifting</h3>
+          <p>partners@lumiere.com</p>
+        </div>
+      </div>
+
+      <div class="contact-form-col animate-slide-up">
+        <h2 class="contact-col-heading">Send a Message</h2>
+        <form id="luxury-contact-form" class="luxury-contact-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="contact-name">First & Last Name</label>
+              <input type="text" id="contact-name" required placeholder="Your Name">
+            </div>
+            <div class="form-group">
+              <label for="contact-email">Email Address</label>
+              <input type="email" id="contact-email" required placeholder="you@example.com">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="contact-subject">Topic of Inquiry</label>
+            <select id="contact-subject" class="contact-form-select">
+              <option value="concierge">Order Support & Concierge</option>
+              <option value="bespoke">Bespoke / Custom Fragrance</option>
+              <option value="corporate">Corporate & Bulk Gifting</option>
+              <option value="press">Press & Partnership</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="contact-message">Message</label>
+            <textarea id="contact-message" rows="6" required placeholder="How can our concierge assist you today?"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block contact-submit-btn">Send Message</button>
+        </form>
+      </div>
+    </div>
+  `;
+  
+  const form = document.getElementById("luxury-contact-form");
+  if (form) {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      alert("Thank you. Your message has been received by our Client Concierge. We will respond within 24 hours.");
+      form.reset();
+    });
+  }
 }
 
 // Start everything when DOM is loaded

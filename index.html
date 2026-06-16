@@ -62,12 +62,12 @@
       <!-- Navigation Menu -->
       <nav class="main-navigation">
         <ul class="nav-links">
-          <li><a href="#" class="nav-link active" data-category="all">Home</a></li>
-          <li><a href="#best-sellers" class="nav-link" data-category="candles">Shop</a></li>
-          <li><a href="#featured-collections" class="nav-link" data-category="collections">Collections</a></li>
-          <li><a href="#featured-collections" class="nav-link" data-category="gifts">Gifts</a></li>
-          <li><a href="#brand-story" class="nav-link">About Us</a></li>
-          <li><a href="#main-footer" class="nav-link">Contact Us</a></li>
+          <li><a href="index.html" class="nav-link active">Home</a></li>
+          <li><a href="shop.html" class="nav-link">Shop</a></li>
+          <li><a href="collections.html" class="nav-link">Collections</a></li>
+          <li><a href="gifts.html" class="nav-link">Gifts</a></li>
+          <li><a href="about.html" class="nav-link">About Us</a></li>
+          <li><a href="contact.html" class="nav-link">Contact Us</a></li>
         </ul>
       </nav>
     </header>
@@ -354,6 +354,54 @@
           <div class="admin-form-group">
             <label>Redirect Link</label>
             <input type="text" id="admin-brand-story-banner-link">
+          </div>
+        </div>
+      </details>
+
+      <!-- 9. About Us Page -->
+      <details class="admin-details">
+        <summary>9. About Us Page</summary>
+        <div class="admin-banner-edit-card">
+          <div class="admin-form-group">
+            <label>Story Title</label>
+            <input type="text" id="admin-about-title">
+          </div>
+          <div class="admin-form-group">
+            <label>Story Paragraph 1</label>
+            <textarea id="admin-about-desc1" rows="3"></textarea>
+          </div>
+          <div class="admin-form-group">
+            <label>Story Paragraph 2</label>
+            <textarea id="admin-about-desc2" rows="3"></textarea>
+          </div>
+          <div class="admin-form-group">
+            <label>Story Image 1 URL</label>
+            <input type="text" id="admin-about-img1">
+            <input type="file" id="admin-about-img1-file" accept="image/*" class="admin-file-input">
+          </div>
+          <div class="admin-form-group">
+            <label>Story Image 2 URL</label>
+            <input type="text" id="admin-about-img2">
+            <input type="file" id="admin-about-img2-file" accept="image/*" class="admin-file-input">
+          </div>
+        </div>
+      </details>
+
+      <!-- 10. Contact Us Page -->
+      <details class="admin-details">
+        <summary>10. Contact Us Page</summary>
+        <div class="admin-banner-edit-card">
+          <div class="admin-form-group">
+            <label>Concierge Email</label>
+            <input type="text" id="admin-contact-email">
+          </div>
+          <div class="admin-form-group">
+            <label>Concierge Phone</label>
+            <input type="text" id="admin-contact-phone">
+          </div>
+          <div class="admin-form-group">
+            <label>Atelier Address</label>
+            <input type="text" id="admin-contact-address">
           </div>
         </div>
       </details>
