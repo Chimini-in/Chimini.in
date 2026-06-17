@@ -17,8 +17,9 @@
   --black: #000000;
   
   /* Fonts */
-  --font-serif: 'Playfair Display', Georgia, serif;
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;          /* Headings, titles, product names */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif; /* UI: nav, buttons, labels, badges */
+  --font-body: 'Poppins', system-ui, -apple-system, sans-serif; /* Body: paragraphs, descriptions, captions */
   
   /* Layout */
   --max-width: 1400px;
@@ -52,17 +53,29 @@ html {
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: var(--font-sans);
+  font-family: var(--font-body); /* Poppins for all base body text */
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
 
+/* ALL HEADINGS keep Playfair Display — no Poppins here */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-serif);
   font-weight: 400;
   letter-spacing: 0.03em;
+}
+
+/* Paragraphs, descriptions, captions — Poppins */
+p, li, blockquote, figcaption, caption, small {
+  font-family: var(--font-body);
+  line-height: 1.75;
+}
+
+/* UI controls (buttons, inputs, selects) inherit Inter via --font-sans */
+button, input, textarea, select, label {
+  font-family: var(--font-sans);
 }
 
 a {
@@ -71,8 +84,9 @@ a {
   transition: color var(--transition-fast);
 }
 
+/* Reset: UI controls use Inter (--font-sans), not Poppins */
 button, input, textarea, select {
-  font-family: inherit;
+  font-family: var(--font-sans);
   font-size: inherit;
   color: inherit;
   background: none;
@@ -90,11 +104,100 @@ img {
   display: block;
 }
 
+
 .icon {
   width: 20px;
   height: 20px;
   stroke-width: 1.5;
   transition: color var(--transition-fast), transform var(--transition-fast);
+}
+
+/* ==========================================================================
+   TYPOGRAPHY PINNING — Font assignment by element role
+   — Playfair Display (--font-serif): headings, titles, product names, logo
+   — Inter (--font-sans): nav, buttons, badges, labels, UI controls, prices
+   — Poppins (--font-body): body copy, paragraphs, descriptions, captions
+   ========================================================================== */
+
+/* Navigation — locked to Inter for sharp luxury UI legibility */
+.nav-link,
+.nav-links a {
+  font-family: var(--font-sans);
+}
+
+/* Product names — keep Playfair Display */
+.product-name {
+  font-family: var(--font-serif);
+}
+
+/* Prices, badges, counts — Inter for clean numerical clarity */
+.product-price,
+.current-price,
+.original-price,
+.discount-badge,
+.product-badge,
+.cart-item-price,
+.wishlist-item-price,
+.badge,
+.product-count,
+.cart-subtotal,
+.control-label,
+.admin-subtitle {
+  font-family: var(--font-sans);
+}
+
+/* Buttons explicitly Inter */
+.btn,
+.add-to-cart-btn,
+.filter-toggle-btn,
+.layout-btn,
+.filter-btn,
+.sort-icon-btn,
+.admin-toggle-btn span {
+  font-family: var(--font-sans);
+}
+
+/* Announcement bar — Inter for legibility */
+.announcement-container,
+#announcement-text {
+  font-family: var(--font-sans);
+}
+
+/* Footer navigation links — Inter */
+.footer-col a,
+.footer-col h3 {
+  font-family: var(--font-serif);
+}
+
+/* Footer description text and copyright — Poppins */
+.footer-desc,
+.footer-bottom p {
+  font-family: var(--font-body);
+}
+
+/* Subpage hero subtitles — Poppins */
+.subpage-subtitle {
+  font-family: var(--font-body);
+}
+
+/* Testimonials — text body Poppins, author Inter */
+.testimonial-text {
+  font-family: var(--font-body);
+}
+.testimonial-author {
+  font-family: var(--font-sans);
+}
+
+/* Collection and category title overlays — serif */
+.collection-title-overlay,
+.category-title {
+  font-family: var(--font-serif);
+}
+
+/* Admin drawer UI — sans */
+.admin-details summary,
+.admin-card-title {
+  font-family: var(--font-sans);
 }
 
 .section-container {
@@ -2310,29 +2413,88 @@ section.full-width-banner-section {
 /* Luxury Card Accents (Badges, Swatches, Pricing Details) */
 .product-badge {
   position: absolute;
-  top: 15px;
-  left: 15px;
+  top: 0;
+  left: 0;
   background-color: var(--dark-charcoal);
   color: var(--bg-primary);
-  font-family: var(--font-serif);
-  font-size: 0.7rem;
-  font-style: italic;
-  letter-spacing: 0.05em;
-  padding: 6px 14px;
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  padding: 8px 16px;
+  text-transform: uppercase;
   z-index: 4;
 }
 
+/* Hover-fade Dual Images */
+.product-image-hover {
+  opacity: 0;
+  transition: opacity 0.4s ease, transform var(--transition-slow) !important;
+  z-index: 2;
+}
+
+.product-image-main {
+  opacity: 1;
+  transition: opacity 0.4s ease, transform var(--transition-slow) !important;
+  z-index: 1;
+}
+
+.product-card:hover .product-image-hover {
+  opacity: 1;
+}
+
+.product-card:hover .product-image-main {
+  opacity: 0;
+}
+
+/* Corner "+" Add to Cart Button Overlay */
+.product-cart-overlay-btn {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  width: 40px;
+  height: 40px;
+  background-color: #ffffff;
+  color: #1a110b;
+  border: none;
+  font-family: var(--font-sans);
+  font-size: 1.6rem;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  z-index: 5;
+  transition: all var(--transition-fast);
+}
+
+.product-cart-overlay-btn:hover {
+  background-color: var(--text-primary);
+  color: var(--white);
+  transform: scale(1.08);
+}
+
+/* Pricing layout */
 .product-price-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 14px;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.mrp-label {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  letter-spacing: 0.02em;
 }
 
 .current-price {
   font-size: 1.05rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-primary);
 }
 
@@ -2351,6 +2513,18 @@ section.full-width-banner-section {
   letter-spacing: 0.03em;
   text-transform: uppercase;
   border-radius: 0;
+}
+
+.discount-badge-green {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: #388E3C; /* solid leaf green */
+  padding: 3px 8px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 4px;
+  display: inline-block;
 }
 
 .scent-swatches {

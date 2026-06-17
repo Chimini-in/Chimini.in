@@ -2413,29 +2413,88 @@ section.full-width-banner-section {
 /* Luxury Card Accents (Badges, Swatches, Pricing Details) */
 .product-badge {
   position: absolute;
-  top: 15px;
-  left: 15px;
+  top: 0;
+  left: 0;
   background-color: var(--dark-charcoal);
   color: var(--bg-primary);
-  font-family: var(--font-serif);
-  font-size: 0.7rem;
-  font-style: italic;
-  letter-spacing: 0.05em;
-  padding: 6px 14px;
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  padding: 8px 16px;
+  text-transform: uppercase;
   z-index: 4;
 }
 
+/* Hover-fade Dual Images */
+.product-image-hover {
+  opacity: 0;
+  transition: opacity 0.4s ease, transform var(--transition-slow) !important;
+  z-index: 2;
+}
+
+.product-image-main {
+  opacity: 1;
+  transition: opacity 0.4s ease, transform var(--transition-slow) !important;
+  z-index: 1;
+}
+
+.product-card:hover .product-image-hover {
+  opacity: 1;
+}
+
+.product-card:hover .product-image-main {
+  opacity: 0;
+}
+
+/* Corner "+" Add to Cart Button Overlay */
+.product-cart-overlay-btn {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  width: 40px;
+  height: 40px;
+  background-color: #ffffff;
+  color: #1a110b;
+  border: none;
+  font-family: var(--font-sans);
+  font-size: 1.6rem;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  z-index: 5;
+  transition: all var(--transition-fast);
+}
+
+.product-cart-overlay-btn:hover {
+  background-color: var(--text-primary);
+  color: var(--white);
+  transform: scale(1.08);
+}
+
+/* Pricing layout */
 .product-price-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 14px;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.mrp-label {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  letter-spacing: 0.02em;
 }
 
 .current-price {
   font-size: 1.05rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-primary);
 }
 
@@ -2454,6 +2513,18 @@ section.full-width-banner-section {
   letter-spacing: 0.03em;
   text-transform: uppercase;
   border-radius: 0;
+}
+
+.discount-badge-green {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: #388E3C; /* solid leaf green */
+  padding: 3px 8px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 4px;
+  display: inline-block;
 }
 
 .scent-swatches {

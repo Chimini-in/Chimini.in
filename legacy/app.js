@@ -14,28 +14,40 @@ const DEFAULT_SETTINGS = {
       id: "prod-1",
       name: "Jasmine & Oakwood",
       price: 28.00,
+      originalPrice: 38.00,
+      badge: "BEST SELLER",
       image: "assets/product_jasmine.png",
+      secondaryImage: "assets/product_sandalwood.png",
       category: "candles"
     },
     {
       id: "prod-2",
       name: "Sandalwood & Amber",
       price: 32.00,
+      originalPrice: null,
+      badge: "NEW ARRIVAL",
       image: "assets/product_sandalwood.png",
+      secondaryImage: "assets/product_jasmine.png",
       category: "candles"
     },
     {
       id: "prod-3",
       name: "Velvet Rose & Oud",
       price: 34.00,
+      originalPrice: 48.00,
+      badge: "FAST MOVING",
       image: "assets/product_rose.png",
+      secondaryImage: "assets/product_fig.png",
       category: "candles"
     },
     {
       id: "prod-4",
       name: "Wild Fig & Honey",
       price: 29.00,
+      originalPrice: null,
+      badge: "LIMITED EDITION",
       image: "assets/product_fig.png",
+      secondaryImage: "assets/product_rose.png",
       category: "candles"
     }
   ],
@@ -448,7 +460,7 @@ function renderCart() {
         document.getElementById("best-sellers").scrollIntoView({ behavior: "smooth" });
       });
     }
-    DOM.cartSubtotal.textContent = "₹0.00";
+    DOM.cartSubtotal.textContent = "?0.00";
     DOM.cartCount.textContent = "0";
     return;
   }
@@ -764,9 +776,22 @@ function renderAdminProductsList() {
         <input type="number" step="0.01" class="prod-price-val" value="${prod.price}" data-index="${index}">
       </div>
       <div class="admin-form-group">
-        <label>Image URL / Base64 (Recommended: 1000x1000 px)</label>
+        <label>Original Price / MRP (₹) (Optional)</label>
+        <input type="number" step="0.01" class="prod-orig-price-val" value="${prod.originalPrice !== null && prod.originalPrice !== undefined ? prod.originalPrice : ''}" data-index="${index}" placeholder="Leave blank if no discount">
+      </div>
+      <div class="admin-form-group">
+        <label>Product Badge (e.g. BEST SELLER)</label>
+        <input type="text" class="prod-badge-val" value="${prod.badge || ''}" data-index="${index}" placeholder="e.g. BEST SELLER">
+      </div>
+      <div class="admin-form-group">
+        <label>Primary Image URL / Base64</label>
         <input type="text" class="prod-image-val" value="${prod.image}" data-index="${index}">
         <input type="file" class="prod-file-val admin-file-input" accept="image/*" data-index="${index}">
+      </div>
+      <div class="admin-form-group">
+        <label>Hover Secondary Image URL / Base64</label>
+        <input type="text" class="prod-secondary-image-val" value="${prod.secondaryImage || ''}" data-index="${index}">
+        <input type="file" class="prod-secondary-file-val admin-file-input" accept="image/*" data-index="${index}">
       </div>
       <div class="admin-form-group">
         <label>Category Tag</label>
@@ -789,6 +814,20 @@ function renderAdminProductsList() {
       };
       reader.readAsDataURL(file);
     });
+
+    const secFileInput = card.querySelector(".prod-secondary-file-val");
+    if (secFileInput) {
+      secFileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          card.querySelector(".prod-secondary-image-val").value = evt.target.result;
+          showToast("Hover image ready!");
+        };
+        reader.readAsDataURL(file);
+      });
+    }
     
     card.querySelector(".delete-product").addEventListener("click", () => {
       storeState.adminSettings.products = storeState.adminSettings.products.filter(p => p.id !== prod.id);
@@ -1001,12 +1040,25 @@ function saveAdminSettings() {
   prodCards.forEach(card => {
     const name = card.querySelector(".prod-name-val").value;
     const price = parseFloat(card.querySelector(".prod-price-val").value) || 0.00;
+    const origPriceVal = card.querySelector(".prod-orig-price-val").value.trim();
+    const originalPrice = origPriceVal !== "" ? parseFloat(origPriceVal) : null;
+    const badge = card.querySelector(".prod-badge-val").value.trim();
     const image = card.querySelector(".prod-image-val").value;
+    const secondaryImage = card.querySelector(".prod-secondary-image-val").value;
     const category = card.querySelector(".prod-cat-val").value;
     const id = card.querySelector(".delete-product").getAttribute("data-id");
     
     if (name.trim() !== "") {
-      updatedProducts.push({ id: id || `prod-${Math.random()}`, name, price, image, category });
+      updatedProducts.push({ 
+        id: id || `prod-${Math.random()}`, 
+        name, 
+        price, 
+        originalPrice, 
+        badge, 
+        image, 
+        secondaryImage, 
+        category 
+      });
     }
   });
   settings.products = updatedProducts;
@@ -1171,7 +1223,10 @@ function bindEvents() {
         id: `prod-${Math.random()}`,
         name: "New Luxury Candle",
         price: 30.00,
+        originalPrice: null,
+        badge: "",
         image: "assets/product_jasmine.png",
+        secondaryImage: "assets/product_jasmine.png",
         category: "candles"
       });
       renderAdminProductsList();
@@ -1526,19 +1581,18 @@ function renderShopProducts() {
   products.forEach((product, index) => {
     const isWishlisted = storeState.wishlist.includes(product.id);
     
-    // Luxury catalog elements (Inspired by reference)
-    // 1. Dynamic premium tags/badges
-    let badgeText = "BEST SELLER";
-    if (product.price > 30) badgeText = "LIMITED EDITION";
-    else if (product.category === "gifts") badgeText = "CURATED GIFT";
-    else if (index === 1) badgeText = "FAST MOVING";
+    // Dynamic premium badge text
+    const badgeText = product.badge ? product.badge.trim() : null;
     
-    // 2. Crossed out price & discount (if even index)
-    const isDiscounted = (index % 2 === 0);
-    const originalPrice = isDiscounted ? Number(product.price * 1.25).toFixed(2) : null;
-    const discountText = isDiscounted ? "20% OFF" : null;
+    // Dynamic discount calculations
+    const priceNum = parseFloat(product.price);
+    const origPriceNum = product.originalPrice ? parseFloat(product.originalPrice) : null;
+    const isDiscounted = (origPriceNum && origPriceNum > priceNum);
+    const originalPrice = isDiscounted ? origPriceNum.toFixed(2) : null;
+    const discountPercent = isDiscounted ? Math.round(((origPriceNum - priceNum) / origPriceNum) * 100) : null;
+    const discountText = isDiscounted ? `${discountPercent}% OFF` : null;
     
-    // 3. Scent notes color swatches
+    // Scent notes color swatches
     const swatches = getScentSwatches(product.name);
     let swatchesHtml = `<div class="scent-swatches">`;
     swatches.forEach(s => {
@@ -1553,8 +1607,9 @@ function renderShopProducts() {
       // List view premium horizontal layout
       card.innerHTML = `
         <div class="product-image-wrapper">
-          <span class="product-badge">${badgeText}</span>
-          <img src="${product.image}" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
+          ${badgeText ? `<span class="product-badge">${badgeText}</span>` : ''}
+          <img src="${product.image}" class="product-image-main" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
+          ${product.secondaryImage ? `<img src="${product.secondaryImage}" class="product-image-hover" alt="${product.name}" onerror="this.style.display='none'">` : ''}
           <button class="wishlist-toggle-btn ${isWishlisted ? "active" : ""}" data-id="${product.id}" aria-label="Add to Wishlist">
             <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
           </button>
@@ -1566,8 +1621,8 @@ function renderShopProducts() {
           </div>
           <div class="product-price-action">
             <div class="product-price-wrapper">
-              <span class="current-price">₹${Number(product.price).toFixed(2)}</span>
-              ${isDiscounted ? `<span class="original-price" style="text-decoration: line-through;">₹${originalPrice}</span> <span class="discount-badge">${discountText}</span>` : ''}
+              <span class="mrp-label">MRP: </span><span class="current-price">₹${Number(product.price).toFixed(0)}</span>
+              ${isDiscounted ? `<span class="original-price" style="text-decoration: line-through;">₹${Number(originalPrice).toFixed(0)}</span> <span class="discount-badge-green">${discountText}</span>` : ''}
             </div>
             <button class="btn btn-primary add-to-cart-btn" data-id="${product.id}" style="padding: 10px 24px;">Add to Cart</button>
           </div>
@@ -1577,20 +1632,21 @@ function renderShopProducts() {
       // Grid view layouts
       card.innerHTML = `
         <div class="product-image-wrapper">
-          <span class="product-badge">${badgeText}</span>
-          <img src="${product.image}" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
+          ${badgeText ? `<span class="product-badge">${badgeText}</span>` : ''}
+          <img src="${product.image}" class="product-image-main" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
+          ${product.secondaryImage ? `<img src="${product.secondaryImage}" class="product-image-hover" alt="${product.name}" onerror="this.style.display='none'">` : ''}
           <button class="wishlist-toggle-btn ${isWishlisted ? "active" : ""}" data-id="${product.id}" aria-label="Add to Wishlist">
             <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
           </button>
+          <button class="product-cart-overlay-btn add-to-cart-btn" data-id="${product.id}" aria-label="Add to Cart">+</button>
         </div>
         <div class="product-info">
           <h3 class="product-name">${product.name}</h3>
           <div class="product-price-wrapper">
-            <span class="current-price">₹${Number(product.price).toFixed(2)}</span>
-            ${isDiscounted ? `<span class="original-price" style="text-decoration: line-through;">₹${originalPrice}</span> <span class="discount-badge">${discountText}</span>` : ''}
+            <span class="mrp-label">MRP: </span><span class="current-price">₹${Number(product.price).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+            ${isDiscounted ? `<span class="original-price" style="text-decoration: line-through;">₹${Number(originalPrice).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span> <span class="discount-badge-green">${discountText}</span>` : ''}
           </div>
           ${swatchesHtml}
-          <button class="btn btn-primary product-card-btn add-to-cart-btn" data-id="${product.id}" style="margin-top: 15px;">Add to Cart</button>
         </div>
       `;
     }
