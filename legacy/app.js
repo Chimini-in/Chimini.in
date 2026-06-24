@@ -1282,7 +1282,7 @@ function bindEvents() {
     link.addEventListener("click", (e) => {
       e.preventDefault();
       const cat = link.getAttribute("data-category");
-      window.location.href = `shop.html?category=${cat || 'all'}`;
+      window.location.href = `/shop?category=${cat || 'all'}`;
     });
   });
 
@@ -1691,18 +1691,18 @@ function renderCollectionsPage() {
       <div class="collection-page-card-content">
         <h3 class="collection-page-card-title">${coll.name}</h3>
         <p class="collection-page-card-desc">Exquisite fragrance notes meticulously blended to elevate your luxury home ambiance.</p>
-        <a href="shop.html?category=all" class="btn btn-secondary collection-page-card-btn">Explore Collection</a>
+        <a href="/shop?category=all" class="btn btn-secondary collection-page-card-btn">Explore Collection</a>
       </div>
     `;
     
     card.querySelector(".collection-page-card-btn").addEventListener("click", (e) => {
       e.preventDefault();
       if (coll.link && coll.link.startsWith('#')) {
-        window.location.href = `shop.html?category=all`;
+        window.location.href = `/shop?category=all`;
       } else if (coll.link) {
         window.location.href = coll.link;
       } else {
-        window.location.href = `shop.html?category=all`;
+        window.location.href = `/shop?category=all`;
       }
     });
     

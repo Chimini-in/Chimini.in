@@ -17,7 +17,44 @@ const MIME_TYPES = {
 
 http.createServer((req, res) => {
   let decodedUrl = decodeURIComponent(req.url.split('?')[0]);
-  let filePath = path.join(__dirname, decodedUrl === '/' ? 'index.html' : decodedUrl);
+  const queryStr = req.url.split('?')[1] || '';
+  const queryString = queryStr ? '?' + queryStr : '';
+
+  // Clean trailing slashes if present (except for root '/')
+  if (decodedUrl.endsWith('/') && decodedUrl.length > 1) {
+    decodedUrl = decodedUrl.slice(0, -1);
+  }
+
+  // Old routes mapping to clean routes for redirects
+  const redirectMap = {
+    '/index.html': '/home',
+    '/shop.html': '/shop',
+    '/collections.html': '/collections',
+    '/gifts.html': '/gifts',
+    '/about.html': '/about',
+    '/contact.html': '/contact'
+  };
+
+  // Redirect old .html requests to clean URLs (301 Permanent Redirect)
+  if (redirectMap[decodedUrl]) {
+    res.writeHead(301, { 'Location': redirectMap[decodedUrl] + queryString });
+    res.end();
+    return;
+  }
+
+  // Route map for clean URLs to physical HTML files
+  const routeMap = {
+    '/': 'index.html',
+    '/home': 'index.html',
+    '/shop': 'shop.html',
+    '/collections': 'collections.html',
+    '/gifts': 'gifts.html',
+    '/about': 'about.html',
+    '/contact': 'contact.html'
+  };
+
+  let relativePath = routeMap[decodedUrl] || decodedUrl;
+  let filePath = path.join(__dirname, relativePath);
   const ext = path.extname(filePath).toLowerCase();
   const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 

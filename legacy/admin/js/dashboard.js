@@ -279,7 +279,7 @@ document.addEventListener('DOMContentLoaded', async () => {
          const catData = {
            name: document.getElementById('catName').value,
            image: document.getElementById('catImage').value,
-           link: 'collections.html?category=' + encodeURIComponent(document.getElementById('catName').value)
+           link: '/collections?category=' + encodeURIComponent(document.getElementById('catName').value)
          };
          
          if (idx === "") {
