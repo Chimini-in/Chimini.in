@@ -19,7 +19,8 @@ export default function Header() {
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const navLinks = [
-    { label: 'Home', href: '/' },
+    { label: 'Home', href: '/home' },
+    { label: 'Shop', href: '/shop' },
     { label: 'Collections', href: '/collections' },
     { label: 'Gifts', href: '/gifts' },
     { label: 'About', href: '/about' },
@@ -65,11 +66,16 @@ export default function Header() {
         {/* Navigation links */}
         <nav aria-label="Main Navigation">
           <ul className="nav-menu" id="dynamicNavMenu">
-            {navLinks.map(link => (
-              <li key={link.href} className={`nav-item ${pathname === link.href ? 'active' : ''}`}>
-                <Link href={link.href}>{link.label}</Link>
-              </li>
-            ))}
+            {navLinks.map(link => {
+              const isActive = link.href === '/home'
+                ? pathname === '/' || pathname === '/home'
+                : pathname === link.href;
+              return (
+                <li key={link.href} className={`nav-item ${isActive ? 'active' : ''}`}>
+                  <Link href={link.href}>{link.label}</Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
       </div>
