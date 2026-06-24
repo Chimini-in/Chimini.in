@@ -8,6 +8,10 @@ const nextConfig = {
         destination: '/index.html',
       },
       {
+        source: '/home',
+        destination: '/index.html',
+      },
+      {
         source: '/shop',
         destination: '/shop.html',
       },
