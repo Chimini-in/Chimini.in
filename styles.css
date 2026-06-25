@@ -900,15 +900,7 @@ section.full-width-banner-section {
   margin-bottom: 0 !important;
 }
 
-/* --- 11. CUSTOMER TESTIMONIALS — EDITORIAL LAYOUT --- */
-.testimonials-editorial {
-  background-color: var(--bg-primary);
-justify-content: center;
-  gap: 50px;
-  min-width: max-content;
-  margin: 0 auto;
-  padding: 0 40px;
-}
+
 
 .category-item {
   display: flex;
@@ -1129,7 +1121,7 @@ section.full-width-banner-section {
 /* Grid */
 .tg-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
   margin-bottom: 60px;
 }
