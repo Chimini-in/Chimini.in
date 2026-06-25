@@ -1046,28 +1046,15 @@ justify-content: center;
   width: 100%;
 }
 
-/* Force standard dimensions using aspect-ratio */
+/* Prevent cropping and maintain natural aspect ratio */
 .hero-banner a,
-.hero-banner img {
-  width: 100%;
-  aspect-ratio: 1920 / 800; /* Standard: 1920x800 px */
-  object-fit: cover;
-  display: block;
-}
-
+.hero-banner img,
 .products-ads-banner a,
-.products-ads-banner img {
-  width: 100%;
-  aspect-ratio: 1920 / 600; /* Standard: 1920x600 px */
-  object-fit: cover;
-  display: block;
-}
-
+.products-ads-banner img,
 .brand-story-banner a,
 .brand-story-banner img {
   width: 100%;
-  aspect-ratio: 1920 / 700; /* Standard: 1920x700 px */
-  object-fit: cover;
+  height: auto;
   display: block;
 }
 
