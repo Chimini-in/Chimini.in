@@ -92,20 +92,29 @@ const DEFAULT_SETTINGS = {
     {
       id: "test-1",
       rating: 5,
-      text: "The Jasmine & Oakwood scent transformed my living room completely. It smells incredibly luxurious, and the burn is perfectly clean.",
-      author: "Eleanor Vance"
+      text: "Gifted the Jasmine & Sandalwood hamper to my mother on Diwali — she adored it. The packaging felt like unwrapping art. CHIMINI is my go-to for every festive occasion.",
+      author: "Priya Sharma",
+      designation: "Mumbai, Maharashtra",
+      caption: "Client photo · Diwali gift unboxing",
+      theme: "gold"
     },
     {
       id: "test-2",
       rating: 5,
-      text: "I purchased the Artisan Gift Hamper for a friend, and she was blown away by the presentation and fragrance. CHIMINI is my go-to gifting brand.",
-      author: "Sebastian Thorne"
+      text: "The Rose & Oud candle transformed my living space entirely. I light it every evening and it instantly feels like a luxury retreat. A brand that truly gets Indian homes.",
+      author: "Arjun Mehta",
+      designation: "Bengaluru, Karnataka",
+      caption: "Client photo · Rose & Oud shelfie",
+      theme: "teal"
     },
     {
       id: "test-3",
       rating: 5,
-      text: "Hands down the most beautiful candles I have ever owned. The ceramic containers are works of art, and the eco-wax burns so slowly.",
-      author: "Camille Laurent"
+      text: "Ordered the corporate gift set for my team of 20 — every single person loved it. The eco-friendly packaging and the scents made me look like the best manager ever!",
+      author: "Neha Kapoor",
+      designation: "Delhi, NCR",
+      caption: "Client photo · Corporate gifting moment",
+      theme: "coral"
     }
   ]
 };
@@ -362,75 +371,117 @@ function renderMarketingBanners() {
   }
 }
 
-// G. Customer Testimonials Slider
+// G. Customer Testimonials — 3-Card Grid Layout
 function renderTestimonials() {
-  if (!DOM.testimonialsTrack) return;
-  DOM.testimonialsTrack.innerHTML = "";
-  DOM.testimonialsDots.innerHTML = "";
-  
-  const tests = storeState.adminSettings.testimonials;
-  
-  if (tests.length === 0) {
-    DOM.testimonialsTrack.innerHTML = `<div class="testimonial-card"><p class="testimonial-text">No reviews listed yet.</p></div>`;
-    return;
+  const section = document.getElementById('testimonials');
+  if (!section) return;
+
+  const tests = storeState.adminSettings.testimonials || [];
+  const displayTests = tests.slice(0, 3); // Get first 3
+  if (displayTests.length === 0) return;
+
+  // Build the structure
+  section.innerHTML = `
+    <div class="testimonials-grid-section">
+      <!-- Section Header -->
+      <div class="tg-header">
+        <div class="tg-eyebrow">✦ REAL STORIES ✦</div>
+        <h2 class="tg-heading">Loved by <span class="tg-heading-italic">every home</span></h2>
+        <p class="tg-subheading">From gifting moments to everyday rituals — here's what our community says.</p>
+      </div>
+
+      <!-- Grid Container -->
+      <div class="tg-grid">
+        ${displayTests.map((t) => {
+          const theme = t.theme || 'gold';
+          const initial = t.author ? t.author.charAt(0) : '';
+          
+          return `
+            <div class="tg-card card-${theme}">
+              <!-- Top Accent Bar -->
+              <div class="tg-card-accent-bar"></div>
+              
+              <!-- Client Photo Zone -->
+              <div class="tg-photo-zone">
+                <div class="tg-camera-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                  </svg>
+                </div>
+                <div class="tg-photo-name">${t.author}</div>
+                <div class="tg-photo-caption">${t.caption || ''}</div>
+                <button class="tg-upload-btn">+ Upload photo</button>
+              </div>
+
+              <!-- Review Zone -->
+              <div class="tg-review-zone">
+                <div class="tg-avatar-row">
+                  <div class="tg-avatar">${initial}</div>
+                  <div class="tg-avatar-text">
+                    <div class="tg-avatar-name">${t.author}</div>
+                    <div class="tg-avatar-city">${t.designation || ''}</div>
+                  </div>
+                </div>
+
+                <div class="tg-stars">
+                  ${buildStars(t.rating)}
+                </div>
+                
+                <div class="tg-divider-line"></div>
+                
+                <div class="tg-quote-mark">"</div>
+                
+                <blockquote class="tg-review-text">
+                  ${t.text}
+                </blockquote>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <!-- Bottom Stats Bar -->
+      <div class="tg-stats-bar">
+        <div class="tg-stat">
+          <div class="tg-stat-value">4.9★</div>
+          <div class="tg-stat-label">Average Rating</div>
+        </div>
+        <div class="tg-stat-divider"></div>
+        <div class="tg-stat">
+          <div class="tg-stat-value">12K+</div>
+          <div class="tg-stat-label">Happy Customers</div>
+        </div>
+        <div class="tg-stat-divider"></div>
+        <div class="tg-stat">
+          <div class="tg-stat-value">98%</div>
+          <div class="tg-stat-label">Would Gift Again</div>
+        </div>
+      </div>
+      
+      <!-- Decorative Pattern & CTA -->
+      <div class="tg-bottom-decor">
+        <div class="tg-pattern">✦ ❋ ✦ ❋ ✦</div>
+        <button class="tg-cta-btn">READ MORE REVIEWS</button>
+      </div>
+    </div>
+  `;
+}
+
+function buildStars(rating) {
+  let html = '';
+  for (let i = 0; i < 5; i++) {
+    html += `<svg class="et-star" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="${i < rating ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
   }
-  
-  tests.forEach((test, index) => {
-    // Generate Stars HTML
-    let starsHtml = "";
-    for (let i = 0; i < 5; i++) {
-      starsHtml += `<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${i < test.rating ? "currentColor" : "none"}" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
-    }
-    
-    // Card slide
-    const card = document.createElement("div");
-    card.className = "testimonial-card";
-    card.innerHTML = `
-      <div class="testimonial-stars">${starsHtml}</div>
-      <p class="testimonial-text">"${test.text}"</p>
-      <span class="testimonial-author">${test.author}</span>
-    `;
-    DOM.testimonialsTrack.appendChild(card);
-    
-    // Dot indicator
-    const dot = document.createElement("button");
-    dot.className = `testimonial-dot ${index === storeState.currentTestimonialIndex ? "active" : ""}`;
-    dot.ariaLabel = `Go to review ${index + 1}`;
-    dot.addEventListener("click", () => {
-      setTestimonialSlide(index);
-    });
-    DOM.testimonialsDots.appendChild(dot);
-  });
-  
-  // Set initial position
-  setTestimonialSlide(storeState.currentTestimonialIndex);
+  return html;
 }
 
 function setTestimonialSlide(index) {
-  const tests = storeState.adminSettings.testimonials;
-  if (tests.length === 0) return;
-  
-  storeState.currentTestimonialIndex = (index + tests.length) % tests.length;
-  
-  if (DOM.testimonialsTrack) {
-    DOM.testimonialsTrack.style.transform = `translateX(-${storeState.currentTestimonialIndex * 100}%)`;
-  }
-  
-  const dots = DOM.testimonialsDots.querySelectorAll(".testimonial-dot");
-  dots.forEach((dot, i) => {
-    if (i === storeState.currentTestimonialIndex) {
-      dot.classList.add("active");
-    } else {
-      dot.classList.remove("active");
-    }
-  });
+  // No-op kept for compatibility — logic is now self-contained in renderTestimonials
 }
 
 function startTestimonialsAutoplay() {
-  stopTestimonialsAutoplay();
-  testimonialInterval = setInterval(() => {
-    setTestimonialSlide(storeState.currentTestimonialIndex + 1);
-  }, 7000);
+  // No-op — autoplay started inside renderTestimonials
 }
 
 function stopTestimonialsAutoplay() {
