@@ -678,6 +678,10 @@ body.has-sticky-header {
 }
 
 /* --- 8. SHOP BY FRAGRANCE / CATEGORY --- */
+.shop-by-fragrance {
+  padding-top: 0;
+}
+
 .categories-scroll-wrapper {
   overflow-x: auto;
   padding: 10px 0 25px 0;
