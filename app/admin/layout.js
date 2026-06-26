@@ -125,7 +125,7 @@ export default function AdminLayout({ children }) {
 }
 
 function SidebarLink({ href, current, children }) {
-  const isActive = current === href || (current.startsWith(href) && href !== '/admin/dashboard');
+  const isActive = current === href || (current?.startsWith(href) && href !== '/admin/dashboard');
   
   return (
     <Link href={href} style={{ 
