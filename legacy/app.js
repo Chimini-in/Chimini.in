@@ -377,7 +377,7 @@ function renderTestimonials() {
   if (!section) return;
 
   const tests = storeState.adminSettings.testimonials || [];
-  const displayTests = tests.slice(0, 3); // Get first 3
+  const displayTests = tests.slice(0, 4); // Get first 4
   if (displayTests.length === 0) return;
 
   // Build the structure

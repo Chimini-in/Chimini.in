@@ -377,7 +377,7 @@ function renderTestimonials() {
   if (!section) return;
 
   const tests = storeState.adminSettings.testimonials || [];
-  const displayTests = tests.slice(0, 3); // Get first 3
+  const displayTests = tests.slice(0, 4); // Get first 4
   if (displayTests.length === 0) return;
 
   // Build the structure
@@ -1837,6 +1837,11 @@ function renderAboutPage() {
   const container = document.getElementById("about-page-container");
   if (!container) return;
   
+  if (storeState.adminSettings.pages && storeState.adminSettings.pages['about_us']) {
+    container.innerHTML = storeState.adminSettings.pages['about_us'];
+    return;
+  }
+
   const about = storeState.adminSettings.about || {};
   
   container.innerHTML = `
@@ -1904,6 +1909,11 @@ function renderContactPage() {
   const container = document.getElementById("contact-page-container");
   if (!container) return;
   
+  if (storeState.adminSettings.pages && storeState.adminSettings.pages['contact_us']) {
+    container.innerHTML = storeState.adminSettings.pages['contact_us'];
+    return;
+  }
+
   const contact = storeState.adminSettings.contact || {};
   
   container.innerHTML = `
@@ -1976,8 +1986,111 @@ function renderContactPage() {
   }
 }
 
+// --- 4. SUPABASE DATA FETCHING ---
+const SUPABASE_URL = "https://jvopwqkbtrupkayzfyvl.supabase.co";
+const SUPABASE_KEY = "sb_publishable_kZNSe5NLKgISdmCetfSxBw_ebT3ieem";
+
+async function fetchSupabaseData() {
+  try {
+    const headers = {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`
+    };
+
+    // Parallel fetch for speed
+    const [settingsRes, bannersRes, productsRes, categoriesRes, testimonialsRes, pagesRes] = await Promise.all([
+      fetch(`${SUPABASE_URL}/rest/v1/settings?select=*`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/banners?select=*&is_published=eq.true&order=sort_order.asc`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/products?select=*,categories(title)&is_published=eq.true&order=sort_order.asc`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/categories?select=*&order=sort_order.asc`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/testimonials?select=*&is_published=eq.true&order=sort_order.asc`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/page_content?select=*`, { headers })
+    ]);
+
+    const [settings, banners, products, categories, testimonials, pages] = await Promise.all([
+      settingsRes.json(), bannersRes.json(), productsRes.json(), categoriesRes.json(), testimonialsRes.json(), pagesRes.json()
+    ]);
+
+    // Map to legacy DEFAULT_SETTINGS format for compatibility
+    const newSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+
+    // Map Announcements
+    const announcementSetting = settings.find(s => s.setting_key === 'announcements');
+    if (announcementSetting) {
+      const arr = Array.isArray(announcementSetting.setting_value) ? announcementSetting.setting_value : JSON.parse(announcementSetting.setting_value);
+      if (arr.length > 0) newSettings.announcementText = arr.join(' • ');
+    }
+
+    // Map Banners
+    const heroBanner = banners.find(b => b.section_id === 'hero');
+    if (heroBanner) {
+      newSettings.heroBanner = {
+        title: heroBanner.title_overlay || '',
+        subtitle: heroBanner.subtitle_overlay || '',
+        image: heroBanner.image_url,
+        link: heroBanner.link_url || '#',
+        buttonText: heroBanner.button_text || 'Shop Now'
+      };
+    }
+
+    // Map Products
+    if (products && products.length > 0) {
+      newSettings.products = products.map(p => ({
+        id: p.id,
+        name: p.title,
+        price: p.price,
+        originalPrice: null,
+        badge: p.badges,
+        image: p.image_url,
+        secondaryImage: p.image_url,
+        category: p.categories?.title?.toLowerCase() || p.category || 'all',
+        fragrance: p.fragrance
+      }));
+    }
+
+    // Map Categories
+    if (categories && categories.length > 0) {
+      newSettings.categories = categories.map(c => ({
+        id: c.id,
+        name: c.title,
+        image: c.image_url || 'assets/product_jasmine.png'
+      }));
+    }
+
+    // Map Testimonials
+    if (testimonials && testimonials.length > 0) {
+      newSettings.testimonials = testimonials.map(t => ({
+        id: t.id,
+        rating: t.rating || 5,
+        text: t.content,
+        author: t.author,
+        designation: t.city,
+        caption: t.caption,
+        theme: t.theme || 'gold'
+      }));
+    }
+
+    // Map Pages
+    newSettings.pages = {};
+    if (pages && pages.length > 0) {
+      pages.forEach(p => {
+        if (p.content && p.content.html) {
+          newSettings.pages[p.page_name] = p.content.html;
+        }
+      });
+    }
+
+    // Overwrite global store
+    storeState.adminSettings = newSettings;
+    
+  } catch (err) {
+    console.error("Failed to load Supabase data. Falling back to local data.", err);
+  }
+}
+
 // Start everything when DOM is loaded
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  await fetchSupabaseData();
   bindEvents();
   initStore();
   initAdminFields();
