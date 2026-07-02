@@ -28,23 +28,16 @@ const PROMISES = [
 ];
 
 export default function GiftsPage() {
-  const { addToCart } = useStore();
+  const { products, addToCart } = useStore();
   const [gifts, setGifts] = useState([]);
 
   useEffect(() => {
-    // If we have actual gifts in local storage, use them.
-    // Otherwise use some demo data for the UI
-    const localGifts = localStorage.getItem('chimini_gifts');
-    if (localGifts) {
-      setGifts(JSON.parse(localGifts));
-    } else {
-      setGifts([
-        { id: 'g1', name: 'The Festive Glow Box', price: 1499, contents: '2x Large Candles, 1x Diffuser, Matches', image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&q=80&w=500', badge: '★ BESTSELLER' },
-        { id: 'g2', name: 'Mini Indulgence Trio', price: 899, contents: '3x Mini Travel Candles, Silk Pouch', image: 'https://images.unsplash.com/photo-1605814561005-59b85c3dc09b?auto=format&fit=crop&q=80&w=500', badge: 'NEW ARRIVAL' },
-        { id: 'g3', name: 'The Wellness Retreat', price: 2199, contents: 'Large Soy Candle, Bath Salts, Essential Oil', image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=500' },
-      ]);
+    // Filter products that have is_gift set to true
+    if (products && products.length > 0) {
+      const giftProducts = products.filter(p => p.is_gift);
+      setGifts(giftProducts.length > 0 ? giftProducts : products.slice(0, 3)); // fallback to some products if none flagged
     }
-  }, []);
+  }, [products]);
 
   const scrollToSection = (id) => {
     const el = document.getElementById(id);
@@ -519,9 +512,11 @@ export default function GiftsPage() {
           <h2 className="section-title heading-display">Curated Gift Sets</h2>
         </div>
         <div className="gift-grid">
-          {gifts.map((gift, i) => {
-            const isBestseller = i === 0 || gift.badge === '★ BESTSELLER';
-            const isNew = i === 1 || gift.badge === 'NEW ARRIVAL';
+          {gifts.length === 0 ? (
+            <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '2rem' }}>No gift sets available yet.</p>
+          ) : gifts.map((gift, i) => {
+            const isBestseller = gift.is_best_seller || gift.badge === '★ BESTSELLER';
+            const isNew = gift.badge === 'NEW ARRIVAL';
             const price = gift.price || 1499;
             
             return (
@@ -533,7 +528,7 @@ export default function GiftsPage() {
                 </div>
                 <div className="gift-info">
                   <h3 className="gift-name heading-display">{gift.name}</h3>
-                  <p className="gift-contents">{gift.contents || '2x Candles, Silk Pouch, Matchbox'}</p>
+                  <p className="gift-contents">{gift.description || gift.contents || 'Beautifully packaged gift set'}</p>
                   <span className="gift-price">₹{price}</span>
                   <button className="btn-marigold" onClick={() => addToCart(gift)}>ADD TO CART</button>
                 </div>

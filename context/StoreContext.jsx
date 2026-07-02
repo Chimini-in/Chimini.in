@@ -7,56 +7,86 @@ const StoreContext = createContext();
 
 export function StoreProvider({ children }) {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [collections, setCollections] = useState([]);
+  const [heroSlides, setHeroSlides] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
+
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [announcements, setAnnouncements] = useState([
-    "Free shipping on orders over $150 | Use code: LUXE150",
-    "Scent of the Month: 20% off with code: SCENT20",
-    "Crafted with 100% natural soy wax & botanical oils"
-  ]);
-  const [heroSlides, setHeroSlides] = useState([]);
-  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [isLoadingStore, setIsLoadingStore] = useState(true);
 
   useEffect(() => {
-    // Load initial data from localStorage if available
+    // Load cart from session storage
     const savedCart = sessionStorage.getItem('chimini_cart');
     if (savedCart) {
-      setCart(JSON.parse(savedCart));
-    }
-    const savedProducts = localStorage.getItem('chimini_products');
-    if (savedProducts) {
-      setProducts(JSON.parse(savedProducts));
-    }
-
-    const savedAnnouncements = localStorage.getItem('chimini_announcements');
-    if (savedAnnouncements) {
-      setAnnouncements(JSON.parse(savedAnnouncements));
+      try { setCart(JSON.parse(savedCart)); } catch (e) { }
     }
 
     // Sync from Supabase
     async function fetchStoreData() {
-      if (supabaseClient) {
-        try {
-          const { data: productsData } = await supabaseClient.from('products').select('*');
-          if (productsData && productsData.length > 0) {
-            const mappedProducts = productsData.map(p => ({
-              id: p.id,
-              name: p.title,
-              price: parseFloat(p.price),
-              image: p.image_url,
-              category: p.category,
-              fragrance: p.fragrance,
-              availability: p.availability ? "In Stock" : "Out of Stock",
-              badge: p.badges || ""
-            }));
-            setProducts(mappedProducts);
-            localStorage.setItem('chimini_products', JSON.stringify(mappedProducts));
-          }
-        } catch (e) {
-          console.error("Supabase sync error:", e);
+      if (!supabaseClient) return;
+      setIsLoadingStore(true);
+      try {
+        const [
+          { data: pData },
+          { data: catData },
+          { data: colData },
+          { data: banData },
+          { data: testData },
+          { data: revData },
+          { data: setData }
+        ] = await Promise.all([
+          supabaseClient.from('products').select('*').eq('is_published', true),
+          supabaseClient.from('categories').select('*').eq('is_published', true).order('sort_order'),
+          supabaseClient.from('collections').select('*').eq('is_published', true).order('sort_order'),
+          supabaseClient.from('banners').select('*').eq('section_id', 'hero').order('sort_order'),
+          supabaseClient.from('testimonials').select('*').eq('is_published', true).order('sort_order'),
+          supabaseClient.from('reviews').select('*').eq('is_approved', true).order('created_at', { ascending: false }),
+          supabaseClient.from('settings').select('*').eq('setting_key', 'announcements').single()
+        ]);
+
+        if (pData) {
+          const mappedProducts = pData.map(p => ({
+            id: p.id,
+            name: p.title,
+            description: p.description,
+            price: parseFloat(p.price),
+            image: p.image_url,
+            category: p.category_id || p.category,
+            fragrance: p.fragrance,
+            availability: p.availability ? "In Stock" : "Out of Stock",
+            badge: p.badges || "",
+            is_best_seller: p.is_best_seller,
+            is_gift: p.is_gift
+          }));
+          setProducts(mappedProducts);
         }
+
+        if (catData) setCategories(catData);
+        if (colData) setCollections(colData);
+        if (banData) setHeroSlides(banData);
+        if (testData) setTestimonials(testData);
+        if (revData) setReviews(revData);
+        
+        if (setData && setData.setting_value) {
+          try {
+            const parsed = typeof setData.setting_value === 'string' ? JSON.parse(setData.setting_value) : setData.setting_value;
+            if (Array.isArray(parsed)) setAnnouncements(parsed);
+          } catch (e) { setAnnouncements([setData.setting_value]); }
+        } else {
+          setAnnouncements(["Welcome to Chimini"]); // Default fallback
+        }
+
+      } catch (e) {
+        console.error("Supabase sync error:", e);
+      } finally {
+        setIsLoadingStore(false);
       }
     }
+
     fetchStoreData();
   }, []);
 
@@ -99,15 +129,19 @@ export function StoreProvider({ children }) {
   return (
     <StoreContext.Provider value={{
       products,
+      categories,
+      collections,
+      heroSlides,
+      testimonials,
+      reviews,
+      announcements,
+      isLoadingStore,
       cart,
       isCartOpen,
       setIsCartOpen,
       addToCart,
       changeCartQty,
-      removeFromCart,
-      announcements,
-      heroSlides,
-      featuredProducts
+      removeFromCart
     }}>
       {children}
     </StoreContext.Provider>

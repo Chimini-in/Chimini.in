@@ -12,7 +12,8 @@ export default function ProductsPage() {
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
     title: '', description: '', price: '', image_url: '', category_id: '',
-    fragrance: '', badges: '', is_published: true, sort_order: 0
+    fragrance: '', badges: '', is_published: true, sort_order: 0,
+    is_best_seller: false, is_gift: false
   });
 
   useEffect(() => {
@@ -64,13 +65,16 @@ export default function ProductsPage() {
         fragrance: prod.fragrance || '',
         badges: prod.badges || '',
         is_published: prod.is_published,
-        sort_order: prod.sort_order || 0
+        sort_order: prod.sort_order || 0,
+        is_best_seller: prod.is_best_seller || false,
+        is_gift: prod.is_gift || false
       });
     } else {
       setEditingId(null);
       setFormData({
         title: '', description: '', price: '', image_url: '', category_id: '',
-        fragrance: '', badges: '', is_published: true, sort_order: 0
+        fragrance: '', badges: '', is_published: true, sort_order: 0,
+        is_best_seller: false, is_gift: false
       });
     }
     setShowModal(true);
@@ -197,9 +201,19 @@ export default function ProductsPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
-                <input type="checkbox" id="is_pub" checked={formData.is_published} onChange={e => setFormData({...formData, is_published: e.target.checked})} />
-                <label htmlFor="is_pub" style={{ fontSize: '0.9rem' }}>Publish immediately</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginTop: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <input type="checkbox" id="is_pub" checked={formData.is_published} onChange={e => setFormData({...formData, is_published: e.target.checked})} />
+                  <label htmlFor="is_pub" style={{ fontSize: '0.9rem' }}>Published</label>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <input type="checkbox" id="is_best_seller" checked={formData.is_best_seller} onChange={e => setFormData({...formData, is_best_seller: e.target.checked})} />
+                  <label htmlFor="is_best_seller" style={{ fontSize: '0.9rem' }}>⭐ Best Seller</label>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <input type="checkbox" id="is_gift" checked={formData.is_gift} onChange={e => setFormData({...formData, is_gift: e.target.checked})} />
+                  <label htmlFor="is_gift" style={{ fontSize: '0.9rem' }}>🎁 Gift Item</label>
+                </div>
               </div>
 
               <div style={{ display: 'flex', gap: '10px', marginTop: '20px', justifyContent: 'flex-end' }}>

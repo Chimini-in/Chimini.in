@@ -4,25 +4,23 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useStore } from '@/context/StoreContext';
 
-const CATEGORIES = [
-  { id: 'shapes', label: 'SHAPES', image: 'https://images.unsplash.com/photo-1605814561005-59b85c3dc09b?auto=format&fit=crop&q=80&w=500' },
-  { id: 'florals', label: 'FLORALS', image: 'https://images.unsplash.com/photo-1596431969695-1f9db8d26c5f?auto=format&fit=crop&q=80&w=500' },
-  { id: 'gifting', label: 'GIFTING', image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&q=80&w=500' },
-  { id: 'seasonal', label: 'SEASONAL', image: 'https://images.unsplash.com/photo-1610224426549-3bc7a7187fb7?auto=format&fit=crop&q=80&w=500' },
-  { id: 'wellness', label: 'WELLNESS', image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=500' },
-];
-
 export default function CollectionsPage() {
-  const { products, addToCart } = useStore();
-  const [activeCategory, setActiveCategory] = useState('shapes');
+  const { products, categories, addToCart } = useStore();
+  const [activeCategory, setActiveCategory] = useState(null);
+
+  // Set initial active category when categories load
+  useEffect(() => {
+    if (categories.length > 0 && !activeCategory) {
+      setActiveCategory(categories[0].slug || categories[0].id);
+    }
+  }, [categories, activeCategory]);
 
   // Filter products by the chosen categories
   const getProductsForCategory = (catId) => {
     return products.filter(p => {
-      const cat = (p.category || '').toLowerCase();
-      const name = (p.name || '').toLowerCase();
-      if (cat.includes(catId) || name.includes(catId)) return true;
-      return false; 
+      const pCat = (p.category || '').toLowerCase();
+      const pName = (p.name || '').toLowerCase();
+      return pCat.includes(catId) || pName.includes(catId);
     });
   };
 
@@ -40,8 +38,9 @@ export default function CollectionsPage() {
   useEffect(() => {
     const handleScroll = () => {
       let current = '';
-      CATEGORIES.forEach(cat => {
-        const el = document.getElementById(`section-${cat.id}`);
+      categories.forEach(cat => {
+        const id = cat.slug || cat.id;
+        const el = document.getElementById(`section-${id}`);
         if (el) {
           const rect = el.getBoundingClientRect();
           if (rect.top <= 200 && rect.bottom >= 200) {
@@ -56,7 +55,7 @@ export default function CollectionsPage() {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [activeCategory]);
+  }, [activeCategory, categories]);
 
   return (
     <div className="collections-page">
@@ -483,39 +482,51 @@ export default function CollectionsPage() {
         <div className="hero-content">
           <span className="hero-badge">New Collection ✦</span>
           <h1 className="hero-title heading-display">Light Up Every Moment</h1>
-          <button className="btn-primary" onClick={() => scrollToCategory('shapes')}>EXPLORE NOW →</button>
+          <button className="btn-primary" onClick={() => { if (categories.length > 0) scrollToCategory(categories[0].slug || categories[0].id) }}>EXPLORE NOW →</button>
         </div>
       </section>
 
       {/* 2. CATEGORY FILTER */}
       <section className="category-filter-wrapper">
         <div className="category-filter">
-          {CATEGORIES.map(cat => (
-            <div 
-              key={cat.id} 
-              className={`category-tile ${activeCategory === cat.id ? 'active' : ''}`}
-              onClick={() => scrollToCategory(cat.id)}
-            >
-              <div className="category-tile-img-wrapper">
-                <img src={cat.image} alt={cat.label} className="category-tile-img" />
+          {categories.map(cat => {
+            const catId = cat.slug || cat.id;
+            return (
+              <div 
+                key={catId} 
+                className={`category-tile ${activeCategory === catId ? 'active' : ''}`}
+                onClick={() => scrollToCategory(catId)}
+              >
+                <div className="category-tile-img-wrapper" style={{ backgroundColor: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem' }}>
+                  {cat.image_url ? (
+                    <img src={cat.image_url} alt={cat.title} className="category-tile-img" />
+                  ) : (
+                    <span>{cat.icon || '🕯️'}</span>
+                  )}
+                </div>
+                <span className="category-tile-label">{cat.title}</span>
               </div>
-              <span className="category-tile-label">{cat.label}</span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
       {/* 3. CATEGORY SECTIONS */}
-      {CATEGORIES.map((cat, index) => {
-        const catProducts = getProductsForCategory(cat.id);
+      {categories.map((cat, index) => {
+        const catId = cat.slug || cat.id;
+        const catProducts = getProductsForCategory(catId);
         
         return (
-          <React.Fragment key={cat.id}>
-            <section id={`section-${cat.id}`} className="category-section">
+          <React.Fragment key={catId}>
+            <section id={`section-${catId}`} className="category-section">
               <div className="category-banner">
-                <img src={cat.image} alt={cat.label} className="category-banner-img" />
+                {cat.image_url ? (
+                  <img src={cat.image_url} alt={cat.title} className="category-banner-img" />
+                ) : (
+                  <div className="category-banner-img" style={{ backgroundColor: '#2A7C6F' }} />
+                )}
                 <div className="category-banner-overlay"></div>
-                <h2 className="category-banner-title heading-display">{cat.label}</h2>
+                <h2 className="category-banner-title heading-display">{cat.title}</h2>
               </div>
 
               <div className="product-grid-new">

@@ -82,9 +82,11 @@ export default function AdminLayout({ children }) {
           <SidebarLink href="/admin/dashboard" current={pathname}>Dashboard</SidebarLink>
           <SidebarLink href="/admin/banners" current={pathname}>Banners & Hero</SidebarLink>
           <SidebarLink href="/admin/categories" current={pathname}>Categories</SidebarLink>
+          <SidebarLink href="/admin/collections" current={pathname}>Collections</SidebarLink>
           <SidebarLink href="/admin/products" current={pathname}>Products & Shop</SidebarLink>
           <SidebarLink href="/admin/pages" current={pathname}>Static Pages</SidebarLink>
           <SidebarLink href="/admin/testimonials" current={pathname}>Testimonials</SidebarLink>
+          <SidebarLink href="/admin/reviews" current={pathname}>Reviews</SidebarLink>
           <SidebarLink href="/admin/settings" current={pathname}>Global Settings</SidebarLink>
         </nav>
 
@@ -106,9 +108,11 @@ export default function AdminLayout({ children }) {
             {pathname === '/admin/dashboard' ? 'Overview' : 
              pathname === '/admin/banners' ? 'Manage Banners' :
              pathname === '/admin/categories' ? 'Manage Categories' :
+             pathname === '/admin/collections' ? 'Manage Collections' :
              pathname === '/admin/products' ? 'Manage Products' :
              pathname === '/admin/pages' ? 'Manage Static Pages' :
              pathname === '/admin/testimonials' ? 'Manage Testimonials' :
+             pathname === '/admin/reviews' ? 'Manage Reviews' :
              pathname === '/admin/settings' ? 'Global Settings' : ''}
           </h2>
           <a href="/" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.85rem', color: 'var(--color-accent)', textDecoration: 'none', fontWeight: '500' }}>

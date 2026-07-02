@@ -1,6 +1,46 @@
-import React from 'react';
+"use client";
+
+import React, { useEffect, useState } from 'react';
+import { supabaseClient } from '@/lib/supabase';
 
 export default function AboutPage() {
+  const [content, setContent] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchContent() {
+      const { data } = await supabaseClient.from('page_content').select('content').eq('page_name', 'about_us').single();
+      if (data && data.content) {
+        setContent(data.content);
+      }
+      setLoading(false);
+    }
+    fetchContent();
+  }, []);
+
+  if (loading) return <div style={{ padding: '100px', textAlign: 'center' }}>Loading...</div>;
+
+  // Fallback defaults
+  const c = content || {};
+  const heroImage = c.hero_image || 'https://images.unsplash.com/photo-1602874801007-bd458bb1b8b6?auto=format&fit=crop&q=80&w=2000';
+  const heroTitle = c.hero_title || 'Born from the Heart of India 🕯️';
+  const heroSubtitle = c.hero_subtitle || 'Every candle tells a story of craft, scent, and celebration';
+
+  const storyAHeading = c.story_a_heading || 'Where It All Began';
+  const storyABody = c.story_a_body || "CHIMINI was born from a simple desire: to create a sensory sanctuary that feels vibrant, joyful, and deeply rooted in Indian culture. We believe that a fragrance isn't just a scent—it's a gateway to a memory, a mood, and a moment of pure celebration.";
+  const storyAQuote = c.story_a_quote || "We wanted to bottle the feeling of coming home.";
+  const storyAImage = c.story_a_image || 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=800';
+
+  const storyBHeading = c.story_b_heading || 'Crafted with Nature, Made with Love';
+  const storyBBody = c.story_b_body || 'Our philosophy is simple: what goes into the air you breathe should be as pure as the intentions behind it. We meticulously select every element that makes up a CHIMINI candle.';
+  const storyBImage = c.story_b_image || 'https://images.unsplash.com/photo-1596431969695-1f9db8d26c5f?auto=format&fit=crop&q=80&w=800';
+
+  const bigQuote = c.big_quote || "Every flame we light is an act of intention.";
+  
+  const founderImage = c.founder_image || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=600';
+  const founderName = c.founder_name || 'Priya Sharma';
+  const founderQuote = c.founder_quote || "I started CHIMINI because I couldn't find a brand that married the rich, vibrant heritage of India with modern, clean-burning home fragrance. I wanted colours that popped, scents that evoked nostalgia, and products that felt like a celebration the moment you opened the box. Thank you for inviting our joy into your homes.";
+
   return (
     <div className="about-page">
       <style dangerouslySetInnerHTML={{__html: `
@@ -21,329 +61,80 @@ export default function AboutPage() {
 
         /* 1. HERO */
         .hero-banner {
-          position: relative;
-          width: 100%;
-          height: 70vh;
-          min-height: 500px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: url('https://images.unsplash.com/photo-1602874801007-bd458bb1b8b6?auto=format&fit=crop&q=80&w=2000') center/cover no-repeat;
-          text-align: center;
+          position: relative; width: 100%; height: 70vh; min-height: 500px;
+          display: flex; align-items: center; justify-content: center; text-align: center;
+          background: url('${heroImage}') center/cover no-repeat;
         }
         .hero-overlay {
-          position: absolute;
-          inset: 0;
-          background: rgba(42, 124, 111, 0.45); /* soft warm teal wash */
-          mix-blend-mode: multiply;
+          position: absolute; inset: 0; background: rgba(42, 124, 111, 0.45); mix-blend-mode: multiply;
         }
         .hero-content {
-          position: relative;
-          z-index: 1;
-          color: #FFF;
-          padding: 0 1.5rem;
-          max-width: 800px;
+          position: relative; z-index: 1; color: #FFF; padding: 0 1.5rem; max-width: 800px;
         }
         .hero-title {
-          font-size: clamp(3rem, 6vw, 5rem);
-          line-height: 1.1;
-          margin: 0 0 1.5rem 0;
-          text-shadow: 2px 2px 10px rgba(0,0,0,0.4);
+          font-size: clamp(3rem, 6vw, 5rem); line-height: 1.1; margin: 0 0 1.5rem 0; text-shadow: 2px 2px 10px rgba(0,0,0,0.4);
         }
         .hero-subtext {
-          font-size: clamp(1.2rem, 3vw, 1.8rem);
-          font-weight: 500;
-          letter-spacing: 0.05em;
-          margin: 0;
-          text-shadow: 1px 1px 5px rgba(0,0,0,0.4);
+          font-size: clamp(1.2rem, 3vw, 1.8rem); font-weight: 500; letter-spacing: 0.05em; margin: 0; text-shadow: 1px 1px 5px rgba(0,0,0,0.4);
         }
 
         /* 2. OUR STORY */
-        .story-section {
-          padding: 6rem 2rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .story-section-b {
-          background-color: #FFF3E0;
-        }
-        .story-container {
-          max-width: 1200px;
-          width: 100%;
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 5rem;
-          align-items: center;
-        }
-        .story-img-wrap {
-          border-radius: 20px;
-          overflow: hidden;
-          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-          aspect-ratio: 4/5;
-        }
-        .story-img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-        .story-heading {
-          font-size: clamp(2.5rem, 4vw, 3.5rem);
-          margin: 0 0 1.5rem 0;
-          color: #2A2A2A;
-          line-height: 1.15;
-        }
-        .story-body {
-          color: #444;
-          font-size: 1.15rem;
-          line-height: 1.8;
-          margin-bottom: 2rem;
-        }
-        .story-quote {
-          font-size: 1.8rem;
-          color: #E8533A;
-          font-family: 'Playfair Display', serif;
-          font-style: italic;
-          line-height: 1.4;
-          margin: 2.5rem 0;
-          border-left: 5px solid #F4A623;
-          padding-left: 1.5rem;
-        }
-        .bullet-list {
-          list-style: none;
-          padding: 0;
-          margin: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
-        }
-        .bullet-item {
-          display: flex;
-          align-items: flex-start;
-          gap: 1rem;
-          font-size: 1.15rem;
-          line-height: 1.6;
-        }
-        .bullet-dot {
-          color: #F4A623;
-          font-size: 1.5rem;
-          line-height: 1;
-        }
+        .story-section { padding: 6rem 2rem; display: flex; align-items: center; justify-content: center; }
+        .story-section-b { background-color: #FFF3E0; }
+        .story-container { max-width: 1200px; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+        .story-img-wrap { border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1); aspect-ratio: 4/5; }
+        .story-img { width: 100%; height: 100%; object-fit: cover; }
+        .story-heading { font-size: clamp(2.5rem, 4vw, 3.5rem); margin: 0 0 1.5rem 0; color: #2A2A2A; line-height: 1.15; }
+        .story-body { color: #444; font-size: 1.15rem; line-height: 1.8; margin-bottom: 2rem; white-space: pre-wrap; }
+        .story-quote { font-size: 1.8rem; color: #E8533A; font-family: 'Playfair Display', serif; font-style: italic; line-height: 1.4; margin: 2.5rem 0; border-left: 5px solid #F4A623; padding-left: 1.5rem; }
+
+        .bullet-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1.5rem; }
+        .bullet-item { display: flex; align-items: flex-start; gap: 1rem; font-size: 1.15rem; line-height: 1.6; }
+        .bullet-dot { color: #F4A623; font-size: 1.5rem; line-height: 1; }
 
         /* 3. OUR VALUES */
-        .values-section {
-          padding: 6rem 2rem;
-          max-width: 1200px;
-          margin: 0 auto;
-        }
-        .section-header {
-          text-align: center;
-          margin-bottom: 4rem;
-        }
-        .section-title {
-          font-size: clamp(3rem, 5vw, 4rem);
-          color: #2A2A2A;
-          margin: 0;
-        }
-        .values-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 2rem;
-        }
-        .value-card {
-          padding: 3.5rem 2rem;
-          border-radius: 16px;
-          color: #FFF;
-          text-align: center;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 1.5rem;
-        }
+        .values-section { padding: 6rem 2rem; max-width: 1200px; margin: 0 auto; }
+        .section-header { text-align: center; margin-bottom: 4rem; }
+        .section-title { font-size: clamp(3rem, 5vw, 4rem); color: #2A2A2A; margin: 0; }
+        .values-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+        .value-card { padding: 3.5rem 2rem; border-radius: 16px; color: #FFF; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
         .bg-marigold { background-color: #F4A623; }
         .bg-coral { background-color: #E8533A; }
         .bg-teal { background-color: #2A7C6F; }
-        .value-icon {
-          font-size: 3.5rem;
-        }
-        .value-title {
-          font-size: 1.8rem;
-          margin: 0;
-        }
-        .value-desc {
-          font-size: 1.1rem;
-          line-height: 1.6;
-          margin: 0;
-        }
+        .value-icon { font-size: 3.5rem; }
+        .value-title { font-size: 1.8rem; margin: 0; }
+        .value-desc { font-size: 1.1rem; line-height: 1.6; margin: 0; }
 
         /* 4. FULL-BLEED QUOTE BANNER */
-        .quote-banner {
-          background-color: #2A2A2A; /* Rich Charcoal */
-          padding: 6rem 2rem;
-          text-align: center;
-          color: #FFF8F0;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 2rem;
-        }
-        .quote-banner-text {
-          font-size: clamp(2.5rem, 5vw, 4rem);
-          max-width: 1000px;
-          margin: 0;
-          line-height: 1.3;
-        }
-        .quote-star {
-          color: #FFC300;
-          font-size: 2.5rem;
-        }
+        .quote-banner { background-color: #2A2A2A; padding: 6rem 2rem; text-align: center; color: #FFF8F0; display: flex; flex-direction: column; align-items: center; gap: 2rem; }
+        .quote-banner-text { font-size: clamp(2.5rem, 5vw, 4rem); max-width: 1000px; margin: 0; line-height: 1.3; }
+        .quote-star { color: #FFC300; font-size: 2.5rem; }
 
         /* 5. FOUNDER SECTION */
-        .founder-section {
-          padding: 7rem 2rem;
-          max-width: 1000px;
-          margin: 0 auto;
-          display: grid;
-          grid-template-columns: 1fr 2fr;
-          gap: 4rem;
-          align-items: center;
-        }
-        .founder-img-wrap {
-          width: 100%;
-          aspect-ratio: 1;
-          border-radius: 50%;
-          overflow: hidden;
-          box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-          border: 10px solid #FFF;
-        }
-        .founder-img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-        .founder-heading {
-          font-size: clamp(2rem, 4vw, 3rem);
-          margin: 0 0 1.5rem 0;
-          color: #2A2A2A;
-        }
-        .founder-note {
-          font-size: 1.25rem;
-          line-height: 1.8;
-          font-style: italic;
-          color: #444;
-          margin-bottom: 2rem;
-        }
-        .founder-sign {
-          font-family: 'Playfair Display', serif;
-          font-size: 2.5rem;
-          color: #E8533A;
-          margin: 0;
-          font-style: italic;
-          font-weight: 700;
-        }
+        .founder-section { padding: 7rem 2rem; max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr 2fr; gap: 4rem; align-items: center; }
+        .founder-img-wrap { width: 100%; aspect-ratio: 1; border-radius: 50%; overflow: hidden; box-shadow: 0 15px 30px rgba(0,0,0,0.15); border: 10px solid #FFF; }
+        .founder-img { width: 100%; height: 100%; object-fit: cover; }
+        .founder-heading { font-size: clamp(2rem, 4vw, 3rem); margin: 0 0 1.5rem 0; color: #2A2A2A; }
+        .founder-note { font-size: 1.25rem; line-height: 1.8; font-style: italic; color: #444; margin-bottom: 2rem; white-space: pre-wrap; }
+        .founder-sign { font-family: 'Playfair Display', serif; font-size: 2.5rem; color: #E8533A; margin: 0; font-style: italic; font-weight: 700; }
 
         /* 6. CRAFT PROCESS */
-        .process-section {
-          background-color: #FFF3E0;
-          padding: 6rem 2rem;
-        }
-        .process-container {
-          max-width: 1200px;
-          margin: 0 auto;
-        }
-        .process-row {
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-          position: relative;
-          margin-top: 4rem;
-        }
-        .process-step {
-          flex: 1;
-          text-align: center;
-          position: relative;
-          z-index: 2;
-          padding: 0 1rem;
-        }
-        .process-num {
-          font-family: 'Playfair Display', serif;
-          font-size: 2.5rem;
-          color: #F4A623;
-          font-weight: 700;
-          margin-bottom: 1rem;
-        }
-        .process-icon {
-          font-size: 3rem;
-          margin-bottom: 1.5rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #FFF;
-          width: 90px;
-          height: 90px;
-          margin-left: auto;
-          margin-right: auto;
-          border-radius: 50%;
-          box-shadow: 0 8px 20px rgba(0,0,0,0.06);
-        }
-        .process-title {
-          font-size: 1.25rem;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-          margin: 0 0 0.8rem 0;
-          color: #2A2A2A;
-        }
-        .process-desc {
-          font-size: 1rem;
-          color: #555;
-          margin: 0;
-          line-height: 1.5;
-        }
-        /* Arrow connectors */
-        .process-row::before {
-          content: "";
-          position: absolute;
-          top: 110px;
-          left: 10%;
-          right: 10%;
-          border-top: 2px dashed #E8533A;
-          z-index: 1;
-        }
+        .process-section { background-color: #FFF3E0; padding: 6rem 2rem; }
+        .process-container { max-width: 1200px; margin: 0 auto; }
+        .process-row { display: flex; align-items: flex-start; justify-content: space-between; position: relative; margin-top: 4rem; }
+        .process-step { flex: 1; text-align: center; position: relative; z-index: 2; padding: 0 1rem; }
+        .process-num { font-family: 'Playfair Display', serif; font-size: 2.5rem; color: #F4A623; font-weight: 700; margin-bottom: 1rem; }
+        .process-icon { font-size: 3rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; background: #FFF; width: 90px; height: 90px; margin-left: auto; margin-right: auto; border-radius: 50%; box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
+        .process-title { font-size: 1.25rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 0.8rem 0; color: #2A2A2A; }
+        .process-desc { font-size: 1rem; color: #555; margin: 0; line-height: 1.5; }
+        .process-row::before { content: ""; position: absolute; top: 110px; left: 10%; right: 10%; border-top: 2px dashed #E8533A; z-index: 1; }
 
         /* 7. TRUST BADGES ROW */
-        .trust-section {
-          padding: 5rem 2rem;
-          background-color: #FFF8F0;
-        }
-        .trust-row {
-          display: flex;
-          justify-content: center;
-          gap: 1.5rem;
-          flex-wrap: wrap;
-          max-width: 1000px;
-          margin: 0 auto;
-        }
-        .trust-badge {
-          background-color: #F4A623;
-          color: #FFF;
-          padding: 1.2rem 2.5rem;
-          border-radius: 50px;
-          font-weight: 700;
-          font-size: 1.1rem;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          display: flex;
-          align-items: center;
-          gap: 0.8rem;
-          box-shadow: 0 6px 15px rgba(244, 166, 35, 0.25);
-          transition: transform 0.3s ease;
-        }
-        .trust-badge:hover {
-          transform: translateY(-5px);
-        }
+        .trust-section { padding: 5rem 2rem; background-color: #FFF8F0; }
+        .trust-row { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; max-width: 1000px; margin: 0 auto; }
+        .trust-badge { background-color: #F4A623; color: #FFF; padding: 1.2rem 2.5rem; border-radius: 50px; font-weight: 700; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.8rem; box-shadow: 0 6px 15px rgba(244, 166, 35, 0.25); transition: transform 0.3s ease; }
+        .trust-badge:hover { transform: translateY(-5px); }
 
-        /* Responsive adjustments */
         @media (max-width: 900px) {
           .story-container { grid-template-columns: 1fr !important; gap: 3rem; }
           .story-img-wrap { order: -1; aspect-ratio: 16/9; }
@@ -360,8 +151,8 @@ export default function AboutPage() {
       <section className="hero-banner">
         <div className="hero-overlay"></div>
         <div className="hero-content">
-          <h1 className="hero-title heading-display">Born from the Heart of India 🕯️</h1>
-          <p className="hero-subtext">Every candle tells a story of craft, scent, and celebration</p>
+          <h1 className="hero-title heading-display">{heroTitle}</h1>
+          <p className="hero-subtext">{heroSubtitle}</p>
         </div>
       </section>
 
@@ -369,19 +160,12 @@ export default function AboutPage() {
       <section className="story-section">
         <div className="story-container">
           <div className="story-text">
-            <h2 className="story-heading heading-display">Where It All Began</h2>
-            <p className="story-body">
-              CHIMINI was born from a simple desire: to create a sensory sanctuary that feels vibrant, joyful, and deeply rooted in Indian culture. We believe that a fragrance isn't just a scent—it's a gateway to a memory, a mood, and a moment of pure celebration.
-            </p>
-            <blockquote className="story-quote">
-              "We wanted to bottle the feeling of coming home."
-            </blockquote>
-            <p className="story-body">
-              From our tiny kitchen experiments to becoming a staple in homes across the country, our journey has been fueled by a passion for bold aesthetics and artisanal craftsmanship.
-            </p>
+            <h2 className="story-heading heading-display">{storyAHeading}</h2>
+            <p className="story-body">{storyABody}</p>
+            {storyAQuote && <blockquote className="story-quote">"{storyAQuote}"</blockquote>}
           </div>
           <div className="story-img-wrap">
-            <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=800" alt="Artisan hands" className="story-img" />
+            <img src={storyAImage} alt="Artisan hands" className="story-img" />
           </div>
         </div>
       </section>
@@ -390,13 +174,11 @@ export default function AboutPage() {
       <section className="story-section story-section-b">
         <div className="story-container" style={{ gridTemplateColumns: '1fr 1fr' }}>
           <div className="story-img-wrap">
-            <img src="https://images.unsplash.com/photo-1596431969695-1f9db8d26c5f?auto=format&fit=crop&q=80&w=800" alt="Botanicals" className="story-img" />
+            <img src={storyBImage} alt="Botanicals" className="story-img" />
           </div>
           <div className="story-text">
-            <h2 className="story-heading heading-display">Crafted with Nature,<br/>Made with Love</h2>
-            <p className="story-body">
-              Our philosophy is simple: what goes into the air you breathe should be as pure as the intentions behind it. We meticulously select every element that makes up a CHIMINI candle.
-            </p>
+            <h2 className="story-heading heading-display">{storyBHeading}</h2>
+            <p className="story-body">{storyBBody}</p>
             <ul className="bullet-list">
               <li className="bullet-item">
                 <span className="bullet-dot">●</span>
@@ -443,7 +225,7 @@ export default function AboutPage() {
       <section className="quote-banner">
         <span className="quote-star">✦</span>
         <h2 className="quote-banner-text heading-display">
-          <span style={{ fontStyle: 'italic' }}>"Every flame we light is an act of intention."</span>
+          <span style={{ fontStyle: 'italic' }}>"{bigQuote}"</span>
         </h2>
         <span className="quote-star">✦</span>
       </section>
@@ -451,14 +233,12 @@ export default function AboutPage() {
       {/* 5. FOUNDER SECTION */}
       <section className="founder-section">
         <div className="founder-img-wrap">
-          <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=600" alt="Founder Portrait" className="founder-img" />
+          <img src={founderImage} alt="Founder Portrait" className="founder-img" />
         </div>
         <div className="founder-text">
           <h2 className="founder-heading heading-display">A Note from Our Founder</h2>
-          <p className="founder-note">
-            "I started CHIMINI because I couldn't find a brand that married the rich, vibrant heritage of India with modern, clean-burning home fragrance. I wanted colours that popped, scents that evoked nostalgia, and products that felt like a celebration the moment you opened the box. Thank you for inviting our joy into your homes."
-          </p>
-          <h3 className="founder-sign">Priya Sharma</h3>
+          <p className="founder-note">"{founderQuote}"</p>
+          <h3 className="founder-sign">{founderName}</h3>
         </div>
       </section>
 

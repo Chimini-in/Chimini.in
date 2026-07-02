@@ -1,16 +1,23 @@
 "use client";
 
-import React, { useState } from 'react';
-
-const FAQS = [
-  { question: 'How do I track my order?', answer: 'Once your order ships, we will send you a tracking link via email and SMS so you can follow its journey to your door.' },
-  { question: 'Do you offer gift wrapping?', answer: 'Yes! All our gift sets come beautifully wrapped. You can also add custom gift wrapping to individual items at checkout.' },
-  { question: 'Can I customise a candle?', answer: 'Absolutely. Use our "Build Your Own" section on the Gifts page to pick your favourite scent, box, ribbon, and add a handwritten note.' },
-  { question: 'Do you accept bulk or corporate orders?', answer: 'We do! We offer special pricing and custom branding for bulk corporate orders. Select "Corporate Orders" in the form above and we will be in touch.' }
-];
+import React, { useEffect, useState } from 'react';
+import { supabaseClient } from '@/lib/supabase';
 
 export default function ContactPage() {
   const [openFaq, setOpenFaq] = useState(null);
+  const [content, setContent] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchContent() {
+      const { data } = await supabaseClient.from('page_content').select('content').eq('page_name', 'contact_us').single();
+      if (data && data.content) {
+        setContent(data.content);
+      }
+      setLoading(false);
+    }
+    fetchContent();
+  }, []);
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -20,6 +27,21 @@ export default function ContactPage() {
     e.preventDefault();
     alert("Message Sent! We'll get back to you within 24 hours.");
   };
+
+  if (loading) return <div style={{ padding: '100px', textAlign: 'center' }}>Loading...</div>;
+
+  const c = content || {};
+  const faqs = c.faqs || [
+    { question: 'How do I track my order?', answer: 'Once your order ships, we will send you a tracking link via email and SMS so you can follow its journey to your door.' },
+    { question: 'Do you offer gift wrapping?', answer: 'Yes! All our gift sets come beautifully wrapped. You can also add custom gift wrapping to individual items at checkout.' },
+    { question: 'Can I customise a candle?', answer: 'Absolutely. Use our "Build Your Own" section on the Gifts page to pick your favourite scent, box, ribbon, and add a handwritten note.' },
+    { question: 'Do you accept bulk or corporate orders?', answer: 'We do! We offer special pricing and custom branding for bulk corporate orders. Select "Corporate Orders" in the form above and we will be in touch.' }
+  ];
+
+  const email = c.email || 'hello@chimini.in';
+  const phone = c.phone || '+91 98765 43210';
+  const address = c.address || '124 Artisan Lane,\nBandra West, Mumbai 400050\nIndia';
+  const hours = c.hours || 'Mon - Sat: 10:00 AM - 8:00 PM\nSun: Closed';
 
   return (
     <div className="contact-page">
@@ -146,6 +168,7 @@ export default function ContactPage() {
         .info-text {
           font-size: 1.1rem;
           line-height: 1.6;
+          white-space: pre-wrap;
         }
         .info-text strong {
           display: block;
@@ -314,6 +337,7 @@ export default function ContactPage() {
           align-items: center;
           justify-content: center;
           gap: 0.5rem;
+          white-space: pre-wrap;
         }
         .btn-locator {
           background-color: #FFF;
@@ -433,28 +457,28 @@ export default function ContactPage() {
               <span className="info-icon">📍</span>
               <div className="info-text">
                 <strong>Visit Our Studio</strong>
-                124 Artisan Lane,<br/>Bandra West, Mumbai 400050<br/>India
+                {address}
               </div>
             </div>
             <div className="info-item">
               <span className="info-icon">✉️</span>
               <div className="info-text">
                 <strong>Email Us</strong>
-                hello@chimini.in
+                {email}
               </div>
             </div>
             <div className="info-item">
               <span className="info-icon">📞</span>
               <div className="info-text">
                 <strong>Call Us</strong>
-                +91 98765 43210
+                {phone}
               </div>
             </div>
             <div className="info-item">
               <span className="info-icon">🕒</span>
               <div className="info-text">
                 <strong>Store Hours</strong>
-                Mon - Sat: 10:00 AM - 8:00 PM<br/>Sun: Closed
+                {hours}
               </div>
             </div>
             <a href="#" className="btn-whatsapp">Chat on WhatsApp</a>
@@ -492,7 +516,7 @@ export default function ContactPage() {
           <h2 className="faq-title heading-display">Quick Answers</h2>
         </div>
         <div className="faq-accordion">
-          {FAQS.map((faq, index) => (
+          {faqs.map((faq, index) => (
             <div key={index} className={`accordion-item ${openFaq === index ? 'open' : ''}`}>
               <button className="accordion-header" onClick={() => toggleFaq(index)}>
                 <h4 className="accordion-q">{faq.question}</h4>
@@ -512,7 +536,7 @@ export default function ContactPage() {
       <section className="locator-banner">
         <h2 className="locator-title heading-display">Visit Us In-Store</h2>
         <p className="locator-address">
-          <span>📍</span> 124 Artisan Lane, Bandra West, Mumbai
+          <span>📍</span> {address.replace(/\n/g, ' ')}
         </p>
         <button className="btn-locator">FIND OUR STORE</button>
       </section>

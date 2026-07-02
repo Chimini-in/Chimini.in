@@ -1,38 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  async rewrites() {
-    return [
-      {
-        source: '/',
-        destination: '/index.html',
-      },
-      {
-        source: '/home',
-        destination: '/index.html',
-      },
-      {
-        source: '/shop',
-        destination: '/shop.html',
-      },
-      {
-        source: '/collections',
-        destination: '/collections.html',
-      },
-      {
-        source: '/gifts',
-        destination: '/gifts.html',
-      },
-      {
-        source: '/about',
-        destination: '/about.html',
-      },
-      {
-        source: '/contact',
-        destination: '/contact.html',
-      },
-    ];
-  },
+  // Removed rewrites to legacy static HTML files so Next.js app router takes over.
 };
 
 export default nextConfig;
