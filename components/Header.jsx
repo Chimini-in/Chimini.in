@@ -41,7 +41,7 @@ export default function Header() {
 
           {/* Centered Logo */}
           <div className="brand-logo">
-            <Link href="/" id="brandLogoText">
+            <Link href="/home" id="brandLogoText">
               <img src="/logo.png" alt="CHIMINI Logo" className="brand-logo-img" />
             </Link>
           </div>
