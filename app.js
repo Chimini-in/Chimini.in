@@ -1988,7 +1988,7 @@ function renderContactPage() {
 
 // --- 4. SUPABASE DATA FETCHING ---
 const SUPABASE_URL = "https://jvopwqkbtrupkayzfyvl.supabase.co";
-const SUPABASE_KEY = "sb_publishable_kZNSe5NLKgISdmCetfSxBw_ebT3ieem";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2b3B3cWtidHJ1cGtheXpmeXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNDQwMjksImV4cCI6MjA5NjgyMDAyOX0.KHWIko4CvlGHDq8QPdNEFqPMXBFkfiZTn_wr9qXWguw";
 
 async function fetchSupabaseData() {
   try {
