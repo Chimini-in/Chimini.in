@@ -85,8 +85,8 @@ const DEFAULT_SETTINGS = {
   },
   contact: {
     email: "concierge@chimini.com",
-    phone: "+33 (0) 1 45 67 89 00",
-    address: "48 Rue de la CHIMINI, Paris"
+    phone: "+91 97418 55293, +91 96320 90645",
+    address: "Mangalore, Karnataka"
   },
   testimonials: [
     {
@@ -1879,7 +1879,7 @@ function renderAboutPage() {
         </div>
         <div class="about-story-text animate-slide-up">
           <h2 class="about-section-heading">Our Craft & Philosophy</h2>
-          <p class="about-paragraph">Each batch is mixed and poured in micro-runs at our Parisian atelier. We trace our ingredients back to their botanical sources: organic soy from local family farms, wild-harvested absolute oils, and lead-free cotton fibers.</p>
+          <p class="about-paragraph">Each batch is mixed and poured in micro-runs at our Mangalore atelier. We trace our ingredients back to their botanical sources: organic soy from local family farms, wild-harvested absolute oils, and lead-free cotton fibers.</p>
           <p class="about-paragraph">Sustainability isn't a badge we wear; it is the fundamental core of our design process. Every single container is engineered for secondary lifetime usage as a premium storage jar, vase, or decorative luxury organizer.</p>
         </div>
       </div>
@@ -1931,12 +1931,12 @@ function renderContactPage() {
         </div>
         <div class="contact-detail-item">
           <h3>Concierge Phone</h3>
-          <p>${contact.phone || '+33 (0) 1 45 67 89 00'}</p>
+          <p>${contact.phone || '+91 97418 55293, +91 96320 90645'}</p>
           <span class="contact-detail-hours">Mon - Fri, 9:00 AM - 6:00 PM CET</span>
         </div>
         <div class="contact-detail-item">
           <h3>Atelier Location</h3>
-          <p>${contact.address || '48 Rue de la CHIMINI, Paris'}</p>
+          <p>${contact.address || 'Mangalore, Karnataka'}</p>
         </div>
         <div class="contact-detail-item">
           <h3>Corporate & Events Gifting</h3>
