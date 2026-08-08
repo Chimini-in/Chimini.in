@@ -84,7 +84,7 @@ const DEFAULT_SETTINGS = {
     image2: "assets/hero_banner_1.png"
   },
   contact: {
-    email: "concierge@chimini.com",
+    email: "chiminiofficial@gmail.com",
     phone: "+91 97418 55293, +91 96320 90645",
     address: "Mangalore, Karnataka"
   },
@@ -1910,7 +1910,7 @@ function renderContactPage() {
         <h2 class="contact-col-heading">Atelier Details</h2>
         <div class="contact-detail-item">
           <h3>General Inquiry</h3>
-          <p>${contact.email || 'concierge@chimini.com'}</p>
+          <p>${contact.email || 'chiminiofficial@gmail.com'}</p>
         </div>
         <div class="contact-detail-item">
           <h3>Concierge Phone</h3>
