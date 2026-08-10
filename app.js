@@ -1805,12 +1805,10 @@ function renderCollectionsPage() {
         <div class="collection-card-media">
           <img src="${coll.image || 'assets/campaign_banner.png'}" alt="${coll.name}" class="collection-card-img" onerror="this.src='assets/campaign_banner.png'">
           <div class="collection-card-overlay"></div>
-          <div class="collection-card-badge">EXPLORE</div>
-        </div>
-        <div class="collection-card-info">
-          <h2 class="collection-card-title">${coll.name}</h2>
-          <p class="collection-card-sub">${coll.description || 'Meticulously crafted luxury scented elements and artisan vessels'}</p>
-          <span class="collection-card-action">View Products <svg class="icon arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span>
+          <div class="collection-card-text-overlay">
+            <h2 class="collection-card-title">${coll.name}</h2>
+          </div>
+          <div class="collection-card-badge">EXPLORE &rarr;</div>
         </div>
       </a>
     `;

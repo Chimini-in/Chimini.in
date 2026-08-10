@@ -3344,3 +3344,68 @@ section.full-width-banner-section {
     font-size: 2.2rem;
   }
 }
+
+
+/* --- Updated Collection Card Styling (Text inside image) --- */
+.collection-card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 35%, rgba(0,0,0,0.7) 100%);
+  opacity: 0.8;
+  transition: opacity 0.4s ease;
+}
+
+.collection-index-card:hover .collection-card-overlay {
+  opacity: 0.9;
+}
+
+.collection-card-text-overlay {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 110px;
+  z-index: 2;
+}
+
+.collection-card-title {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: #FFFFFF;
+  letter-spacing: 0.02em;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  transition: color 0.3s ease;
+}
+
+.collection-index-card:hover .collection-card-title {
+  color: #F3E5AB;
+}
+
+.collection-card-badge {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
+  color: var(--text-primary);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 20px;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+}
+
+.collection-index-card:hover .collection-card-badge {
+  background-color: var(--color-gold, #C5A880);
+  color: #FFFFFF;
+  transform: translateX(2px);
+}
