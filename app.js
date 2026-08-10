@@ -1761,44 +1761,60 @@ function renderCollectionsPage() {
   const container = document.getElementById("collections-page-container");
   if (!container) return;
   
-  const collections = storeState.adminSettings.collections;
+  const collections = (storeState.adminSettings && storeState.adminSettings.collections) || [];
   
   container.innerHTML = `
-    <section class="subpage-hero">
-      <h1 class="subpage-title">Curated Collections</h1>
-      <p class="subpage-subtitle">Aesthetic scents and vessels designed for every mood and season</p>
+    ${renderPageHeroHtml("collections")}
+
+    <section class="collections-index-section section-container">
+      <div class="collections-header animate-slide-up">
+        <span class="collections-badge">CHIMINI EDITIONS</span>
+        <h1 class="collections-main-title">Curated Collections</h1>
+        <p class="collections-subtitle">Explore handcrafted luxury fragrance collections curated for every mood, space, and season.</p>
+      </div>
+
+      <div class="collections-grid-container" id="collections-grid-container"></div>
     </section>
-    <div class="collections-page-grid section-container" id="collections-page-grid"></div>
   `;
   
-  const grid = document.getElementById("collections-page-grid");
+  const grid = document.getElementById("collections-grid-container");
   if (!grid) return;
+
+  if (collections.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column: 1/-1; text-align: center; padding: 60px 0; color: var(--text-secondary); font-family: var(--font-serif); font-size: 1.2rem;">
+        No collections currently available.
+      </div>
+    `;
+    return;
+  }
   
   collections.forEach(coll => {
     const card = document.createElement("div");
-    card.className = "collection-page-card animate-slide-up";
+    card.className = "collection-index-card animate-slide-up";
+
+    let targetLink = "/shop?category=all";
+    if (coll.link && !coll.link.startsWith('#')) {
+      targetLink = coll.link;
+    } else if (coll.name) {
+      targetLink = `/shop?category=${encodeURIComponent(coll.name.toLowerCase())}`;
+    }
+
     card.innerHTML = `
-      <div class="collection-page-card-image">
-        <img src="${coll.image}" alt="${coll.name}" onerror="this.src='assets/campaign_banner.png'">
-      </div>
-      <div class="collection-page-card-content">
-        <h3 class="collection-page-card-title">${coll.name}</h3>
-        <p class="collection-page-card-desc">Exquisite fragrance notes meticulously blended to elevate your luxury home ambiance.</p>
-        <a href="/shop?category=all" class="btn btn-secondary collection-page-card-btn">Explore Collection</a>
-      </div>
+      <a href="${targetLink}" class="collection-card-inner">
+        <div class="collection-card-media">
+          <img src="${coll.image || 'assets/campaign_banner.png'}" alt="${coll.name}" class="collection-card-img" onerror="this.src='assets/campaign_banner.png'">
+          <div class="collection-card-overlay"></div>
+          <div class="collection-card-badge">EXPLORE</div>
+        </div>
+        <div class="collection-card-info">
+          <h2 class="collection-card-title">${coll.name}</h2>
+          <p class="collection-card-sub">${coll.description || 'Meticulously crafted luxury scented elements and artisan vessels'}</p>
+          <span class="collection-card-action">View Products <svg class="icon arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span>
+        </div>
+      </a>
     `;
-    
-    card.querySelector(".collection-page-card-btn").addEventListener("click", (e) => {
-      e.preventDefault();
-      if (coll.link && coll.link.startsWith('#')) {
-        window.location.href = `/shop?category=all`;
-      } else if (coll.link) {
-        window.location.href = coll.link;
-      } else {
-        window.location.href = `/shop?category=all`;
-      }
-    });
-    
+
     grid.appendChild(card);
   });
 }
