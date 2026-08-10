@@ -174,7 +174,11 @@ const DOM = {
   wishlistItemsContainer: document.getElementById("wishlist-items-container"),
   closeWishlistBtn: document.getElementById("close-wishlist-btn"),
   
-  // Admin drawer elements are only present in the admin portal, not on public pages.
+  adminDrawer: document.getElementById("admin-drawer"),
+  adminToggleBtn: document.getElementById("admin-toggle-btn"),
+  closeAdminBtn: document.getElementById("close-admin-btn"),
+  adminSaveBtn: document.getElementById("admin-save-btn"),
+  adminResetBtn: document.getElementById("admin-reset-btn"),
   
   toast: document.getElementById("toast")
 };
@@ -671,14 +675,12 @@ function openDrawer(drawerElement) {
 }
 
 function closeAllDrawers() {
-  if (DOM.cartDrawer) {
-    DOM.cartDrawer.classList.remove("active");
-    DOM.cartDrawer.setAttribute("aria-hidden", "true");
-  }
-  if (DOM.wishlistDrawer) {
-    DOM.wishlistDrawer.classList.remove("active");
-    DOM.wishlistDrawer.setAttribute("aria-hidden", "true");
-  }
+  DOM.cartDrawer.classList.remove("active");
+  DOM.cartDrawer.setAttribute("aria-hidden", "true");
+  DOM.wishlistDrawer.classList.remove("active");
+  DOM.wishlistDrawer.setAttribute("aria-hidden", "true");
+  DOM.adminDrawer.classList.remove("active");
+  DOM.adminDrawer.setAttribute("aria-hidden", "true");
   
   const filterDrawer = document.getElementById("filter-drawer");
   if (filterDrawer) {
@@ -686,7 +688,7 @@ function closeAllDrawers() {
     filterDrawer.setAttribute("aria-hidden", "true");
   }
   
-  if (DOM.drawerOverlay) DOM.drawerOverlay.classList.remove("active");
+  DOM.drawerOverlay.classList.remove("active");
   document.body.style.overflow = "";
 }
 
@@ -1192,7 +1194,11 @@ function bindEvents() {
   if (DOM.wishlistBtn) DOM.wishlistBtn.addEventListener("click", () => openDrawer(DOM.wishlistDrawer));
   if (DOM.closeWishlistBtn) DOM.closeWishlistBtn.addEventListener("click", closeAllDrawers);
   
-  // Admin toggle/close buttons are only wired up in the admin portal, not here.
+  if (DOM.adminToggleBtn) DOM.adminToggleBtn.addEventListener("click", () => {
+    initAdminFields(); // load values before opening
+    openDrawer(DOM.adminDrawer);
+  });
+  if (DOM.closeAdminBtn) DOM.closeAdminBtn.addEventListener("click", closeAllDrawers);
   
   if (DOM.drawerOverlay) DOM.drawerOverlay.addEventListener("click", closeAllDrawers);
   
@@ -1316,7 +1322,8 @@ function bindEvents() {
     });
   }
   
-  // Admin save/reset buttons are only wired up in the admin portal, not here.
+  if (DOM.adminSaveBtn) DOM.adminSaveBtn.addEventListener("click", saveAdminSettings);
+  if (DOM.adminResetBtn) DOM.adminResetBtn.addEventListener("click", resetAdminSettings);
   
   // Sticky header trigger removed (header is static)
 
@@ -1398,6 +1405,48 @@ function initStore() {
   
   // Start carousel auto-scrolls
   startTestimonialsAutoplay();
+}
+
+
+function getPageBanner(pageKey) {
+  if (typeof storeState !== 'undefined' && storeState) {
+    if (storeState.adminSettings && storeState.adminSettings.pageBanners && storeState.adminSettings.pageBanners[pageKey]) {
+      const b = storeState.adminSettings.pageBanners[pageKey];
+      if (b && b.image && b.image.trim() !== '') return b;
+    }
+    if (storeState.adminSettings && storeState.adminSettings[pageKey + 'Banner']) {
+      const b = storeState.adminSettings[pageKey + 'Banner'];
+      if (b && b.image && b.image.trim() !== '') return b;
+    }
+    if (storeState.banners && Array.isArray(storeState.banners)) {
+      const found = storeState.banners.find(b => 
+        (b.section_id === pageKey || b.section_id === pageKey + '_banner') && 
+        (b.is_published === undefined || b.is_published === true) &&
+        (b.image_url && b.image_url.trim() !== '')
+      );
+      if (found) {
+        return {
+          image: found.image_url,
+          link: found.link_url || '#'
+        };
+      }
+    }
+  }
+  return null;
+}
+
+function renderPageHeroHtml(pageKey) {
+  const banner = getPageBanner(pageKey);
+  if (!banner || !banner.image || banner.image.trim() === '') {
+    return '';
+  }
+  return `
+    <section class="subpage-hero banner-image-hero full-width-banner-section" style="margin-bottom: 2rem;">
+      <a href="${banner.link || '#'}">
+        <img src="${banner.image}" alt="${pageKey} banner" style="width: 100%; max-height: 400px; object-fit: cover; display: block;">
+      </a>
+    </section>
+  `;
 }
 
 // --- 9. SUBPAGE DYNAMIC RENDERERS ---
@@ -1830,6 +1879,11 @@ function renderAboutPage() {
   const container = document.getElementById("about-page-container");
   if (!container) return;
   
+  if (storeState.adminSettings.pages && storeState.adminSettings.pages['about_us']) {
+    container.innerHTML = storeState.adminSettings.pages['about_us'];
+    return;
+  }
+
   const about = storeState.adminSettings.about || {};
   
   container.innerHTML = `
@@ -1897,6 +1951,11 @@ function renderContactPage() {
   const container = document.getElementById("contact-page-container");
   if (!container) return;
   
+  if (storeState.adminSettings.pages && storeState.adminSettings.pages['contact_us']) {
+    container.innerHTML = storeState.adminSettings.pages['contact_us'];
+    return;
+  }
+
   const contact = storeState.adminSettings.contact || {};
   
   container.innerHTML = `
@@ -1969,9 +2028,112 @@ function renderContactPage() {
   }
 }
 
+// --- 4. SUPABASE DATA FETCHING ---
+const SUPABASE_URL = "https://jvopwqkbtrupkayzfyvl.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2b3B3cWtidHJ1cGtheXpmeXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNDQwMjksImV4cCI6MjA5NjgyMDAyOX0.KHWIko4CvlGHDq8QPdNEFqPMXBFkfiZTn_wr9qXWguw";
+
+async function fetchSupabaseData() {
+  try {
+    const headers = {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`
+    };
+
+    // Parallel fetch for speed
+    const [settingsRes, bannersRes, productsRes, categoriesRes, testimonialsRes, pagesRes] = await Promise.all([
+      fetch(`${SUPABASE_URL}/rest/v1/settings?select=*`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/banners?select=*&is_published=eq.true&order=sort_order.asc`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/products?select=*,categories(title)&is_published=eq.true&order=sort_order.asc`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/categories?select=*&order=sort_order.asc`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/testimonials?select=*&is_published=eq.true&order=sort_order.asc`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/page_content?select=*`, { headers })
+    ]);
+
+    const [settings, banners, products, categories, testimonials, pages] = await Promise.all([
+      settingsRes.json(), bannersRes.json(), productsRes.json(), categoriesRes.json(), testimonialsRes.json(), pagesRes.json()
+    ]);
+
+    // Map to legacy DEFAULT_SETTINGS format for compatibility
+    const newSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+
+    // Map Announcements
+    const announcementSetting = settings.find(s => s.setting_key === 'announcements');
+    if (announcementSetting) {
+      const arr = Array.isArray(announcementSetting.setting_value) ? announcementSetting.setting_value : JSON.parse(announcementSetting.setting_value);
+      if (arr.length > 0) newSettings.announcementText = arr.join(' • ');
+    }
+
+    // Map Banners
+    const heroBanner = banners.find(b => b.section_id === 'hero');
+    if (heroBanner) {
+      newSettings.heroBanner = {
+        title: heroBanner.title_overlay || '',
+        subtitle: heroBanner.subtitle_overlay || '',
+        image: heroBanner.image_url,
+        link: heroBanner.link_url || '#',
+        buttonText: heroBanner.button_text || 'Shop Now'
+      };
+    }
+
+    // Map Products
+    if (products && products.length > 0) {
+      newSettings.products = products.map(p => ({
+        id: p.id,
+        name: p.title,
+        price: p.price,
+        originalPrice: null,
+        badge: p.badges,
+        image: p.image_url,
+        secondaryImage: p.image_url,
+        category: p.categories?.title?.toLowerCase() || p.category || 'all',
+        fragrance: p.fragrance
+      }));
+    }
+
+    // Map Categories
+    if (categories && categories.length > 0) {
+      newSettings.categories = categories.map(c => ({
+        id: c.id,
+        name: c.title,
+        image: c.image_url || 'assets/product_jasmine.png'
+      }));
+    }
+
+    // Map Testimonials
+    if (testimonials && testimonials.length > 0) {
+      newSettings.testimonials = testimonials.map(t => ({
+        id: t.id,
+        rating: t.rating || 5,
+        text: t.content,
+        author: t.author,
+        designation: t.city,
+        caption: t.caption,
+        theme: t.theme || 'gold'
+      }));
+    }
+
+    // Map Pages
+    newSettings.pages = {};
+    if (pages && pages.length > 0) {
+      pages.forEach(p => {
+        if (p.content && p.content.html) {
+          newSettings.pages[p.page_name] = p.content.html;
+        }
+      });
+    }
+
+    // Overwrite global store
+    storeState.adminSettings = newSettings;
+    
+  } catch (err) {
+    console.error("Failed to load Supabase data. Falling back to local data.", err);
+  }
+}
+
 // Start everything when DOM is loaded
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  await fetchSupabaseData();
   bindEvents();
   initStore();
-  // initAdminFields() is called only by the admin portal, not on public pages.
+  initAdminFields();
 });

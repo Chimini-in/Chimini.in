@@ -185,9 +185,14 @@ export default function BannersPage() {
                 <div>
                   <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.85rem' }}>Section ID *</label>
                   <select value={formData.section_id} onChange={e => setFormData({...formData, section_id: e.target.value})} required style={inputStyle}>
-                    <option value="hero">Hero Slider</option>
-                    <option value="ads_1">Promo Ads Grid</option>
-                    <option value="brand_story">Brand Story Banner</option>
+                    <option value="hero">Hero Slider (Home)</option>
+                    <option value="ads_1">Promo Ads Grid (Home)</option>
+                    <option value="brand_story">Brand Story Banner (Home)</option>
+                    <option value="shop">Shop Page Banner</option>
+                    <option value="collections">Collections Page Banner</option>
+                    <option value="gifts">Gifts Page Banner</option>
+                    <option value="about">About Us Page Banner</option>
+                    <option value="contact">Contact Us Page Banner</option>
                   </select>
                 </div>
                 <div>

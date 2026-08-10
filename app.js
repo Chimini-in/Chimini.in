@@ -1407,6 +1407,48 @@ function initStore() {
   startTestimonialsAutoplay();
 }
 
+
+function getPageBanner(pageKey) {
+  if (typeof storeState !== 'undefined' && storeState) {
+    if (storeState.adminSettings && storeState.adminSettings.pageBanners && storeState.adminSettings.pageBanners[pageKey]) {
+      const b = storeState.adminSettings.pageBanners[pageKey];
+      if (b && b.image && b.image.trim() !== '') return b;
+    }
+    if (storeState.adminSettings && storeState.adminSettings[pageKey + 'Banner']) {
+      const b = storeState.adminSettings[pageKey + 'Banner'];
+      if (b && b.image && b.image.trim() !== '') return b;
+    }
+    if (storeState.banners && Array.isArray(storeState.banners)) {
+      const found = storeState.banners.find(b => 
+        (b.section_id === pageKey || b.section_id === pageKey + '_banner') && 
+        (b.is_published === undefined || b.is_published === true) &&
+        (b.image_url && b.image_url.trim() !== '')
+      );
+      if (found) {
+        return {
+          image: found.image_url,
+          link: found.link_url || '#'
+        };
+      }
+    }
+  }
+  return null;
+}
+
+function renderPageHeroHtml(pageKey) {
+  const banner = getPageBanner(pageKey);
+  if (!banner || !banner.image || banner.image.trim() === '') {
+    return '';
+  }
+  return `
+    <section class="subpage-hero banner-image-hero full-width-banner-section" style="margin-bottom: 2rem;">
+      <a href="${banner.link || '#'}">
+        <img src="${banner.image}" alt="${pageKey} banner" style="width: 100%; max-height: 400px; object-fit: cover; display: block;">
+      </a>
+    </section>
+  `;
+}
+
 // --- 9. SUBPAGE DYNAMIC RENDERERS ---
 
 function highlightActiveNav() {
