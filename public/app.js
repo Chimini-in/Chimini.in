@@ -338,36 +338,48 @@ function renderFeaturedCollections() {
   });
 }
 
-// F. Marketing Banners & Story Sections
 function renderMarketingBanners() {
-  // 1. Products Ads Banner 1
+  // 1. Hero Banner
+  if (DOM.heroBanner) {
+    const html = renderBannerSlot('home_hero');
+    if (html) {
+      DOM.heroBanner.innerHTML = html;
+    } else {
+      // Default fallback
+      const hero = storeState.adminSettings.heroBanner || {};
+      if (hero.image) {
+        DOM.heroBanner.innerHTML = `<a href="${hero.link || '#'}" class="banner-slot-link">
+          <img src="${hero.image}" alt="Hero Banner" class="banner-slot-img" onerror="this.parentElement.style.display='none'">
+        </a>`;
+      }
+    }
+  }
+
+  // 2. Ads Banner 1
   if (DOM.productsAdsBanner1) {
-    const ad1 = storeState.adminSettings.adsBanner1;
-    DOM.productsAdsBanner1.innerHTML = `
-      <a href="${ad1.link || '#'}">
-        <img src="${ad1.image}" alt="Products Ads Banner 1" onerror="this.src='assets/promo_banner.png'">
-      </a>
-    `;
+    const html = renderBannerSlot('home_ads_1');
+    DOM.productsAdsBanner1.innerHTML = html || (() => {
+      const ad = storeState.adminSettings.adsBanner1 || {};
+      return ad.image ? `<a href="${ad.link || '#'}" class="banner-slot-link"><img src="${ad.image}" class="banner-slot-img" onerror="this.parentElement.style.display='none'"></a>` : '';
+    })();
   }
-  
-  // 2. Products Ads Banner 2
+
+  // 3. Ads Banner 2
   if (DOM.productsAdsBanner2) {
-    const ad2 = storeState.adminSettings.adsBanner2;
-    DOM.productsAdsBanner2.innerHTML = `
-      <a href="${ad2.link || '#'}">
-        <img src="${ad2.image}" alt="Products Ads Banner 2" onerror="this.src='assets/campaign_banner.png'">
-      </a>
-    `;
+    const html = renderBannerSlot('home_ads_2');
+    DOM.productsAdsBanner2.innerHTML = html || (() => {
+      const ad = storeState.adminSettings.adsBanner2 || {};
+      return ad.image ? `<a href="${ad.link || '#'}" class="banner-slot-link"><img src="${ad.image}" class="banner-slot-img" onerror="this.parentElement.style.display='none'"></a>` : '';
+    })();
   }
-  
-  // 3. Brand Story Banner
+
+  // 4. Brand Story Banner
   if (DOM.brandStoryBanner) {
-    const story = storeState.adminSettings.storyBanner;
-    DOM.brandStoryBanner.innerHTML = `
-      <a href="${story.link || '#'}">
-        <img src="${story.image}" alt="Our Brand Story" onerror="this.src='assets/story_banner.png'">
-      </a>
-    `;
+    const html = renderBannerSlot('home_brand_story');
+    DOM.brandStoryBanner.innerHTML = html || (() => {
+      const story = storeState.adminSettings.storyBanner || {};
+      return story.image ? `<a href="${story.link || '#'}" class="banner-slot-link"><img src="${story.image}" class="banner-slot-img" onerror="this.parentElement.style.display='none'"></a>` : '';
+    })();
   }
 }
 
@@ -1408,45 +1420,62 @@ function initStore() {
 }
 
 
-function getPageBanner(pageKey) {
-  if (typeof storeState !== 'undefined' && storeState) {
-    if (storeState.adminSettings && storeState.adminSettings.pageBanners && storeState.adminSettings.pageBanners[pageKey]) {
-      const b = storeState.adminSettings.pageBanners[pageKey];
-      if (b && b.image && b.image.trim() !== '') return b;
-    }
-    if (storeState.adminSettings && storeState.adminSettings[pageKey + 'Banner']) {
-      const b = storeState.adminSettings[pageKey + 'Banner'];
-      if (b && b.image && b.image.trim() !== '') return b;
-    }
-    if (storeState.banners && Array.isArray(storeState.banners)) {
-      const found = storeState.banners.find(b => 
-        (b.section_id === pageKey || b.section_id === pageKey + '_banner') && 
-        (b.is_published === undefined || b.is_published === true) &&
-        (b.image_url && b.image_url.trim() !== '')
-      );
-      if (found) {
-        return {
-          image: found.image_url,
-          link: found.link_url || '#'
-        };
-      }
-    }
+function getPageBanner(slotId) {
+  // Look in storeState.banners array (from Supabase)
+  if (storeState.banners && Array.isArray(storeState.banners)) {
+    const found = storeState.banners.find(b =>
+      b.section_id === slotId &&
+      (b.is_published === undefined || b.is_published === true) &&
+      b.image_url && b.image_url.trim() !== ''
+    );
+    if (found) return { image: found.image_url, link: found.link_url || '#' };
   }
+
+  // Legacy fallback: old section_id style without page prefix
+  const legacyKey = slotId.split('_').slice(1).join('_');
+  if (storeState.banners && Array.isArray(storeState.banners)) {
+    const found = storeState.banners.find(b =>
+      (b.section_id === legacyKey || b.section_id === slotId.split('_').pop()) &&
+      (b.is_published === undefined || b.is_published === true) &&
+      b.image_url && b.image_url.trim() !== ''
+    );
+    if (found) return { image: found.image_url, link: found.link_url || '#' };
+  }
+
+  // Legacy adminSettings fallbacks
+  const legacyMap = {
+    home_hero:        storeState.adminSettings?.heroBanner,
+    home_ads_1:       storeState.adminSettings?.adsBanner1,
+    home_ads_2:       storeState.adminSettings?.adsBanner2,
+    home_brand_story: storeState.adminSettings?.storyBanner,
+    shop_top:         storeState.adminSettings?.pageBanners?.shop,
+    collections_top:  storeState.adminSettings?.pageBanners?.collections,
+    gifts_top:        storeState.adminSettings?.pageBanners?.gifts,
+    about_top:        storeState.adminSettings?.pageBanners?.about,
+    contact_top:      storeState.adminSettings?.pageBanners?.contact,
+  };
+  const legacy = legacyMap[slotId];
+  if (legacy && legacy.image && legacy.image.trim() !== '') return legacy;
+
   return null;
 }
 
+function renderBannerSlot(slotId, extraStyle = '') {
+  const banner = getPageBanner(slotId);
+  if (!banner || !banner.image || banner.image.trim() === '') return '';
+  return `<a href="${banner.link || '#'}" class="banner-slot-link" style="${extraStyle}">
+    <img src="${banner.image}" alt="banner" class="banner-slot-img" onerror="this.parentElement.style.display='none'">
+  </a>`;
+}
+
+// Keep old name for compatibility
 function renderPageHeroHtml(pageKey) {
-  const banner = getPageBanner(pageKey);
-  if (!banner || !banner.image || banner.image.trim() === '') {
-    return '';
-  }
-  return `
-    <section class="subpage-hero banner-image-hero full-width-banner-section" style="margin-bottom: 2rem;">
-      <a href="${banner.link || '#'}">
-        <img src="${banner.image}" alt="${pageKey} banner" style="width: 100%; max-height: 400px; object-fit: cover; display: block;">
-      </a>
-    </section>
-  `;
+  // Map old page keys to new slot IDs
+  const slotMap = { shop: 'shop_top', collections: 'collections_top', gifts: 'gifts_top', about: 'about_top', contact: 'contact_top' };
+  const slotId = slotMap[pageKey] || pageKey;
+  const html = renderBannerSlot(slotId);
+  if (!html) return '';
+  return `<div class="page-top-banner-wrap">${html}</div>`;
 }
 
 // --- 9. SUBPAGE DYNAMIC RENDERERS ---
@@ -1963,12 +1992,7 @@ function renderGiftsPage() {
         </div>
       </section>
 
-      <!-- 3. Promo Banner 1 -->
-      <section class="gifts-promo-banner animate-slide-up">
-        <h2>Artisan Gift Hampers Under ₹500</h2>
-        <p>Hand-poured organic soy wax candles paired with botanical bath salts &amp; brass wick trimmers in a luxury keepsake box.</p>
-        <a href="/shop?category=gifts" class="btn btn-secondary">Explore Hampers Under ₹500</a>
-      </section>
+      <!-- 3. Promo Banner 1 -->${renderBannerSlot('gifts_promo_1') ? '<div class="gifts-img-banner">' + renderBannerSlot('gifts_promo_1') + '</div>' : ''}
 
       <!-- 4. Shop by Price (Single Unified Row of Round Tiles) -->
       <section class="price-section-block">
@@ -2005,12 +2029,7 @@ function renderGiftsPage() {
         </div>
       </section>
 
-      <!-- 6. Promo Banner 2 -->
-      <section class="gifts-promo-banner animate-slide-up" style="background: linear-gradient(135deg, #1C2D27 0%, #2A473D 100%);">
-        <h2>Bespoke Corporate &amp; Wedding Favors</h2>
-        <p>Custom wax stamps, personalized scent branding, and white-glove bulk delivery for your grand celebrations.</p>
-        <a href="/contact" class="btn btn-primary" style="background:#FAF8F5; color:#1C2D27;">Request Bulk Quote</a>
-      </section>
+      <!-- 6. Promo Banner 2 -->${renderBannerSlot('gifts_promo_2') ? '<div class="gifts-img-banner">' + renderBannerSlot('gifts_promo_2') + '</div>' : ''}
 
       <!-- 7. Shop by Occasion (4 Tiles Per Row, Box-Shaped) -->
       <section class="tile-grid-section">
@@ -2047,12 +2066,7 @@ function renderGiftsPage() {
         </div>
       </section>
 
-      <!-- 9. Promo Banner 3 -->
-      <section class="gifts-promo-banner animate-slide-up" style="background: linear-gradient(135deg, #4A3B32 0%, #2A1F18 100%);">
-        <h2>Create Unforgettable Moments</h2>
-        <p>Complimentary handwritten calligraphy gift notes and signature textured box wrapping on every gift order.</p>
-        <a href="#gift-customizer" class="btn btn-secondary">Build Your Gift Now</a>
-      </section>
+      <!-- 9. Promo Banner 3 -->${renderBannerSlot('gifts_promo_3') ? '<div class="gifts-img-banner">' + renderBannerSlot('gifts_promo_3') + '</div>' : ''}
 
     </div>
   `;

@@ -4079,3 +4079,67 @@ section.full-width-banner-section {
   .occasion-tiles-grid { grid-template-columns: repeat(2, 1fr); }
   .gift-cards-grid { grid-template-columns: 1fr; }
 }
+
+
+/* ==========================================================================
+   BANNER SLOTS — Pure image+link, no text overlay
+   ========================================================================== */
+.banner-slot-link {
+  display: block;
+  width: 100%;
+  line-height: 0;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.banner-slot-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.banner-slot-link:hover .banner-slot-img {
+  transform: scale(1.02);
+}
+
+.page-top-banner-wrap {
+  width: 100%;
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+/* Hero banner: full width, no fixed height, auto aspect */
+#hero-banner .banner-slot-link,
+#hero-banner .banner-slot-img {
+  max-height: 600px;
+  object-fit: cover;
+}
+
+/* Ads banners: constrained height */
+#products-ads-banner-1 .banner-slot-img,
+#products-ads-banner-2 .banner-slot-img {
+  max-height: 500px;
+  object-fit: cover;
+}
+
+/* Brand story banner */
+#brand-story-banner .banner-slot-img {
+  max-height: 450px;
+  object-fit: cover;
+}
+
+/* In-page slot wrappers (gifts promo etc.) */
+.gifts-img-banner {
+  width: 100%;
+  margin-bottom: 50px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.gifts-img-banner .banner-slot-img {
+  max-height: 380px;
+  object-fit: cover;
+  border-radius: 8px;
+}
