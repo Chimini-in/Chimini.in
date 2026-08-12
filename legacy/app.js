@@ -2429,9 +2429,13 @@ async function fetchSupabaseData() {
 }
 
 // Start everything when DOM is loaded
-document.addEventListener("DOMContentLoaded", async () => {
-  await fetchSupabaseData();
+document.addEventListener("DOMContentLoaded", () => {
   bindEvents();
   initStore();
   initAdminFields();
+
+  // Fetch latest live data from Supabase in background without blocking initial DOM paint
+  fetchSupabaseData().then(() => {
+    initStore();
+  });
 });
