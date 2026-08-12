@@ -85,6 +85,7 @@ export default function AdminLayout({ children }) {
           <SidebarLink href="/admin/collections" current={pathname}>Collections</SidebarLink>
           <SidebarLink href="/admin/products" current={pathname}>Products & Shop</SidebarLink>
           <SidebarLink href="/admin/pages" current={pathname}>Static Pages</SidebarLink>
+          <SidebarLink href="/admin/gifts" current={pathname}>Gifts Page</SidebarLink>
           <SidebarLink href="/admin/testimonials" current={pathname}>Testimonials</SidebarLink>
           <SidebarLink href="/admin/reviews" current={pathname}>Reviews</SidebarLink>
           <SidebarLink href="/admin/settings" current={pathname}>Global Settings</SidebarLink>
