@@ -2316,16 +2316,14 @@ async function fetchSupabaseData() {
       'Pragma': 'no-cache'
     };
 
-    const ts = Date.now();
-
-    // Parallel fetch for speed with cache-busting query parameter
+    // Parallel fetch for speed with no-store cache directive (clean PostgREST URLs)
     const [settingsRes, bannersRes, productsRes, categoriesRes, testimonialsRes, pagesRes] = await Promise.all([
-      fetch(`${SUPABASE_URL}/rest/v1/settings?select=*&t=${ts}`, { headers }),
-      fetch(`${SUPABASE_URL}/rest/v1/banners?select=*&is_published=eq.true&order=sort_order.asc&t=${ts}`, { headers }),
-      fetch(`${SUPABASE_URL}/rest/v1/products?select=*,categories(title)&is_published=eq.true&order=sort_order.asc&t=${ts}`, { headers }),
-      fetch(`${SUPABASE_URL}/rest/v1/categories?select=*&order=sort_order.asc&t=${ts}`, { headers }),
-      fetch(`${SUPABASE_URL}/rest/v1/testimonials?select=*&is_published=eq.true&order=sort_order.asc&t=${ts}`, { headers }),
-      fetch(`${SUPABASE_URL}/rest/v1/page_content?select=*&t=${ts}`, { headers })
+      fetch(`${SUPABASE_URL}/rest/v1/settings?select=*`, { headers, cache: 'no-store' }),
+      fetch(`${SUPABASE_URL}/rest/v1/banners?select=*&is_published=eq.true&order=sort_order.asc`, { headers, cache: 'no-store' }),
+      fetch(`${SUPABASE_URL}/rest/v1/products?select=*,categories(title)&is_published=eq.true&order=sort_order.asc`, { headers, cache: 'no-store' }),
+      fetch(`${SUPABASE_URL}/rest/v1/categories?select=*&order=sort_order.asc`, { headers, cache: 'no-store' }),
+      fetch(`${SUPABASE_URL}/rest/v1/testimonials?select=*&is_published=eq.true&order=sort_order.asc`, { headers, cache: 'no-store' }),
+      fetch(`${SUPABASE_URL}/rest/v1/page_content?select=*`, { headers, cache: 'no-store' })
     ]);
 
     const [settings, banners, products, categories, testimonials, pages] = await Promise.all([
