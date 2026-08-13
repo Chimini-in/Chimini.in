@@ -89,6 +89,7 @@ export default function AdminLayout({ children }) {
           <SidebarLink href="/admin/testimonials" current={pathname}>Testimonials</SidebarLink>
           <SidebarLink href="/admin/reviews" current={pathname}>Reviews</SidebarLink>
           <SidebarLink href="/admin/settings" current={pathname}>Global Settings</SidebarLink>
+          <SidebarLink href="/admin/setup" current={pathname}>⚙ Database Setup</SidebarLink>
         </nav>
 
         <div style={{ padding: '20px', borderTop: '1px solid #e2e8f0' }}>
@@ -114,7 +115,8 @@ export default function AdminLayout({ children }) {
              pathname === '/admin/pages' ? 'Manage Static Pages' :
              pathname === '/admin/testimonials' ? 'Manage Testimonials' :
              pathname === '/admin/reviews' ? 'Manage Reviews' :
-             pathname === '/admin/settings' ? 'Global Settings' : ''}
+             pathname === '/admin/settings' ? 'Global Settings' :
+             pathname === '/admin/setup' ? 'Database Setup & Permissions' : ''}
           </h2>
           <a href="/" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.85rem', color: 'var(--color-accent)', textDecoration: 'none', fontWeight: '500' }}>
             View Live Store &rarr;
