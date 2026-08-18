@@ -57,14 +57,21 @@ async function uploadImage(file) {
 // BannerSlotCard — one inline card per banner slot
 // ─────────────────────────────────────────────────────────────────────────────
 function BannerSlotCard({ slot, record, onChange }) {
-  const [localImageUrl, setLocalImageUrl] = useState(record.image_url || '');
-  const [localLinkUrl, setLocalLinkUrl] = useState(record.link_url || '');
-  const [isPublished, setIsPublished] = useState(record.is_published !== false);
+  const [localImageUrl, setLocalImageUrl] = useState(record?.image_url || '');
+  const [localLinkUrl, setLocalLinkUrl] = useState(record?.link_url || '');
+  const [isPublished, setIsPublished] = useState(record?.is_published !== false);
   const [uploading, setUploading] = useState(false);
   const [uploadErr, setUploadErr] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const fileRef = useRef(null);
+
+  // Sync state whenever record prop changes from Supabase fetch
+  useEffect(() => {
+    setLocalImageUrl(record?.image_url || '');
+    setLocalLinkUrl(record?.link_url || '');
+    setIsPublished(record?.is_published !== false);
+  }, [record?.image_url, record?.link_url, record?.is_published]);
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];

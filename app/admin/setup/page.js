@@ -9,71 +9,69 @@ const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 const TABLES_TO_CHECK = ['banners', 'products', 'categories', 'testimonials', 'settings', 'page_content'];
 
 const SQL_FIX = `
--- Grant read access to anon (public website)
-GRANT SELECT ON public.banners TO anon;
-GRANT SELECT ON public.products TO anon;
-GRANT SELECT ON public.categories TO anon;
-GRANT SELECT ON public.testimonials TO anon;
-GRANT SELECT ON public.settings TO anon;
-GRANT SELECT ON public.page_content TO anon;
+-- 1. Grant ALL table permissions to anon & authenticated
+GRANT ALL ON public.banners TO anon, authenticated;
+GRANT ALL ON public.products TO anon, authenticated;
+GRANT ALL ON public.categories TO anon, authenticated;
+GRANT ALL ON public.testimonials TO anon, authenticated;
+GRANT ALL ON public.settings TO anon, authenticated;
+GRANT ALL ON public.page_content TO anon, authenticated;
+GRANT ALL ON public.collections TO anon, authenticated;
+GRANT ALL ON public.reviews TO anon, authenticated;
 
--- Grant full access to authenticated (admin users)
-GRANT ALL ON public.banners TO authenticated;
-GRANT ALL ON public.products TO authenticated;
-GRANT ALL ON public.categories TO authenticated;
-GRANT ALL ON public.testimonials TO authenticated;
-GRANT ALL ON public.settings TO authenticated;
-GRANT ALL ON public.page_content TO authenticated;
+-- 2. Sequence access
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
 
--- Sequence access
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO anon;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO authenticated;
-
--- Enable RLS
+-- 3. Enable RLS
 ALTER TABLE public.banners ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.testimonials ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.page_content ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.collections ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies for anon (read)
-DROP POLICY IF EXISTS "anon_read_banners" ON public.banners;
-CREATE POLICY "anon_read_banners" ON public.banners FOR SELECT TO anon USING (true);
-
-DROP POLICY IF EXISTS "anon_read_products" ON public.products;
-CREATE POLICY "anon_read_products" ON public.products FOR SELECT TO anon USING (true);
-
-DROP POLICY IF EXISTS "anon_read_categories" ON public.categories;
-CREATE POLICY "anon_read_categories" ON public.categories FOR SELECT TO anon USING (true);
-
-DROP POLICY IF EXISTS "anon_read_testimonials" ON public.testimonials;
-CREATE POLICY "anon_read_testimonials" ON public.testimonials FOR SELECT TO anon USING (true);
-
-DROP POLICY IF EXISTS "anon_read_settings" ON public.settings;
-CREATE POLICY "anon_read_settings" ON public.settings FOR SELECT TO anon USING (true);
-
-DROP POLICY IF EXISTS "anon_read_page_content" ON public.page_content;
-CREATE POLICY "anon_read_page_content" ON public.page_content FOR SELECT TO anon USING (true);
-
--- RLS Policies for authenticated (admin full access)
+-- 4. Full access policies for anon & authenticated
+DROP POLICY IF EXISTS "anon_full_banners" ON public.banners;
 DROP POLICY IF EXISTS "admin_all_banners" ON public.banners;
-CREATE POLICY "admin_all_banners" ON public.banners FOR ALL TO authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "anon_read_banners" ON public.banners;
+CREATE POLICY "full_access_banners" ON public.banners FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 
+DROP POLICY IF EXISTS "anon_full_products" ON public.products;
 DROP POLICY IF EXISTS "admin_all_products" ON public.products;
-CREATE POLICY "admin_all_products" ON public.products FOR ALL TO authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "anon_read_products" ON public.products;
+CREATE POLICY "full_access_products" ON public.products FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 
+DROP POLICY IF EXISTS "anon_full_categories" ON public.categories;
 DROP POLICY IF EXISTS "admin_all_categories" ON public.categories;
-CREATE POLICY "admin_all_categories" ON public.categories FOR ALL TO authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "anon_read_categories" ON public.categories;
+CREATE POLICY "full_access_categories" ON public.categories FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 
+DROP POLICY IF EXISTS "anon_full_testimonials" ON public.testimonials;
 DROP POLICY IF EXISTS "admin_all_testimonials" ON public.testimonials;
-CREATE POLICY "admin_all_testimonials" ON public.testimonials FOR ALL TO authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "anon_read_testimonials" ON public.testimonials;
+CREATE POLICY "full_access_testimonials" ON public.testimonials FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 
+DROP POLICY IF EXISTS "anon_full_settings" ON public.settings;
 DROP POLICY IF EXISTS "admin_all_settings" ON public.settings;
-CREATE POLICY "admin_all_settings" ON public.settings FOR ALL TO authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "anon_read_settings" ON public.settings;
+CREATE POLICY "full_access_settings" ON public.settings FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 
+DROP POLICY IF EXISTS "anon_full_page_content" ON public.page_content;
 DROP POLICY IF EXISTS "admin_all_page_content" ON public.page_content;
-CREATE POLICY "admin_all_page_content" ON public.page_content FOR ALL TO authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "anon_read_page_content" ON public.page_content;
+CREATE POLICY "full_access_page_content" ON public.page_content FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "anon_full_collections" ON public.collections;
+DROP POLICY IF EXISTS "admin_all_collections" ON public.collections;
+DROP POLICY IF EXISTS "anon_read_collections" ON public.collections;
+CREATE POLICY "full_access_collections" ON public.collections FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "anon_full_reviews" ON public.reviews;
+DROP POLICY IF EXISTS "admin_all_reviews" ON public.reviews;
+DROP POLICY IF EXISTS "anon_read_reviews" ON public.reviews;
+CREATE POLICY "full_access_reviews" ON public.reviews FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 `.trim();
 
 export default function DatabaseSetupPage() {
