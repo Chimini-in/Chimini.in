@@ -230,20 +230,22 @@ export default function BannersPage() {
     const existing = records[slotId];
     if (existing && existing.id) {
       // Update existing row
-      await supabaseClient.from('banners').update({
+      const { error } = await supabaseClient.from('banners').update({
         image_url: updates.image_url,
         link_url: updates.link_url,
         is_published: updates.is_published,
       }).eq('id', existing.id);
+      if (error) throw error;
     } else {
       // Insert new row
-      const { data } = await supabaseClient.from('banners').insert([{
+      const { data, error } = await supabaseClient.from('banners').insert([{
         section_id: slotId,
         image_url: updates.image_url,
         link_url: updates.link_url,
         is_published: updates.is_published,
         sort_order: 0,
       }]).select().single();
+      if (error) throw error;
       if (data) {
         setRecords(prev => ({ ...prev, [slotId]: { id: data.id, ...updates } }));
         return;

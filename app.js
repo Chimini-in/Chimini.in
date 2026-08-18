@@ -1480,8 +1480,7 @@ function getPageBanner(slotId) {
   // Look in storeState.banners array (from Supabase)
   if (storeState.banners && Array.isArray(storeState.banners)) {
     const found = storeState.banners.find(b =>
-      b.section_id === slotId &&
-      (b.is_published === undefined || b.is_published === true) &&
+      b.section_id === slotId && (b.is_published !== false) &&
       b.image_url && b.image_url.trim() !== ''
     );
     if (found) return { image: found.image_url, link: found.link_url || '#' };
@@ -1491,8 +1490,7 @@ function getPageBanner(slotId) {
   const legacyKey = slotId.split('_').slice(1).join('_');
   if (storeState.banners && Array.isArray(storeState.banners)) {
     const found = storeState.banners.find(b =>
-      (b.section_id === legacyKey || b.section_id === slotId.split('_').pop()) &&
-      (b.is_published === undefined || b.is_published === true) &&
+      (b.section_id === legacyKey || b.section_id === slotId.split('_').pop()) && (b.is_published !== false) &&
       b.image_url && b.image_url.trim() !== ''
     );
     if (found) return { image: found.image_url, link: found.link_url || '#' };
@@ -1566,7 +1564,6 @@ function renderPageContent() {
 function renderShopPage() {
   const container = document.getElementById("shop-page-container");
   if (!container) return;
-  
   // Parse URL parameters for initial category filter
   const params = new URLSearchParams(window.location.search);
   const catQuery = params.get("category");
@@ -1575,12 +1572,16 @@ function renderShopPage() {
     storeState.shopInitialized = true;
   }
   
+  
+  const bannerHtml = renderPageHeroHtml("shop");
+
   if (!container.innerHTML.trim() || !container.querySelector(".catalog-toolbar")) {
     container.innerHTML = `
+      ${bannerHtml || `
       <section class="subpage-hero">
         <h1 class="subpage-title">The Atelier Shop</h1>
         <p class="subpage-subtitle">Immersive botanical fragrances hand-poured in luxury vessels</p>
-      </section>
+      </section>`}
       
       <!-- Catalog Toolbar -->
       <div class="catalog-toolbar section-container">
@@ -2210,7 +2211,6 @@ function renderGiftsPage() {
 function renderAboutPage() {
   const container = document.getElementById("about-page-container");
   if (!container) return;
-  
   if (storeState.adminSettings.pages && storeState.adminSettings.pages['about_us']) {
     container.innerHTML = storeState.adminSettings.pages['about_us'];
     return;
@@ -2218,11 +2218,15 @@ function renderAboutPage() {
 
   const about = storeState.adminSettings.about || {};
   
+  
+  const bannerHtml = renderPageHeroHtml("about");
+
   container.innerHTML = `
+    ${bannerHtml || `
     <section class="subpage-hero">
       <h1 class="subpage-title">${about.title || 'A Quest for Olfactory Purity'}</h1>
       <p class="subpage-subtitle">The story of CHIMINI's clean-burning luxury scents</p>
-    </section>
+    </section>`}
     
     <div class="about-story-section section-container">
       <div class="about-story-grid">
@@ -2282,7 +2286,6 @@ function renderAboutPage() {
 function renderContactPage() {
   const container = document.getElementById("contact-page-container");
   if (!container) return;
-  
   if (storeState.adminSettings.pages && storeState.adminSettings.pages['contact_us']) {
     container.innerHTML = storeState.adminSettings.pages['contact_us'];
     return;
@@ -2290,11 +2293,15 @@ function renderContactPage() {
 
   const contact = storeState.adminSettings.contact || {};
   
+  
+  const bannerHtml = renderPageHeroHtml("contact");
+
   container.innerHTML = `
+    ${bannerHtml || `
     <section class="subpage-hero">
       <h1 class="subpage-title">Client Concierge</h1>
       <p class="subpage-subtitle">We are here to assist with custom orders, corporate gifts, or scent inquiries</p>
-    </section>
+    </section>`}
 
     <div class="contact-layout section-container">
       <div class="contact-details-col animate-slide-up">
@@ -2376,7 +2383,7 @@ async function fetchSupabaseData() {
     // Parallel fetch for speed with no-store cache directive (clean PostgREST URLs)
     const [settingsRes, bannersRes, productsRes, categoriesRes, testimonialsRes, pagesRes] = await Promise.all([
       fetch(`${SUPABASE_URL}/rest/v1/settings?select=*`, { headers, cache: 'no-store' }),
-      fetch(`${SUPABASE_URL}/rest/v1/banners?select=*&is_published=eq.true&order=sort_order.asc`, { headers, cache: 'no-store' }),
+      fetch(`${SUPABASE_URL}/rest/v1/banners?select=*&order=sort_order.asc`, { headers, cache: 'no-store' }),
       fetch(`${SUPABASE_URL}/rest/v1/products?select=*,categories(title)&is_published=eq.true&order=sort_order.asc`, { headers, cache: 'no-store' }),
       fetch(`${SUPABASE_URL}/rest/v1/categories?select=*&order=sort_order.asc`, { headers, cache: 'no-store' }),
       fetch(`${SUPABASE_URL}/rest/v1/testimonials?select=*&is_published=eq.true&order=sort_order.asc`, { headers, cache: 'no-store' }),
