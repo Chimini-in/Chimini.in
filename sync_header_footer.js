@@ -30,7 +30,7 @@ if (!footerMatch) {
 const footerContent = footerMatch[0];
 
 // Files to update
-const filesToUpdate = ['shop.html', 'collections.html', 'gifts.html', 'about.html', 'contact.html'];
+const filesToUpdate = ['shop.html', 'collections.html', 'gifts.html', 'about.html', 'contact.html', 'product.html'];
 const directories = [publicDir, legacyDir];
 
 for (const dir of directories) {

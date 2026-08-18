@@ -9,7 +9,7 @@ const DEFAULT_SETTINGS = {
     image: "assets/hero_banner_1.png",
     link: "#best-sellers"
   },
-  products: [
+    products: [
     {
       id: "prod-1",
       name: "Jasmine & Oakwood",
@@ -18,7 +18,21 @@ const DEFAULT_SETTINGS = {
       badge: "BEST SELLER",
       image: "assets/product_jasmine.png",
       secondaryImage: "assets/product_sandalwood.png",
-      category: "candles"
+      images: [
+        "assets/product_jasmine.png",
+        "assets/product_sandalwood.png",
+        "assets/product_rose.png",
+        "assets/product_fig.png"
+      ],
+      category: "candles",
+      categoryTitle: "Artisanal Candles",
+      fragrance: "Night-blooming Jasmine, Smoked Oakwood, Amber Resin",
+      description: "An intoxicating blend of night-blooming white jasmine layered over smoky aged oakwood and warm amber crystals. Hand-poured with pure botanical soy wax and braided cotton wicks for a clean, soot-free burn that gently permeates your sanctuary with tranquility.",
+      careInfo: "• Trim wick to 1/4 inch (6mm) before every burn.\n• On first light, allow the melt pool to reach the full diameter of the vessel (2-3 hours) to prevent tunneling.\n• Do not burn for more than 4 consecutive hours.\n• Keep away from drafts, flammable items, children, and pets.",
+      shippingInfo: "• Complimentary Luxury Shipping on orders over ₹100.\n• Dispatched within 24-48 business hours with live SMS & email tracking.\n• Securely encased in our signature gold-embossed ivory gift box.",
+      returnsInfo: "• 7-Day Complimentary Returns on unburned, sealed items in original luxury packaging.\n• Contact concierge@chimini.com or WhatsApp +91 97418 55293 for instant concierge support.",
+      rating: 4.9,
+      reviewCount: 142
     },
     {
       id: "prod-2",
@@ -28,7 +42,21 @@ const DEFAULT_SETTINGS = {
       badge: "NEW ARRIVAL",
       image: "assets/product_sandalwood.png",
       secondaryImage: "assets/product_jasmine.png",
-      category: "candles"
+      images: [
+        "assets/product_sandalwood.png",
+        "assets/product_jasmine.png",
+        "assets/product_rose.png",
+        "assets/product_fig.png"
+      ],
+      category: "candles",
+      categoryTitle: "Artisanal Candles",
+      fragrance: "Mysore Sandalwood, Golden Amber, Cardamom Pods",
+      description: "Warm, sacred Mysore sandalwood balanced with rich golden amber and crushed cardamom spice. Designed to create a grounding meditative atmosphere in living rooms, studies, and sacred corners.",
+      careInfo: "• Trim wick to 1/4 inch before each light.\n• Allow wax to melt to edges on initial burn (2-3 hours).\n• Keep burning surface level and heat-resistant.",
+      shippingInfo: "• Free shipping on orders above ₹100.\n• Dispatched within 24-48 hours with full tracking.\n• Luxury packaging suitable for immediate gifting.",
+      returnsInfo: "• 7-day hassle-free returns for unused candles in original condition.",
+      rating: 4.8,
+      reviewCount: 96
     },
     {
       id: "prod-3",
@@ -38,7 +66,21 @@ const DEFAULT_SETTINGS = {
       badge: "FAST MOVING",
       image: "assets/product_rose.png",
       secondaryImage: "assets/product_fig.png",
-      category: "candles"
+      images: [
+        "assets/product_rose.png",
+        "assets/product_fig.png",
+        "assets/product_jasmine.png",
+        "assets/product_sandalwood.png"
+      ],
+      category: "candles",
+      categoryTitle: "Signature Editions",
+      fragrance: "Damask Rose Petals, Smoky Dark Oud, Clove",
+      description: "A decadent, velvety floral aroma infused with deep, smoky agarwood (oud) and a hint of warm clove. An opulent signature statement piece handcrafted for luxurious evenings and intimate dinner settings.",
+      careInfo: "• Trim cotton wick to 1/4 inch prior to every use.\n• Keep wax pool free of debris.\n• Discontinue use when 1/2 inch of wax remains.",
+      shippingInfo: "• Complimentary shipping on orders above ₹100.\n• Dispatched in 24-48 hours in luxury embossed packaging.",
+      returnsInfo: "• 7-day return policy for unused, unopened candles.",
+      rating: 5.0,
+      reviewCount: 168
     },
     {
       id: "prod-4",
@@ -48,7 +90,21 @@ const DEFAULT_SETTINGS = {
       badge: "LIMITED EDITION",
       image: "assets/product_fig.png",
       secondaryImage: "assets/product_rose.png",
-      category: "candles"
+      images: [
+        "assets/product_fig.png",
+        "assets/product_rose.png",
+        "assets/product_sandalwood.png",
+        "assets/product_jasmine.png"
+      ],
+      category: "candles",
+      categoryTitle: "Botanical Soy",
+      fragrance: "Sun-ripened Fig, Wild Acacia Honey, Green Cedar",
+      description: "Lush green fig leaves, sun-drenched Mediterranean fig flesh, and golden acacia honey layered over crushed cedarwood. Fresh, sweet, and uplifting — the perfect daytime companion for living spaces.",
+      careInfo: "• Trim wick to 1/4 inch before lighting.\n• Ensure even melt pool on first burn.\n• Never leave unattended while lit.",
+      shippingInfo: "• Complimentary luxury shipping over ₹100 threshold.\n• Handcrafted and dispatched within 24-48 business hours.",
+      returnsInfo: "• 7-day complimentary return policy on all eligible items.",
+      rating: 4.9,
+      reviewCount: 114
     }
   ],
   categories: [
@@ -240,14 +296,14 @@ function renderBestSellers() {
     const card = document.createElement("div");
     card.className = "product-card animate-slide-up";
     card.innerHTML = `
-      <div class="product-image-wrapper">
+      <a href="/product?id=${product.id}" class="product-image-wrapper" style="display:block; text-decoration:none;">
         <img src="${product.image}" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
         <button class="wishlist-toggle-btn ${isWishlisted ? "active" : ""}" data-id="${product.id}" aria-label="Add to Wishlist">
           <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
         </button>
       </div>
       <div class="product-info">
-        <h3 class="product-name">${product.name}</h3>
+        <a href="/product?id=${product.id}" style="text-decoration:none; color:inherit;"><h3 class="product-name">${product.name}</h3></a>
         <p class="product-price">₹${Number(product.price).toFixed(2)}</p>
         <button class="btn btn-primary product-card-btn add-to-cart-btn" data-id="${product.id}">Add to Cart</button>
       </div>
@@ -1504,6 +1560,7 @@ function renderPageContent() {
   renderGiftsPage();
   renderAboutPage();
   renderContactPage();
+  renderProductDetailPage();
 }
 
 function renderShopPage() {
@@ -1730,7 +1787,7 @@ function renderShopProducts() {
       card.innerHTML = `
         <div class="product-image-wrapper">
           ${badgeText ? `<span class="product-badge">${badgeText}</span>` : ''}
-          <img src="${product.image}" class="product-image-main" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
+          <a href="/product?id=${product.id}" style="display:block;"><img src="${product.image}" class="product-image-main" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
           ${product.secondaryImage ? `<img src="${product.secondaryImage}" class="product-image-hover" alt="${product.name}" onerror="this.style.display='none'">` : ''}
           <button class="wishlist-toggle-btn ${isWishlisted ? "active" : ""}" data-id="${product.id}" aria-label="Add to Wishlist">
             <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
@@ -1755,7 +1812,7 @@ function renderShopProducts() {
       card.innerHTML = `
         <div class="product-image-wrapper">
           ${badgeText ? `<span class="product-badge">${badgeText}</span>` : ''}
-          <img src="${product.image}" class="product-image-main" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
+          <a href="/product?id=${product.id}" style="display:block;"><img src="${product.image}" class="product-image-main" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
           ${product.secondaryImage ? `<img src="${product.secondaryImage}" class="product-image-hover" alt="${product.name}" onerror="this.style.display='none'">` : ''}
           <button class="wishlist-toggle-btn ${isWishlisted ? "active" : ""}" data-id="${product.id}" aria-label="Add to Wishlist">
             <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
@@ -1763,7 +1820,7 @@ function renderShopProducts() {
           <button class="product-cart-overlay-btn add-to-cart-btn" data-id="${product.id}" aria-label="Add to Cart">+</button>
         </div>
         <div class="product-info">
-          <h3 class="product-name">${product.name}</h3>
+          <a href="/product?id=${product.id}" style="text-decoration:none; color:inherit;"><h3 class="product-name">${product.name}</h3></a>
           <div class="product-price-wrapper">
             <span class="mrp-label">MRP: </span><span class="current-price">₹${Number(product.price).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
             ${isDiscounted ? `<span class="original-price" style="text-decoration: line-through;">₹${Number(originalPrice).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span> <span class="discount-badge-green">${discountText}</span>` : ''}
@@ -2371,51 +2428,31 @@ async function fetchSupabaseData() {
       }
     }
 
-    // Map Products
+        // Map Products
     if (products && Array.isArray(products) && products.length > 0) {
       newSettings.products = products.map(p => ({
         id: p.id,
         name: p.title,
         price: p.price,
-        originalPrice: null,
-        badge: p.badges,
-        image: p.image_url,
-        secondaryImage: p.image_url,
-        category: p.categories?.title?.toLowerCase() || p.category || 'all',
-        fragrance: p.fragrance
+        originalPrice: p.original_price || null,
+        badge: p.badges || (p.is_best_seller ? 'BEST SELLER' : null),
+        image: p.image_url || 'assets/product_jasmine.png',
+        secondaryImage: p.secondary_image_url || p.image_url || 'assets/product_sandalwood.png',
+        images: (Array.isArray(p.images) && p.images.length > 0) 
+          ? p.images 
+          : (p.image_url ? [p.image_url, p.secondary_image_url || 'assets/product_sandalwood.png', 'assets/product_rose.png', 'assets/product_fig.png'].filter(Boolean) : ['assets/product_jasmine.png']),
+        category: p.categories?.title?.toLowerCase() || p.category || 'candles',
+        categoryTitle: p.categories?.title || 'Artisanal Candles',
+        fragrance: p.fragrance || 'Signature Botanical Blend',
+        description: p.description || '',
+        careInfo: p.care_info || '',
+        shippingInfo: p.shipping_info || '',
+        returnsInfo: p.returns_info || '',
+        rating: p.rating || 4.9,
+        reviewCount: p.review_count || 128,
+        is_best_seller: p.is_best_seller || false,
+        is_gift: p.is_gift || false
       }));
-    }
-
-    // Map Categories
-    if (categories && Array.isArray(categories) && categories.length > 0) {
-      newSettings.categories = categories.map(c => ({
-        id: c.id,
-        name: c.title,
-        image: c.image_url || 'assets/product_jasmine.png'
-      }));
-    }
-
-    // Map Testimonials
-    if (testimonials && Array.isArray(testimonials) && testimonials.length > 0) {
-      newSettings.testimonials = testimonials.map(t => ({
-        id: t.id,
-        rating: t.rating || 5,
-        text: t.content,
-        author: t.author,
-        designation: t.city,
-        caption: t.caption,
-        theme: t.theme || 'gold'
-      }));
-    }
-
-    // Map Pages
-    newSettings.pages = {};
-    if (pages && Array.isArray(pages) && pages.length > 0) {
-      pages.forEach(p => {
-        if (p.content && p.content.html) {
-          newSettings.pages[p.page_name] = p.content.html;
-        }
-      });
     }
 
     // Overwrite global store
@@ -2437,3 +2474,479 @@ document.addEventListener("DOMContentLoaded", () => {
     initStore();
   });
 });
+
+
+
+// --- 10. PRODUCT DETAIL PAGE (PDP) RENDERER ---
+
+function renderProductDetailPage() {
+  const container = document.getElementById("product-page-container");
+  if (!container) return;
+
+  const products = (storeState.adminSettings && storeState.adminSettings.products) || [];
+  if (products.length === 0) return;
+
+  // Get product ID from URL query parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const prodId = urlParams.get("id");
+
+  // Find product or fallback to first product
+  let product = products.find(p => p.id === prodId || String(p.id) === String(prodId));
+  if (!product) {
+    product = products[0];
+  }
+
+  // Page title update
+  document.title = product.name + " | CHIMINI Luxury Scented Candles";
+
+  // Determine gallery images
+  let galleryImages = [];
+  if (Array.isArray(product.images) && product.images.length > 0) {
+    galleryImages = product.images;
+  } else if (product.image) {
+    galleryImages = [
+      product.image,
+      product.secondaryImage || 'assets/product_sandalwood.png',
+      'assets/product_rose.png',
+      'assets/product_fig.png'
+    ].filter(Boolean);
+  } else {
+    galleryImages = ['assets/product_jasmine.png'];
+  }
+
+  // Pricing calculations
+  const priceNum = parseFloat(product.price) || 0;
+  const origPriceNum = product.originalPrice ? parseFloat(product.originalPrice) : null;
+  const isDiscounted = (origPriceNum && origPriceNum > priceNum);
+  const discountPercent = isDiscounted ? Math.round(((origPriceNum - priceNum) / origPriceNum) * 100) : null;
+
+  // Scent swatches
+  const swatches = getScentSwatches(product.name);
+
+  // Badge text
+  const badgeText = product.badge ? product.badge.trim() : (product.is_best_seller ? 'BEST SELLER' : null);
+
+  // Wishlist state
+  const isWishlisted = storeState.wishlist.includes(product.id);
+
+  // Descriptions & Accordion Content with luxury fallback
+  const descriptionText = product.description || ("Immerse your sanctuary in the transcendent warmth of " + product.name + ". Handcrafted with 100% natural botanical soy wax and infused with rare essential oils, this slow-burning candle fills your living spaces with an aura of understated luxury and serene calm.");
+  
+  const fragranceNotes = product.fragrance || 'Top: Night Blooming Flora · Heart: Warm Smoked Botanicals · Base: Aged Amber & Precious Woods';
+
+  const careInfoText = product.careInfo || product.care_info || "• Wick Care: Trim wick to 1/4 inch (6mm) before each lighting to ensure a soot-free, even flame.\n• First Burn: Allow the melt pool to reach the full circumference of the vessel (2-3 hours) to prevent tunneling.\n• Safety: Never leave a burning candle unattended. Keep away from drafts, flammable materials, children, and pets.";
+
+  const shippingInfoText = product.shippingInfo || product.shipping_info || "• Complimentary Luxury Shipping: On all orders over ₹100.\n• Dispatch Timeline: Handcrafted & dispatched within 24-48 business hours with live SMS & email tracking.\n• Bespoke Packaging: Securely encased in our signature gold-embossed ivory gift box.";
+
+  const returnsInfoText = product.returnsInfo || product.returns_info || "• 7-Day Complimentary Returns: We honor returns for unburned, sealed items in original luxury packaging.\n• Concierge Support: Contact concierge@chimini.com or WhatsApp +91 97418 55293 for instant assistance.";
+
+  // Related products (exclude current)
+  const relatedProducts = products.filter(p => p.id !== product.id).slice(0, 8);
+
+  // Render Full PDP Template
+  let relatedHtml = '';
+  if (relatedProducts.length > 0) {
+    relatedHtml = '<section class="pdp-related-section">' +
+      '<div class="pdp-related-header-wrap">' +
+        '<div>' +
+          '<h2 class="pdp-related-title">You Might Also Like</h2>' +
+          '<p class="pdp-related-subtitle">Handpicked luxury creations curated to complement your space.</p>' +
+        '</div>' +
+        '<div class="pdp-related-nav-btns">' +
+          '<button type="button" class="pdp-nav-arrow-btn" id="pdp-related-prev" aria-label="Previous">&larr;</button>' +
+          '<button type="button" class="pdp-nav-arrow-btn" id="pdp-related-next" aria-label="Next">&rarr;</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="pdp-related-carousel" id="pdp-related-carousel">' +
+        relatedProducts.map(rel => {
+          const relPrice = parseFloat(rel.price) || 0;
+          const relOrigPrice = rel.originalPrice ? parseFloat(rel.originalPrice) : null;
+          const relIsDisc = (relOrigPrice && relOrigPrice > relPrice);
+          const isRelWish = storeState.wishlist.includes(rel.id);
+          
+          return '<div class="pdp-related-card-item">' +
+            '<div class="product-card">' +
+              '<a href="/product?id=' + rel.id + '" class="product-image-wrapper" style="display:block; text-decoration:none;">' +
+                (rel.badge ? '<span class="product-badge">' + rel.badge + '</span>' : '') +
+                '<img src="' + rel.image + '" class="product-image-main" alt="' + rel.name + '" onerror="this.src=\'assets/product_jasmine.png\'">' +
+                (rel.secondaryImage ? '<img src="' + rel.secondaryImage + '" class="product-image-hover" alt="' + rel.name + '" onerror="this.style.display=\'none\'">' : '') +
+                '<button type="button" class="wishlist-toggle-btn ' + (isRelWish ? 'active' : '') + '" data-id="' + rel.id + '" aria-label="Wishlist">' +
+                  '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>' +
+                '</button>' +
+              '</a>' +
+              '<div class="product-info">' +
+                '<a href="/product?id=' + rel.id + '" style="text-decoration:none; color:inherit;">' +
+                  '<h3 class="product-name">' + rel.name + '</h3>' +
+                '</a>' +
+                '<div class="product-price-wrapper">' +
+                  '<span class="mrp-label">MRP: </span><span class="current-price">₹' + Number(relPrice).toLocaleString('en-IN', { maximumFractionDigits: 0 }) + '</span>' +
+                  (relIsDisc ? ' <span class="original-price" style="text-decoration: line-through;">₹' + Number(relOrigPrice).toLocaleString('en-IN', { maximumFractionDigits: 0 }) + '</span>' : '') +
+                '</div>' +
+                '<div style="font-size:0.75rem; color:#D4AF37; margin-top:4px;">★★★★★ 4.9</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('') +
+      '</div>' +
+    '</section>';
+  }
+
+  container.innerHTML = 
+    '<div class="pdp-page-wrapper section-container">' +
+      
+      '<!-- Breadcrumb -->' +
+      '<nav class="pdp-breadcrumb-container" aria-label="Breadcrumb">' +
+        '<div class="pdp-breadcrumb">' +
+          '<a href="/home">Home</a>' +
+          '<span class="pdp-breadcrumb-sep">/</span>' +
+          '<a href="/shop">Shop</a>' +
+          '<span class="pdp-breadcrumb-sep">/</span>' +
+          '<a href="/shop?category=' + encodeURIComponent(product.category || 'candles') + '">' + (product.categoryTitle || (product.category ? product.category.toUpperCase() : 'CANDLES')) + '</a>' +
+          '<span class="pdp-breadcrumb-sep">/</span>' +
+          '<span class="pdp-breadcrumb-current">' + product.name + '</span>' +
+        '</div>' +
+      '</nav>' +
+
+      '<!-- Above The Fold Main 2-Column Grid -->' +
+      '<div class="pdp-main-grid">' +
+        
+        '<!-- Left: Gallery Column -->' +
+        '<div class="pdp-gallery-column">' +
+          '<div class="pdp-main-image-card" id="pdp-main-card">' +
+            (badgeText ? '<span class="pdp-badge-floating ' + (badgeText.includes('BEST') ? 'pdp-badge-gold' : '') + '">' + badgeText + '</span>' : '') +
+            '<img src="' + galleryImages[0] + '" alt="' + product.name + '" class="pdp-main-image" id="pdp-active-image" onerror="this.src=\'assets/product_jasmine.png\'">' +
+          '</div>' +
+
+          '<!-- Thumbnails Row -->' +
+          '<div class="pdp-thumbnails-strip" id="pdp-thumbs-container">' +
+            galleryImages.map((img, idx) => 
+              '<div class="pdp-thumb-item ' + (idx === 0 ? 'active' : '') + '" data-index="' + idx + '" data-src="' + img + '">' +
+                '<img src="' + img + '" alt="' + product.name + ' view ' + (idx + 1) + '" onerror="this.src=\'assets/product_jasmine.png\'">' +
+              '</div>'
+            ).join('') +
+          '</div>' +
+        '</div>' +
+
+        '<!-- Right: Information & Purchasing Column -->' +
+        '<div class="pdp-info-column">' +
+          
+          '<div class="pdp-header-meta">' +
+            '<span class="pdp-category-tag">' + (product.categoryTitle || 'ARTISANAL LUXURY') + '</span>' +
+            '<button class="pdp-share-btn-top" id="pdp-open-share-btn">' +
+              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>' +
+              '<span>Share</span>' +
+            '</button>' +
+          '</div>' +
+
+          '<h1 class="pdp-product-title">' + product.name + '</h1>' +
+
+          '<div class="pdp-rating-row">' +
+            '<span class="pdp-stars">★★★★★</span>' +
+            '<span class="pdp-rating-val">' + (product.rating || '4.9') + '</span>' +
+            '<span class="pdp-rating-count">(' + (product.reviewCount || product.review_count || 128) + ' client reviews)</span>' +
+            '<span class="pdp-stock-badge">In Stock</span>' +
+          '</div>' +
+
+          '<!-- Price -->' +
+          '<div class="pdp-price-container">' +
+            '<span class="pdp-price-current">₹' + Number(priceNum).toLocaleString('en-IN', { maximumFractionDigits: 0 }) + '</span>' +
+            (isDiscounted ? 
+              '<span class="pdp-price-original">₹' + Number(origPriceNum).toLocaleString('en-IN', { maximumFractionDigits: 0 }) + '</span>' +
+              '<span class="pdp-discount-badge">' + discountPercent + '% OFF</span>'
+             : '') +
+            '<span class="pdp-tax-note">Inclusive of all taxes</span>' +
+          '</div>' +
+
+          '<!-- Scent Notes / Variants Swatches -->' +
+          '<div class="pdp-variant-section">' +
+            '<div class="pdp-variant-title">' +
+              '<span>Scent Profile: <strong id="pdp-active-scent-label">' + (swatches[0]?.name || 'Signature Aroma') + '</strong></span>' +
+            '</div>' +
+            '<div class="pdp-swatches-row" id="pdp-swatches-container">' +
+              swatches.map((s, idx) => 
+                '<button type="button" class="pdp-swatch-chip ' + (idx === 0 ? 'active' : '') + '" data-name="' + s.name + '">' +
+                  '<span class="swatch-color-dot" style="background-color: ' + s.color + ';"></span>' +
+                  '<span>' + s.name + '</span>' +
+                '</button>'
+              ).join('') +
+            '</div>' +
+          '</div>' +
+
+          '<!-- Action Buttons: Quantity, Add to Cart, Wishlist -->' +
+          '<div class="pdp-actions-wrapper">' +
+            '<div class="pdp-qty-picker">' +
+              '<button type="button" class="pdp-qty-btn" id="pdp-qty-minus" aria-label="Decrease quantity">&minus;</button>' +
+              '<input type="number" class="pdp-qty-input" id="pdp-qty-val" value="1" min="1" max="99" readonly>' +
+              '<button type="button" class="pdp-qty-btn" id="pdp-qty-plus" aria-label="Increase quantity">&plus;</button>' +
+            '</div>' +
+
+            '<button type="button" class="pdp-add-cart-btn" id="pdp-add-to-cart-btn">' +
+              '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>' +
+              '<span>Add to Cart &bull; ₹' + Number(priceNum).toLocaleString('en-IN', { maximumFractionDigits: 0 }) + '</span>' +
+            '</button>' +
+
+            '<button type="button" class="pdp-wishlist-btn-main ' + (isWishlisted ? 'active' : '') + '" id="pdp-wishlist-toggle-btn" aria-label="Add to Wishlist">' +
+              '<svg width="18" height="18" viewBox="0 0 24 24" fill="' + (isWishlisted ? '#8C6A3D' : 'none') + '" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>' +
+              '<span>' + (isWishlisted ? 'Saved' : 'Wishlist') + '</span>' +
+            '</button>' +
+          '</div>' +
+
+          '<!-- Value Pillars -->' +
+          '<div class="pdp-value-pillars">' +
+            '<div class="pdp-pillar-item">' +
+              '<span class="pdp-pillar-icon">🌿</span>' +
+              '<span>100% Botanical Soy</span>' +
+            '</div>' +
+            '<div class="pdp-pillar-item">' +
+              '<span class="pdp-pillar-icon">✨</span>' +
+              '<span>50+ Hour Clean Burn</span>' +
+            '</div>' +
+            '<div class="pdp-pillar-item">' +
+              '<span class="pdp-pillar-icon">🚚</span>' +
+              '<span>Free Luxury Shipping</span>' +
+            '</div>' +
+          '</div>' +
+
+          '<!-- Accordions -->' +
+          '<div class="pdp-accordion-group">' +
+            
+            '<!-- 1. Description -->' +
+            '<div class="pdp-accordion-item open">' +
+              '<button type="button" class="pdp-accordion-trigger">' +
+                '<span>Description & Olfactory Notes</span>' +
+                '<span class="pdp-accordion-icon">&plus;</span>' +
+              '</button>' +
+              '<div class="pdp-accordion-content">' +
+                '<p style="margin-bottom: 12px;">' + descriptionText.replace(/\n/g, '<br>') + '</p>' +
+                '<div style="padding: 12px; background: #FAF8F5; border-radius: 6px; border-left: 3px solid var(--color-gold, #C5A880);">' +
+                  '<strong>Fragrance Notes:</strong> ' + fragranceNotes +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+
+            '<!-- 2. Product Information & Care -->' +
+            '<div class="pdp-accordion-item">' +
+              '<button type="button" class="pdp-accordion-trigger">' +
+                '<span>Product Information & Care</span>' +
+                '<span class="pdp-accordion-icon">&plus;</span>' +
+              '</button>' +
+              '<div class="pdp-accordion-content">' +
+                '<p style="white-space: pre-line;">' + careInfoText + '</p>' +
+              '</div>' +
+            '</div>' +
+
+            '<!-- 3. Shipping Information -->' +
+            '<div class="pdp-accordion-item">' +
+              '<button type="button" class="pdp-accordion-trigger">' +
+                '<span>Shipping Information</span>' +
+                '<span class="pdp-accordion-icon">&plus;</span>' +
+              '</button>' +
+              '<div class="pdp-accordion-content">' +
+                '<p style="white-space: pre-line;">' + shippingInfoText + '</p>' +
+              '</div>' +
+            '</div>' +
+
+            '<!-- 4. Returns & Exchanges -->' +
+            '<div class="pdp-accordion-item">' +
+              '<button type="button" class="pdp-accordion-trigger">' +
+                '<span>Returns & Exchanges</span>' +
+                '<span class="pdp-accordion-icon">&plus;</span>' +
+              '</button>' +
+              '<div class="pdp-accordion-content">' +
+                '<p style="white-space: pre-line;">' + returnsInfoText + '</p>' +
+              '</div>' +
+            '</div>' +
+
+          '</div>' +
+
+        '</div>' +
+
+      '</div>' +
+
+      '<!-- Below The Fold: You Might Also Like Section -->' +
+      relatedHtml +
+
+    '</div>';
+
+  // --- BIND PDP INTERACTIVE BEHAVIORS ---
+
+  // 1. Thumbnail Clicking
+  const mainImg = document.getElementById("pdp-active-image");
+  const thumbs = container.querySelectorAll(".pdp-thumb-item");
+  thumbs.forEach(thumb => {
+    thumb.addEventListener("click", () => {
+      thumbs.forEach(t => t.classList.remove("active"));
+      thumb.classList.add("active");
+      const targetSrc = thumb.getAttribute("data-src");
+      if (mainImg && targetSrc) {
+        mainImg.style.opacity = '0.3';
+        setTimeout(() => {
+          mainImg.src = targetSrc;
+          mainImg.style.opacity = '1';
+        }, 150);
+      }
+    });
+  });
+
+  // 2. Scent Swatches Selection
+  let selectedVariant = swatches[0]?.name || 'Signature';
+  const swatchBtns = container.querySelectorAll(".pdp-swatch-chip");
+  const scentLabel = document.getElementById("pdp-active-scent-label");
+  swatchBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      swatchBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      selectedVariant = btn.getAttribute("data-name");
+      if (scentLabel) scentLabel.textContent = selectedVariant;
+    });
+  });
+
+  // 3. Quantity Controls
+  const qtyInput = document.getElementById("pdp-qty-val");
+  const minusBtn = document.getElementById("pdp-qty-minus");
+  const plusBtn = document.getElementById("pdp-qty-plus");
+  const addCartBtn = document.getElementById("pdp-add-to-cart-btn");
+
+  const updateCartBtnText = () => {
+    const qty = parseInt(qtyInput.value) || 1;
+    const total = priceNum * qty;
+    if (addCartBtn) {
+      addCartBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg> <span>Add to Cart &bull; ₹' + Number(total).toLocaleString('en-IN', { maximumFractionDigits: 0 }) + '</span>';
+    }
+  };
+
+  if (minusBtn && qtyInput) {
+    minusBtn.addEventListener("click", () => {
+      let val = parseInt(qtyInput.value) || 1;
+      if (val > 1) {
+        qtyInput.value = val - 1;
+        updateCartBtnText();
+      }
+    });
+  }
+
+  if (plusBtn && qtyInput) {
+    plusBtn.addEventListener("click", () => {
+      let val = parseInt(qtyInput.value) || 1;
+      if (val < 99) {
+        qtyInput.value = val + 1;
+        updateCartBtnText();
+      }
+    });
+  }
+
+  // 4. Add to Cart Action
+  if (addCartBtn) {
+    addCartBtn.addEventListener("click", () => {
+      const qty = parseInt(qtyInput ? qtyInput.value : 1) || 1;
+      for (let i = 0; i < qty; i++) {
+        addToCart(product.id);
+      }
+      showToast(qty + "x " + product.name + " added to cart");
+    });
+  }
+
+  // 5. Wishlist Action
+  const pdpWishlistBtn = document.getElementById("pdp-wishlist-toggle-btn");
+  if (pdpWishlistBtn) {
+    pdpWishlistBtn.addEventListener("click", () => {
+      toggleWishlist(product.id);
+      const isNowWishlisted = storeState.wishlist.includes(product.id);
+      pdpWishlistBtn.classList.toggle("active", isNowWishlisted);
+      pdpWishlistBtn.querySelector("span").textContent = isNowWishlisted ? "Saved" : "Wishlist";
+      const svg = pdpWishlistBtn.querySelector("svg");
+      if (svg) svg.setAttribute("fill", isNowWishlisted ? "#8C6A3D" : "none");
+    });
+  }
+
+  // 6. Accordion Toggles
+  const accordionTriggers = container.querySelectorAll(".pdp-accordion-trigger");
+  accordionTriggers.forEach(trigger => {
+    trigger.addEventListener("click", () => {
+      const item = trigger.parentElement;
+      item.classList.toggle("open");
+    });
+  });
+
+  // 7. Share Modal Controls
+  const shareModal = document.getElementById("share-modal");
+  const openShareBtn = document.getElementById("pdp-open-share-btn");
+  const closeShareBtn = document.getElementById("close-share-modal");
+  const shareUrlInput = document.getElementById("share-url-input");
+  const copyShareBtn = document.getElementById("copy-share-url-btn");
+  const sharePreview = document.getElementById("share-product-preview");
+
+  if (openShareBtn && shareModal) {
+    const fullUrl = window.location.href;
+    if (shareUrlInput) shareUrlInput.value = fullUrl;
+
+    if (sharePreview) {
+      sharePreview.innerHTML = 
+        '<img src="' + galleryImages[0] + '" alt="' + product.name + '" onerror="this.src=\'assets/product_jasmine.png\'">' +
+        '<div>' +
+          '<strong style="display:block; font-size:0.92rem; color:#2C221E;">' + product.name + '</strong>' +
+          '<span style="font-size:0.8rem; color:#8C827A;">₹' + Number(priceNum).toLocaleString('en-IN', { maximumFractionDigits: 0 }) + ' &bull; Handcrafted Luxury</span>' +
+        '</div>';
+    }
+
+    // Social Links
+    const encodedUrl = encodeURIComponent(fullUrl);
+    const encodedText = encodeURIComponent("Discover " + product.name + " luxury scented candle from CHIMINI:");
+    const waBtn = document.getElementById("share-whatsapp-btn");
+    const fbBtn = document.getElementById("share-facebook-btn");
+    const twBtn = document.getElementById("share-twitter-btn");
+    const emBtn = document.getElementById("share-email-btn");
+
+    if (waBtn) waBtn.href = "https://api.whatsapp.com/send?text=" + encodedText + "%20" + encodedUrl;
+    if (fbBtn) fbBtn.href = "https://www.facebook.com/sharer/sharer.php?u=" + encodedUrl;
+    if (twBtn) twBtn.href = "https://twitter.com/intent/tweet?text=" + encodedText + "&url=" + encodedUrl;
+    if (emBtn) emBtn.href = "mailto:?subject=" + encodeURIComponent(product.name + ' - CHIMINI Luxury') + "&body=" + encodedText + "%0A%0A" + encodedUrl;
+
+    openShareBtn.addEventListener("click", () => {
+      shareModal.style.display = "flex";
+    });
+
+    if (closeShareBtn) {
+      closeShareBtn.addEventListener("click", () => {
+        shareModal.style.display = "none";
+      });
+    }
+
+    shareModal.addEventListener("click", (e) => {
+      if (e.target === shareModal) shareModal.style.display = "none";
+    });
+
+    if (copyShareBtn && shareUrlInput) {
+      copyShareBtn.addEventListener("click", () => {
+        shareUrlInput.select();
+        navigator.clipboard.writeText(shareUrlInput.value);
+        copyShareBtn.textContent = "Copied ✓";
+        setTimeout(() => { copyShareBtn.textContent = "Copy Link"; }, 2000);
+      });
+    }
+  }
+
+  // 8. Related Products Carousel Navigation
+  const carousel = document.getElementById("pdp-related-carousel");
+  const prevBtn = document.getElementById("pdp-related-prev");
+  const nextBtn = document.getElementById("pdp-related-next");
+
+  if (carousel && prevBtn && nextBtn) {
+    prevBtn.addEventListener("click", () => {
+      carousel.scrollBy({ left: -320, behavior: "smooth" });
+    });
+    nextBtn.addEventListener("click", () => {
+      carousel.scrollBy({ left: 320, behavior: "smooth" });
+    });
+  }
+
+  // Bind wishlist buttons in related products
+  container.querySelectorAll(".wishlist-toggle-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const id = btn.getAttribute("data-id");
+      if (id) toggleWishlist(id);
+    });
+  });
+}
