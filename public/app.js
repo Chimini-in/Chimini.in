@@ -300,7 +300,8 @@ function renderBestSellers() {
         <img src="${product.image}" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
         <button class="wishlist-toggle-btn ${isWishlisted ? "active" : ""}" data-id="${product.id}" aria-label="Add to Wishlist">
           <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-        </button>`n      </a>
+        </button>
+      </a>
       <div class="product-info">
         <a href="/product?id=${product.id}" style="text-decoration:none; color:inherit;"><h3 class="product-name">${product.name}</h3></a>
         <p class="product-price">₹${Number(product.price).toFixed(2)}</p>
