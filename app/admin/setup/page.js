@@ -17,7 +17,6 @@ GRANT ALL ON public.testimonials TO anon, authenticated;
 GRANT ALL ON public.settings TO anon, authenticated;
 GRANT ALL ON public.page_content TO anon, authenticated;
 GRANT ALL ON public.collections TO anon, authenticated;
-GRANT ALL ON public.reviews TO anon, authenticated;
 
 -- 2. Sequence access
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
@@ -30,7 +29,6 @@ ALTER TABLE public.testimonials ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.page_content ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.collections ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
 
 -- 4. Full access policies for anon & authenticated
 DROP POLICY IF EXISTS "anon_full_banners" ON public.banners;
@@ -67,11 +65,6 @@ DROP POLICY IF EXISTS "anon_full_collections" ON public.collections;
 DROP POLICY IF EXISTS "admin_all_collections" ON public.collections;
 DROP POLICY IF EXISTS "anon_read_collections" ON public.collections;
 CREATE POLICY "full_access_collections" ON public.collections FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
-
-DROP POLICY IF EXISTS "anon_full_reviews" ON public.reviews;
-DROP POLICY IF EXISTS "admin_all_reviews" ON public.reviews;
-DROP POLICY IF EXISTS "anon_read_reviews" ON public.reviews;
-CREATE POLICY "full_access_reviews" ON public.reviews FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 `.trim();
 
 export default function DatabaseSetupPage() {
