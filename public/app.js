@@ -2403,6 +2403,9 @@ async function fetchSupabaseData() {
       collectionsRes.json ? collectionsRes.json().catch(() => []) : []
     ]);
 
+    // Initialize mapped settings object
+    const newSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+
     // Store raw banners array directly on storeState
     if (Array.isArray(banners)) {
       storeState.banners = banners;
@@ -2424,9 +2427,6 @@ async function fetchSupabaseData() {
         sort_order: c.sort_order || 0
       }));
     }
-
-    // Map to legacy DEFAULT_SETTINGS format for compatibility
-    const newSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
 
     // Map Announcements
     if (Array.isArray(settings)) {
