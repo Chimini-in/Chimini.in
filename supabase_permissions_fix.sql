@@ -64,3 +64,7 @@ ALTER TABLE public.collections ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "full_access_collections" ON public.collections;
 CREATE POLICY "full_access_collections" ON public.collections FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 
+-- 5. Reload Supabase PostgREST Schema Cache
+NOTIFY pgrst, 'reload schema';
+
+
