@@ -1851,7 +1851,11 @@ function renderCollectionsPage() {
   const container = document.getElementById("collections-page-container");
   if (!container) return;
   
-  const collections = (storeState.adminSettings && storeState.adminSettings.collections) || [];
+  const rawList = (storeState.collections && storeState.collections.length > 0) 
+    ? storeState.collections 
+    : ((storeState.adminSettings && storeState.adminSettings.collections) || []);
+  
+  const collections = rawList.filter(c => c.is_published !== false);
   
   container.innerHTML = `
     ${renderPageHeroHtml("collections")}
@@ -1883,20 +1887,24 @@ function renderCollectionsPage() {
     const card = document.createElement("div");
     card.className = "collection-index-card animate-slide-up";
 
+    const name = coll.title || coll.name || "Collection";
+    const image = coll.image_url || coll.image || "assets/campaign_banner.png";
     let targetLink = "/shop?category=all";
-    if (coll.link && !coll.link.startsWith('#')) {
+    if (coll.link_url && !coll.link_url.startsWith('#')) {
+      targetLink = coll.link_url;
+    } else if (coll.link && !coll.link.startsWith('#')) {
       targetLink = coll.link;
-    } else if (coll.name) {
-      targetLink = `/shop?category=${encodeURIComponent(coll.name.toLowerCase())}`;
+    } else if (name) {
+      targetLink = `/shop?category=${encodeURIComponent(name.toLowerCase())}`;
     }
 
     card.innerHTML = `
       <a href="${targetLink}" class="collection-card-inner">
         <div class="collection-card-media">
-          <img src="${coll.image || 'assets/campaign_banner.png'}" alt="${coll.name}" class="collection-card-img" onerror="this.src='assets/campaign_banner.png'">
+          <img src="${image}" alt="${name}" class="collection-card-img" onerror="this.src='assets/campaign_banner.png'">
           <div class="collection-card-overlay"></div>
           <div class="collection-card-text-overlay">
-            <h2 class="collection-card-title">${coll.name}</h2>
+            <h2 class="collection-card-title">${name}</h2>
           </div>
         </div>
       </a>
@@ -2375,22 +2383,46 @@ async function fetchSupabaseData() {
     };
 
     // Parallel fetch for speed with no-store cache directive (clean PostgREST URLs)
-    const [settingsRes, bannersRes, productsRes, categoriesRes, testimonialsRes, pagesRes] = await Promise.all([
+    const [settingsRes, bannersRes, productsRes, categoriesRes, testimonialsRes, pagesRes, collectionsRes] = await Promise.all([
       fetch(`${SUPABASE_URL}/rest/v1/settings?select=*`, { headers, cache: 'no-store' }),
       fetch(`${SUPABASE_URL}/rest/v1/banners?select=*&order=sort_order.asc`, { headers, cache: 'no-store' }),
       fetch(`${SUPABASE_URL}/rest/v1/products?select=*,categories(title)&is_published=eq.true&order=sort_order.asc`, { headers, cache: 'no-store' }),
       fetch(`${SUPABASE_URL}/rest/v1/categories?select=*&order=sort_order.asc`, { headers, cache: 'no-store' }),
       fetch(`${SUPABASE_URL}/rest/v1/testimonials?select=*&is_published=eq.true&order=sort_order.asc`, { headers, cache: 'no-store' }),
-      fetch(`${SUPABASE_URL}/rest/v1/page_content?select=*`, { headers, cache: 'no-store' })
+      fetch(`${SUPABASE_URL}/rest/v1/page_content?select=*`, { headers, cache: 'no-store' }),
+      fetch(`${SUPABASE_URL}/rest/v1/collections?select=*&order=sort_order.asc`, { headers, cache: 'no-store' }).catch(() => ({ json: () => [] }))
     ]);
 
-    const [settings, banners, products, categories, testimonials, pages] = await Promise.all([
-      settingsRes.json(), bannersRes.json(), productsRes.json(), categoriesRes.json(), testimonialsRes.json(), pagesRes.json()
+    const [settings, banners, products, categories, testimonials, pages, collections] = await Promise.all([
+      settingsRes.json().catch(() => []),
+      bannersRes.json().catch(() => []),
+      productsRes.json().catch(() => []),
+      categoriesRes.json().catch(() => []),
+      testimonialsRes.json().catch(() => []),
+      pagesRes.json().catch(() => []),
+      collectionsRes.json ? collectionsRes.json().catch(() => []) : []
     ]);
 
     // Store raw banners array directly on storeState
     if (Array.isArray(banners)) {
       storeState.banners = banners;
+    }
+
+    // Store live collections from Supabase
+    if (Array.isArray(collections) && collections.length > 0) {
+      storeState.collections = collections;
+      newSettings.collections = collections.map(c => ({
+        id: c.id,
+        name: c.title || c.name || '',
+        title: c.title || c.name || '',
+        description: c.description || '',
+        image: c.image_url || c.image || 'assets/campaign_banner.png',
+        image_url: c.image_url || c.image || 'assets/campaign_banner.png',
+        link: c.link_url || c.link || '/shop?category=all',
+        link_url: c.link_url || c.link || '/shop?category=all',
+        is_published: c.is_published !== false,
+        sort_order: c.sort_order || 0
+      }));
     }
 
     // Map to legacy DEFAULT_SETTINGS format for compatibility

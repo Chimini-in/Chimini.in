@@ -41,6 +41,26 @@ ALTER TABLE public.page_content ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "full_access_page_content" ON public.page_content;
 CREATE POLICY "full_access_page_content" ON public.page_content FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 
+-- 4. Ensure collections table schema has all required columns
+CREATE TABLE IF NOT EXISTS public.collections (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  title text NOT NULL DEFAULT '',
+  description text DEFAULT '',
+  image_url text DEFAULT '',
+  link_url text DEFAULT '',
+  sort_order integer DEFAULT 0,
+  is_published boolean DEFAULT true,
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.collections ADD COLUMN IF NOT EXISTS title text;
+ALTER TABLE public.collections ADD COLUMN IF NOT EXISTS description text;
+ALTER TABLE public.collections ADD COLUMN IF NOT EXISTS image_url text;
+ALTER TABLE public.collections ADD COLUMN IF NOT EXISTS link_url text;
+ALTER TABLE public.collections ADD COLUMN IF NOT EXISTS sort_order integer DEFAULT 0;
+ALTER TABLE public.collections ADD COLUMN IF NOT EXISTS is_published boolean DEFAULT true;
+
 ALTER TABLE public.collections ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "full_access_collections" ON public.collections;
 CREATE POLICY "full_access_collections" ON public.collections FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
