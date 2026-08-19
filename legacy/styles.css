@@ -2438,7 +2438,7 @@ section.full-width-banner-section {
 }
 
 .about-story-image {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
   border: 1px solid rgba(197, 168, 128, 0.1);
   box-shadow: var(--shadow-md);
@@ -3210,7 +3210,7 @@ section.full-width-banner-section {
 .collections-grid-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 35px;
+  gap: 48px;
 }
 
 .collection-index-card {
@@ -3237,7 +3237,7 @@ section.full-width-banner-section {
 .collection-card-media {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
   background-color: #f0ebe4;
 }
@@ -3366,7 +3366,7 @@ section.full-width-banner-section {
   position: absolute;
   bottom: 20px;
   left: 20px;
-  right: 110px;
+  right: 24px;
   z-index: 2;
 }
 
@@ -3883,7 +3883,7 @@ section.full-width-banner-section {
 
 .recipient-box-tile {
   position: relative;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 1;
   border-radius: 10px;
   overflow: hidden;
   border: 1px solid rgba(197, 168, 128, 0.2);
@@ -3941,7 +3941,7 @@ section.full-width-banner-section {
 
 .occasion-box-tile {
   position: relative;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 1;
   border-radius: 10px;
   overflow: hidden;
   border: 1px solid rgba(197, 168, 128, 0.2);
@@ -4925,3 +4925,9 @@ section.full-width-banner-section {
 .pdp-share-btn.share-fb { background-color: #1877F2; color: #FFF; }
 .pdp-share-btn.share-tw { background-color: #1DA1F2; color: #FFF; }
 .pdp-share-btn.share-em { background-color: #2C221E; color: #FFF; }
+
+
+/* Ensure Explore badge is removed on collections */
+.collection-card-badge {
+  display: none !important;
+}

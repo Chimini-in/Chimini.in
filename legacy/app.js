@@ -1898,7 +1898,6 @@ function renderCollectionsPage() {
           <div class="collection-card-text-overlay">
             <h2 class="collection-card-title">${coll.name}</h2>
           </div>
-          <div class="collection-card-badge">EXPLORE &rarr;</div>
         </div>
       </a>
     `;
