@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    CHIMINI LUXURY ECOMMERCE JAVASCRIPT
    ========================================================================== */
 
@@ -1575,13 +1575,16 @@ function renderShopPage() {
   
   const bannerHtml = renderPageHeroHtml("shop");
 
+  // Always refresh the top banner slot after async Supabase data loads
+  const _existingBannerSlot = container.querySelector('.page-top-banner-wrap');
+  if (bannerHtml) {
+    if (_existingBannerSlot) _existingBannerSlot.outerHTML = bannerHtml;
+    else if (container.querySelector('.catalog-toolbar')) container.insertAdjacentHTML('afterbegin', bannerHtml);
+  }
+
   if (!container.innerHTML.trim() || !container.querySelector(".catalog-toolbar")) {
     container.innerHTML = `
-      ${bannerHtml || `
-      <section class="subpage-hero">
-        <h1 class="subpage-title">The Atelier Shop</h1>
-        <p class="subpage-subtitle">Immersive botanical fragrances hand-poured in luxury vessels</p>
-      </section>`}
+      ${bannerHtml || ''}
       
       <!-- Catalog Toolbar -->
       <div class="catalog-toolbar section-container">
@@ -2222,11 +2225,7 @@ function renderAboutPage() {
   const bannerHtml = renderPageHeroHtml("about");
 
   container.innerHTML = `
-    ${bannerHtml || `
-    <section class="subpage-hero">
-      <h1 class="subpage-title">${about.title || 'A Quest for Olfactory Purity'}</h1>
-      <p class="subpage-subtitle">The story of CHIMINI's clean-burning luxury scents</p>
-    </section>`}
+    ${bannerHtml || ''}
     
     <div class="about-story-section section-container">
       <div class="about-story-grid">
@@ -2297,11 +2296,7 @@ function renderContactPage() {
   const bannerHtml = renderPageHeroHtml("contact");
 
   container.innerHTML = `
-    ${bannerHtml || `
-    <section class="subpage-hero">
-      <h1 class="subpage-title">Client Concierge</h1>
-      <p class="subpage-subtitle">We are here to assist with custom orders, corporate gifts, or scent inquiries</p>
-    </section>`}
+    ${bannerHtml || ''}
 
     <div class="contact-layout section-container">
       <div class="contact-details-col animate-slide-up">
