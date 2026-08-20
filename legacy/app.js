@@ -1744,6 +1744,7 @@ function renderShopProducts() {
       const pName = (p.name || p.title || "").toLowerCase().trim();
       const pCat = (p.category || "").toLowerCase().trim();
       const pCatTitle = (p.categoryTitle || "").toLowerCase().trim();
+      const pCollTag = (p.collection_tag || "").toLowerCase().trim();
       
       return (
         pFragTag === fTarget ||
@@ -1775,6 +1776,9 @@ function renderShopProducts() {
       }
 
       return (
+        pCollTag === cTarget ||
+        pCollTag.replace(/-/g, " ") === cTargetNormalized ||
+        (pCollTag && (pCollTag.includes(cTarget) || cTarget.includes(pCollTag))) ||
         pCat === cTarget ||
         pCat.replace(/-/g, " ") === cTargetNormalized ||
         (pCat && (pCat.includes(cTarget) || cTarget.includes(pCat))) ||
@@ -2604,6 +2608,7 @@ async function fetchSupabaseData() {
         category: p.categories?.title?.toLowerCase() || p.category || 'candles',
         categoryTitle: p.categories?.title || 'Artisanal Candles',
         fragrance_tag: p.fragrance_tag || '',
+        collection_tag: p.collection_tag || '',
         fragrance: p.fragrance || 'Signature Botanical Blend',
         description: p.description || '',
         careInfo: p.care_info || '',

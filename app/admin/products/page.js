@@ -26,6 +26,7 @@ async function uploadProductImage(file) {
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [collections, setCollections] = useState([]);
   const [loading, setLoading] = useState(true);
   
   const [showModal, setShowModal] = useState(false);
@@ -43,6 +44,7 @@ export default function ProductsPage() {
     secondary_image_url: '',
     gallery_images: '', // newline or comma separated
     category_id: '',
+    collection_tag: '',
     fragrance_tag: '',
     fragrance: '',
     badges: '',
@@ -72,6 +74,9 @@ export default function ProductsPage() {
     try {
       const catRes = await supabaseClient.from('categories').select('*').order('sort_order');
       if (catRes.data) setCategories(catRes.data);
+
+      const collRes = await supabaseClient.from('collections').select('*').order('sort_order');
+      if (collRes.data) setCollections(collRes.data);
 
       const prodRes = await supabaseClient
         .from('products')
@@ -106,6 +111,7 @@ export default function ProductsPage() {
         secondary_image_url: formData.secondary_image_url || '',
         images: galleryArr.length > 0 ? galleryArr : (formData.image_url ? [formData.image_url] : []),
         category_id: formData.category_id || null,
+        collection_tag: formData.collection_tag || '',
         fragrance_tag: formData.fragrance_tag || '',
         fragrance: formData.fragrance || '',
         badges: formData.badges || '',
@@ -150,6 +156,7 @@ export default function ProductsPage() {
         secondary_image_url: prod.secondary_image_url || '',
         gallery_images: galleryStr,
         category_id: prod.category_id || '',
+        collection_tag: prod.collection_tag || '',
         fragrance_tag: prod.fragrance_tag || '',
         fragrance: prod.fragrance || '',
         badges: prod.badges || '',
@@ -172,6 +179,7 @@ export default function ProductsPage() {
         secondary_image_url: '',
         gallery_images: '',
         category_id: '',
+        collection_tag: '',
         fragrance_tag: '',
         fragrance: '',
         badges: '',
@@ -265,6 +273,7 @@ export default function ProductsPage() {
               <tr style={{ borderBottom: '2px solid #e2e8f0', textAlign: 'left', backgroundColor: '#f8fafc' }}>
                 <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b', width: '60px' }}>Image</th>
                 <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b' }}>Title &amp; Fragrance</th>
+                <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b' }}>Collection</th>
                 <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b' }}>Fragrance Tag</th>
                 <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b' }}>Price</th>
                 <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b', textAlign: 'center' }}>Badges</th>
@@ -287,7 +296,22 @@ export default function ProductsPage() {
                     {prod.fragrance && <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>{prod.fragrance}</div>}
                   </td>
                   <td style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#475569' }}>
-                    {prod.fragrance_tag || prod.categories?.title || <span style={{ color: '#cbd5e1' }}>—</span>}
+                    {prod.collection_tag ? (
+                      <span style={{ padding: '3px 8px', borderRadius: '4px', backgroundColor: '#f1f5f9', color: '#334155', fontSize: '0.78rem', fontWeight: '500' }}>
+                        {prod.collection_tag.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      </span>
+                    ) : (
+                      <span style={{ color: '#cbd5e1' }}>—</span>
+                    )}
+                  </td>
+                  <td style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#475569' }}>
+                    {prod.fragrance_tag || prod.categories?.title ? (
+                      <span style={{ padding: '3px 8px', borderRadius: '4px', backgroundColor: '#fdf4ff', color: '#86198f', fontSize: '0.78rem', fontWeight: '500' }}>
+                        {(prod.fragrance_tag || prod.categories?.title).replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      </span>
+                    ) : (
+                      <span style={{ color: '#cbd5e1' }}>—</span>
+                    )}
                   </td>
                   <td style={{ padding: '14px 16px', fontSize: '0.92rem', color: '#1a1a1a', fontWeight: '600' }}>
                     ₹{prod.price}
@@ -371,13 +395,24 @@ export default function ProductsPage() {
                 {/* TAB 1: BASIC INFO */}
                 {activeTab === 'basic' && (
                   <>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '16px' }}>
                       <div>
                         <label style={labelStyle}>Product Title *</label>
                         <input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required style={inputStyle} placeholder="e.g. Jasmine &amp; Oakwood" />
                       </div>
                       <div>
-                        <label style={labelStyle}>Fragrance Tag <span style={{fontWeight:'normal', color:'#94a3b8'}}>(links to homepage circle filter)</span></label>
+                        <label style={labelStyle}>Collection <span style={{fontWeight:'normal', color:'#94a3b8'}}>(links to /collections)</span></label>
+                        <select value={formData.collection_tag} onChange={e => setFormData({...formData, collection_tag: e.target.value})} style={inputStyle}>
+                          <option value="">-- Select Collection --</option>
+                          {collections.map(c => (
+                            <option key={c.id} value={(c.title || c.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-')}>
+                              {c.title || c.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label style={labelStyle}>Fragrance Tag <span style={{fontWeight:'normal', color:'#94a3b8'}}>(home circles)</span></label>
                         <select value={formData.fragrance_tag} onChange={e => setFormData({...formData, fragrance_tag: e.target.value})} style={inputStyle}>
                           <option value="">-- Select Fragrance --</option>
                           {categories.map(c => <option key={c.id} value={c.slug || c.title.toLowerCase()}>{c.title}</option>)}
