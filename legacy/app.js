@@ -399,7 +399,16 @@ function renderFeaturedCollections() {
     card.className = "collection-card";
     const name = coll.title || coll.name || "Collection";
     const image = coll.image_url || coll.image || "assets/campaign_banner.png";
-    const link = coll.link_url || coll.link || "/shop?category=all";
+    const slug = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
+    const isHtmlExt = window.location.pathname.endsWith('.html');
+    const defaultCategoryLink = (isHtmlExt ? 'shop.html' : '/shop') + '?category=' + encodeURIComponent(slug);
+
+    let targetLink = defaultCategoryLink;
+    if (coll.link_url && !coll.link_url.startsWith('#') && coll.link_url !== '/shop' && coll.link_url !== '/shop?category=all' && coll.link_url !== 'shop.html' && coll.link_url !== 'shop.html?category=all') {
+      targetLink = coll.link_url;
+    } else if (coll.link && !coll.link.startsWith('#') && coll.link !== '/shop' && coll.link !== '/shop?category=all' && coll.link !== 'shop.html' && coll.link !== 'shop.html?category=all') {
+      targetLink = coll.link;
+    }
 
     card.innerHTML = `
       <img src="${image}" alt="${name}" onerror="this.src='assets/campaign_banner.png'">
@@ -408,14 +417,14 @@ function renderFeaturedCollections() {
       </div>
     `;
     card.addEventListener("click", () => {
-      if (link && link.startsWith('#')) {
+      if (targetLink && targetLink.startsWith('#')) {
         storeState.activeCategory = "all";
         storeState.searchQuery = name;
         if (DOM.searchInput) DOM.searchInput.value = name;
         renderBestSellers();
         document.getElementById("best-sellers").scrollIntoView({ behavior: "smooth" });
-      } else if (link) {
-        window.location.href = link;
+      } else if (targetLink) {
+        window.location.href = targetLink;
       }
     });
     DOM.collectionsGrid.appendChild(card);
@@ -1749,9 +1758,35 @@ function renderShopProducts() {
       );
     });
   } else if (storeState.activeCategory && storeState.activeCategory !== "all") {
-    // Apply category tag filter
-    const cTarget = storeState.activeCategory.toLowerCase();
-    products = products.filter(p => (p.category || "").toLowerCase() === cTarget);
+    // Apply category / collection filter
+    const cTarget = storeState.activeCategory.toLowerCase().trim();
+    const cTargetNormalized = cTarget.replace(/-/g, " ");
+    products = products.filter(p => {
+      const pCat = (p.category || "").toLowerCase().trim();
+      const pCatTitle = (p.categoryTitle || "").toLowerCase().trim();
+      const pBadge = (p.badge || p.badges || "").toLowerCase().trim();
+      const pName = (p.name || p.title || "").toLowerCase().trim();
+      const pDesc = (p.description || "").toLowerCase().trim();
+      const pFragTag = (p.fragrance_tag || "").toLowerCase().trim();
+      const pFragNotes = (p.fragrance || "").toLowerCase().trim();
+
+      if ((cTarget.includes("gift") || cTargetNormalized.includes("gift")) && p.is_gift) {
+        return true;
+      }
+
+      return (
+        pCat === cTarget ||
+        pCat.replace(/-/g, " ") === cTargetNormalized ||
+        (pCat && (pCat.includes(cTarget) || cTarget.includes(pCat))) ||
+        pCatTitle.includes(cTargetNormalized) ||
+        pBadge.includes(cTargetNormalized) ||
+        pName.includes(cTargetNormalized) ||
+        pName.includes(cTarget) ||
+        pDesc.includes(cTargetNormalized) ||
+        pFragTag.includes(cTargetNormalized) ||
+        pFragNotes.includes(cTargetNormalized)
+      );
+    });
   }
   
   // Apply price filter
@@ -1767,15 +1802,27 @@ function renderShopProducts() {
   if (countEl) {
     let countText = `${products.length} product${products.length !== 1 ? 's' : ''} found`;
     if (storeState.activeFragrance && storeState.activeFragrance !== "all") {
-      const displayFrag = storeState.activeFragrance.charAt(0).toUpperCase() + storeState.activeFragrance.slice(1);
+      const displayFrag = storeState.activeFragrance.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
       countEl.innerHTML = `${countText} <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:12px;font-size:0.78rem;color:#334155;">Fragrance: <strong>${displayFrag}</strong> <button id="clear-fragrance-filter" style="border:none;background:none;cursor:pointer;color:#64748b;font-weight:bold;padding:0 2px;line-height:1;" title="Clear filter">&times;</button></span>`;
       const clearBtn = document.getElementById("clear-fragrance-filter");
       if (clearBtn) {
         clearBtn.addEventListener("click", () => {
           storeState.activeFragrance = null;
           if (window.history.replaceState) {
-            const cleanUrl = window.location.pathname;
-            window.history.replaceState(null, '', cleanUrl);
+            window.history.replaceState(null, '', window.location.pathname);
+          }
+          renderShopProducts();
+        });
+      }
+    } else if (storeState.activeCategory && storeState.activeCategory !== "all") {
+      const displayCat = storeState.activeCategory.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      countEl.innerHTML = `${countText} <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:12px;font-size:0.78rem;color:#334155;">Collection: <strong>${displayCat}</strong> <button id="clear-category-filter" style="border:none;background:none;cursor:pointer;color:#64748b;font-weight:bold;padding:0 2px;line-height:1;" title="Clear filter">&times;</button></span>`;
+      const clearBtn = document.getElementById("clear-category-filter");
+      if (clearBtn) {
+        clearBtn.addEventListener("click", () => {
+          storeState.activeCategory = "all";
+          if (window.history.replaceState) {
+            window.history.replaceState(null, '', window.location.pathname);
           }
           renderShopProducts();
         });
@@ -1940,13 +1987,15 @@ function renderCollectionsPage() {
 
     const name = coll.title || coll.name || "Collection";
     const image = coll.image_url || coll.image || "assets/campaign_banner.png";
-    let targetLink = "/shop?category=all";
-    if (coll.link_url && !coll.link_url.startsWith('#')) {
+    const slug = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
+    const isHtmlExt = window.location.pathname.endsWith('.html');
+    const defaultCategoryLink = (isHtmlExt ? 'shop.html' : '/shop') + '?category=' + encodeURIComponent(slug);
+
+    let targetLink = defaultCategoryLink;
+    if (coll.link_url && !coll.link_url.startsWith('#') && coll.link_url !== '/shop' && coll.link_url !== '/shop?category=all' && coll.link_url !== 'shop.html' && coll.link_url !== 'shop.html?category=all') {
       targetLink = coll.link_url;
-    } else if (coll.link && !coll.link.startsWith('#')) {
+    } else if (coll.link && !coll.link.startsWith('#') && coll.link !== '/shop' && coll.link !== '/shop?category=all' && coll.link !== 'shop.html' && coll.link !== 'shop.html?category=all') {
       targetLink = coll.link;
-    } else if (name) {
-      targetLink = `/shop?category=${encodeURIComponent(name.toLowerCase())}`;
     }
 
     card.innerHTML = `
@@ -2465,19 +2514,29 @@ async function fetchSupabaseData() {
     // Store live collections from Supabase
     if (Array.isArray(collections) && collections.length > 0) {
       storeState.collections = collections;
-      newSettings.collections = collections.map(c => ({
-        id: c.id,
-        name: c.title || c.name || '',
-        title: c.title || c.name || '',
-        description: c.description || '',
-        image: c.image_url || c.image || 'assets/campaign_banner.png',
-        image_url: c.image_url || c.image || 'assets/campaign_banner.png',
-        link: c.link_url || c.link || '/shop?category=all',
-        link_url: c.link_url || c.link || '/shop?category=all',
-        is_published: c.is_published !== false,
-        is_featured: c.is_featured === true || c.is_featured === "true",
-        sort_order: c.sort_order || 0
-      }));
+      newSettings.collections = collections.map(c => {
+        const cTitle = c.title || c.name || '';
+        const cSlug = cTitle.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
+        const defaultLink = '/shop?category=' + encodeURIComponent(cSlug);
+        const rawLink = c.link_url || c.link || '';
+        const resolvedLink = (rawLink && rawLink !== '/shop' && rawLink !== '/shop?category=all' && !rawLink.startsWith('#'))
+          ? rawLink
+          : defaultLink;
+
+        return {
+          id: c.id,
+          name: cTitle,
+          title: cTitle,
+          description: c.description || '',
+          image: c.image_url || c.image || 'assets/campaign_banner.png',
+          image_url: c.image_url || c.image || 'assets/campaign_banner.png',
+          link: resolvedLink,
+          link_url: resolvedLink,
+          is_published: c.is_published !== false,
+          is_featured: c.is_featured === true || c.is_featured === "true",
+          sort_order: c.sort_order || 0
+        };
+      });
     }
 
     

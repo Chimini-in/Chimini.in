@@ -44,11 +44,17 @@ export default function CollectionsAdminPage() {
     setSaving(true);
     setSaveError(null);
 
+    const slug = formData.title.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const customLink = formData.link_url?.trim();
+    const finalLink = (!customLink || customLink === '/shop' || customLink === '/shop?category=all')
+      ? `/shop?category=${slug}`
+      : customLink;
+
     const payload = {
       title: formData.title.trim(),
       description: formData.description?.trim() || '',
       image_url: formData.image_url?.trim() || '',
-      link_url: formData.link_url?.trim() || '',
+      link_url: finalLink,
       sort_order: parseInt(formData.sort_order) || 0,
       is_published: formData.is_published !== false,
       is_featured: formData.is_featured === true
@@ -397,7 +403,7 @@ export default function CollectionsAdminPage() {
                     value={formData.link_url}
                     onChange={e => setFormData({ ...formData, link_url: e.target.value })}
                     style={iStyle}
-                    placeholder="/shop?category=festive"
+                    placeholder={formData.title ? `/shop?category=${formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}` : "/shop?category=home-decor"}
                   />
                 </div>
                 <div>
