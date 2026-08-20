@@ -44,6 +44,7 @@ export default function ProductsPage() {
     secondary_image_url: '',
     gallery_images: '', // newline or comma separated
     category_id: '',
+    collection_tags: [],
     collection_tag: '',
     fragrance_tag: '',
     fragrance: '',
@@ -111,7 +112,7 @@ export default function ProductsPage() {
         secondary_image_url: formData.secondary_image_url || '',
         images: galleryArr.length > 0 ? galleryArr : (formData.image_url ? [formData.image_url] : []),
         category_id: formData.category_id || null,
-        collection_tag: formData.collection_tag || '',
+        collection_tag: (formData.collection_tags && formData.collection_tags.length > 0) ? formData.collection_tags.join(', ') : (formData.collection_tag || ''),
         fragrance_tag: formData.fragrance_tag || '',
         fragrance: formData.fragrance || '',
         badges: formData.badges || '',
@@ -147,6 +148,9 @@ export default function ProductsPage() {
     if (prod) {
       setEditingId(prod.id);
       const galleryStr = Array.isArray(prod.images) ? prod.images.join('\\n') : '';
+      const rawCollTags = prod.collection_tag 
+        ? (Array.isArray(prod.collection_tag) ? prod.collection_tag : prod.collection_tag.split(',').map(s => s.trim()).filter(Boolean))
+        : [];
       setFormData({
         title: prod.title || '',
         description: prod.description || '',
@@ -156,6 +160,7 @@ export default function ProductsPage() {
         secondary_image_url: prod.secondary_image_url || '',
         gallery_images: galleryStr,
         category_id: prod.category_id || '',
+        collection_tags: rawCollTags,
         collection_tag: prod.collection_tag || '',
         fragrance_tag: prod.fragrance_tag || '',
         fragrance: prod.fragrance || '',
@@ -179,6 +184,7 @@ export default function ProductsPage() {
         secondary_image_url: '',
         gallery_images: '',
         category_id: '',
+        collection_tags: [],
         collection_tag: '',
         fragrance_tag: '',
         fragrance: '',
@@ -296,13 +302,19 @@ export default function ProductsPage() {
                     {prod.fragrance && <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>{prod.fragrance}</div>}
                   </td>
                   <td style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#475569' }}>
-                    {prod.collection_tag ? (
-                      <span style={{ padding: '3px 8px', borderRadius: '4px', backgroundColor: '#f1f5f9', color: '#334155', fontSize: '0.78rem', fontWeight: '500' }}>
-                        {prod.collection_tag.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                      </span>
-                    ) : (
-                      <span style={{ color: '#cbd5e1' }}>—</span>
-                    )}
+                    {(() => {
+                      const tags = prod.collection_tag ? prod.collection_tag.split(',').map(s => s.trim()).filter(Boolean) : [];
+                      if (tags.length === 0) return <span style={{ color: '#cbd5e1' }}>—</span>;
+                      return (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                          {tags.map(t => (
+                            <span key={t} style={{ padding: '2px 7px', borderRadius: '4px', backgroundColor: '#f1f5f9', color: '#334155', fontSize: '0.74rem', fontWeight: '500' }}>
+                              {t.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            </span>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </td>
                   <td style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#475569' }}>
                     {prod.fragrance_tag || prod.categories?.title ? (
@@ -395,28 +407,70 @@ export default function ProductsPage() {
                 {/* TAB 1: BASIC INFO */}
                 {activeTab === 'basic' && (
                   <>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '16px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '16px' }}>
                       <div>
                         <label style={labelStyle}>Product Title *</label>
                         <input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required style={inputStyle} placeholder="e.g. Jasmine &amp; Oakwood" />
                       </div>
                       <div>
-                        <label style={labelStyle}>Collection <span style={{fontWeight:'normal', color:'#94a3b8'}}>(links to /collections)</span></label>
-                        <select value={formData.collection_tag} onChange={e => setFormData({...formData, collection_tag: e.target.value})} style={inputStyle}>
-                          <option value="">-- Select Collection --</option>
-                          {collections.map(c => (
-                            <option key={c.id} value={(c.title || c.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-')}>
-                              {c.title || c.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label style={labelStyle}>Fragrance Tag <span style={{fontWeight:'normal', color:'#94a3b8'}}>(home circles)</span></label>
+                        <label style={labelStyle}>Fragrance Tag <span style={{fontWeight:'normal', color:'#94a3b8'}}>(homepage circles)</span></label>
                         <select value={formData.fragrance_tag} onChange={e => setFormData({...formData, fragrance_tag: e.target.value})} style={inputStyle}>
                           <option value="">-- Select Fragrance --</option>
                           {categories.map(c => <option key={c.id} value={c.slug || c.title.toLowerCase()}>{c.title}</option>)}
                         </select>
+                      </div>
+                    </div>
+
+                    {/* Multi-Select Collections */}
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <label style={{ ...labelStyle, margin: 0 }}>
+                          Assigned Collections <span style={{fontWeight:'normal', color:'#94a3b8'}}>(click to select multiple — e.g. Gifts &amp; Home Decor)</span>
+                        </label>
+                        {formData.collection_tags?.length > 0 && (
+                          <span style={{ fontSize: '0.78rem', color: '#0369a1', fontWeight: '600' }}>
+                            ✓ {formData.collection_tags.length} selected
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', backgroundColor: '#f8fafc', minHeight: '48px', alignItems: 'center' }}>
+                        {collections.length === 0 ? (
+                          <span style={{ fontSize: '0.82rem', color: '#94a3b8' }}>No collections found. Create collections in /admin/collections first.</span>
+                        ) : (
+                          collections.map(c => {
+                            const slug = (c.title || c.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                            const isSelected = (formData.collection_tags || []).includes(slug);
+                            return (
+                              <button
+                                type="button"
+                                key={c.id}
+                                onClick={() => {
+                                  const current = formData.collection_tags || [];
+                                  const updated = isSelected ? current.filter(s => s !== slug) : [...current, slug];
+                                  setFormData({ ...formData, collection_tags: updated });
+                                }}
+                                style={{
+                                  padding: '6px 14px',
+                                  borderRadius: '20px',
+                                  border: isSelected ? '1px solid #0f172a' : '1px solid #cbd5e1',
+                                  backgroundColor: isSelected ? '#0f172a' : '#ffffff',
+                                  color: isSelected ? '#ffffff' : '#475569',
+                                  fontSize: '0.82rem',
+                                  fontWeight: isSelected ? '600' : '400',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  transition: 'all 0.15s ease',
+                                  boxShadow: isSelected ? '0 2px 6px rgba(15,23,42,0.15)' : 'none'
+                                }}
+                              >
+                                <span style={{ fontWeight: 'bold' }}>{isSelected ? '✓' : '+'}</span>
+                                <span>{c.title || c.name}</span>
+                              </button>
+                            );
+                          })
+                        )}
                       </div>
                     </div>
 

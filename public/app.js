@@ -1759,26 +1759,33 @@ function renderShopProducts() {
       );
     });
   } else if (storeState.activeCategory && storeState.activeCategory !== "all") {
-    // Apply category / collection filter
+    // Apply category / collection filter (supports multiple comma-separated collection tags)
     const cTarget = storeState.activeCategory.toLowerCase().trim();
     const cTargetNormalized = cTarget.replace(/-/g, " ");
     products = products.filter(p => {
       const pCat = (p.category || "").toLowerCase().trim();
       const pCatTitle = (p.categoryTitle || "").toLowerCase().trim();
+      const pCollTags = (p.collection_tag || "").toLowerCase().split(',').map(s => s.trim()).filter(Boolean);
       const pBadge = (p.badge || p.badges || "").toLowerCase().trim();
       const pName = (p.name || p.title || "").toLowerCase().trim();
       const pDesc = (p.description || "").toLowerCase().trim();
       const pFragTag = (p.fragrance_tag || "").toLowerCase().trim();
       const pFragNotes = (p.fragrance || "").toLowerCase().trim();
 
-      if ((cTarget.includes("gift") || cTargetNormalized.includes("gift")) && p.is_gift) {
+      const matchColl = pCollTags.some(tag => 
+        tag === cTarget ||
+        tag.replace(/-/g, " ") === cTargetNormalized ||
+        tag.includes(cTarget) ||
+        cTarget.includes(tag)
+      );
+
+      if (matchColl) return true;
+
+      if ((cTarget.includes("gift") || cTargetNormalized.includes("gift")) && (p.is_gift || pCollTags.includes("gift") || pCollTags.includes("gifts"))) {
         return true;
       }
 
       return (
-        pCollTag === cTarget ||
-        pCollTag.replace(/-/g, " ") === cTargetNormalized ||
-        (pCollTag && (pCollTag.includes(cTarget) || cTarget.includes(pCollTag))) ||
         pCat === cTarget ||
         pCat.replace(/-/g, " ") === cTargetNormalized ||
         (pCat && (pCat.includes(cTarget) || cTarget.includes(pCat))) ||
