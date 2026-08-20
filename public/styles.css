@@ -4931,3 +4931,10 @@ section.full-width-banner-section {
 .collection-card-badge {
   display: none !important;
 }
+
+
+/* Hide testimonials stats bar and bottom reviews CTA */
+.tg-stats-bar,
+.tg-bottom-decor {
+  display: none !important;
+}

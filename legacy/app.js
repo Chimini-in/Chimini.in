@@ -525,30 +525,6 @@ function renderTestimonials() {
           `;
         }).join('')}
       </div>
-
-      <!-- Bottom Stats Bar -->
-      <div class="tg-stats-bar">
-        <div class="tg-stat">
-          <div class="tg-stat-value">4.9★</div>
-          <div class="tg-stat-label">Average Rating</div>
-        </div>
-        <div class="tg-stat-divider"></div>
-        <div class="tg-stat">
-          <div class="tg-stat-value">12K+</div>
-          <div class="tg-stat-label">Happy Customers</div>
-        </div>
-        <div class="tg-stat-divider"></div>
-        <div class="tg-stat">
-          <div class="tg-stat-value">98%</div>
-          <div class="tg-stat-label">Would Gift Again</div>
-        </div>
-      </div>
-      
-      <!-- Decorative Pattern & CTA -->
-      <div class="tg-bottom-decor">
-        <div class="tg-pattern">✦ ❋ ✦ ❋ ✦</div>
-        <button class="tg-cta-btn">READ MORE REVIEWS</button>
-      </div>
     </div>
   `;
 }
