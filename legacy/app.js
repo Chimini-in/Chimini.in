@@ -335,30 +335,37 @@ function renderBestSellers() {
 function renderFragranceCategories() {
   if (!DOM.categoriesList) return;
   DOM.categoriesList.innerHTML = "";
-  
-  const cats = storeState.adminSettings.categories;
-  
+
+  const cats = (storeState.adminSettings.categories || []).filter(c => c.is_published !== false || c.published !== false);
+  if (cats.length === 0) return;
+
   cats.forEach(cat => {
     const item = document.createElement("div");
     item.className = "category-item";
+    const slug = cat.slug || (cat.name || cat.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const name = cat.name || cat.title || 'Fragrance';
+    const image = cat.image || cat.image_url || 'assets/product_jasmine.png';
+
     item.innerHTML = `
       <div class="category-circle-wrapper">
-        <img src="${cat.image}" alt="${cat.name}" onerror="this.src='assets/product_jasmine.png'">
+        <img src="${image}" alt="${name}" onerror="this.src='assets/product_jasmine.png'">
       </div>
-      <span class="category-title">${cat.name}</span>
+      <span class="category-title">${name}</span>
     `;
     item.addEventListener("click", () => {
-      // Filter best sellers by category query
-      storeState.activeCategory = cat.name.toLowerCase();
-      storeState.searchQuery = "";
-      if (DOM.searchInput) DOM.searchInput.value = "";
-      
-      // Update nav states
-      DOM.navLinks.forEach(l => l.classList.remove("active"));
-      
-      renderBestSellers();
-      // Scroll to best sellers
-      document.getElementById("best-sellers").scrollIntoView({ behavior: "smooth" });
+      // Navigate to shop with fragrance filter
+      const shopUrl = '/shop?fragrance=' + encodeURIComponent(slug);
+      // If we are already on the shop page, filter in-place instead of navigating
+      const shopContainer = document.getElementById("shop-page-container");
+      if (shopContainer && shopContainer.offsetParent !== null) {
+        storeState.activeFragrance = slug;
+        storeState.searchQuery = "";
+        if (DOM.searchInput) DOM.searchInput.value = "";
+        renderShopProducts();
+        shopContainer.scrollIntoView({ behavior: "smooth" });
+      } else {
+        window.location.href = shopUrl;
+      }
     });
     DOM.categoriesList.appendChild(item);
   });
@@ -1557,11 +1564,18 @@ function renderPageContent() {
 function renderShopPage() {
   const container = document.getElementById("shop-page-container");
   if (!container) return;
-  // Parse URL parameters for initial category filter
+  // Parse URL parameters for initial category/fragrance filter
   const params = new URLSearchParams(window.location.search);
   const catQuery = params.get("category");
-  if (catQuery && !storeState.shopInitialized) {
-    storeState.activeCategory = catQuery.toLowerCase();
+  const fragranceQuery = params.get("fragrance");
+  if (!storeState.shopInitialized) {
+    if (fragranceQuery) {
+      storeState.activeFragrance = fragranceQuery.toLowerCase();
+      storeState.activeCategory = "all";
+    } else if (catQuery) {
+      storeState.activeCategory = catQuery.toLowerCase();
+      storeState.activeFragrance = null;
+    }
     storeState.shopInitialized = true;
   }
   
@@ -2422,6 +2436,22 @@ async function fetchSupabaseData() {
       }));
     }
 
+    
+    // Map Categories (Shop by Fragrance circles) from Supabase
+    if (Array.isArray(categories) && categories.length > 0) {
+      newSettings.categories = categories
+        .filter(c => c.is_published !== false)
+        .map(c => ({
+          id: c.id,
+          name: c.title || '',
+          title: c.title || '',
+          slug: c.slug || c.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+          image: c.image_url || 'assets/product_jasmine.png',
+          image_url: c.image_url || 'assets/product_jasmine.png',
+          sort_order: c.sort_order || 0
+        }));
+    }
+
     // Map Announcements
     if (Array.isArray(settings)) {
       const announcementSetting = settings.find(s => s.setting_key === 'announcements');
@@ -2470,6 +2500,7 @@ async function fetchSupabaseData() {
           : (p.image_url ? [p.image_url, p.secondary_image_url || 'assets/product_sandalwood.png', 'assets/product_rose.png', 'assets/product_fig.png'].filter(Boolean) : ['assets/product_jasmine.png']),
         category: p.categories?.title?.toLowerCase() || p.category || 'candles',
         categoryTitle: p.categories?.title || 'Artisanal Candles',
+        fragrance_tag: p.fragrance_tag || '',
         fragrance: p.fragrance || 'Signature Botanical Blend',
         description: p.description || '',
         careInfo: p.care_info || '',

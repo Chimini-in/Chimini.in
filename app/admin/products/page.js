@@ -43,6 +43,7 @@ export default function ProductsPage() {
     secondary_image_url: '',
     gallery_images: '', // newline or comma separated
     category_id: '',
+    fragrance_tag: '',
     fragrance: '',
     badges: '',
     care_info: '',
@@ -105,6 +106,7 @@ export default function ProductsPage() {
         secondary_image_url: formData.secondary_image_url || '',
         images: galleryArr.length > 0 ? galleryArr : (formData.image_url ? [formData.image_url] : []),
         category_id: formData.category_id || null,
+        fragrance_tag: formData.fragrance_tag || '',
         fragrance: formData.fragrance || '',
         badges: formData.badges || '',
         care_info: formData.care_info || '',
@@ -148,6 +150,7 @@ export default function ProductsPage() {
         secondary_image_url: prod.secondary_image_url || '',
         gallery_images: galleryStr,
         category_id: prod.category_id || '',
+        fragrance_tag: prod.fragrance_tag || '',
         fragrance: prod.fragrance || '',
         badges: prod.badges || '',
         care_info: prod.care_info || '',
@@ -169,6 +172,7 @@ export default function ProductsPage() {
         secondary_image_url: '',
         gallery_images: '',
         category_id: '',
+        fragrance_tag: '',
         fragrance: '',
         badges: '',
         care_info: '',
@@ -261,7 +265,7 @@ export default function ProductsPage() {
               <tr style={{ borderBottom: '2px solid #e2e8f0', textAlign: 'left', backgroundColor: '#f8fafc' }}>
                 <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b', width: '60px' }}>Image</th>
                 <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b' }}>Title &amp; Fragrance</th>
-                <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b' }}>Category</th>
+                <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b' }}>Fragrance Tag</th>
                 <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b' }}>Price</th>
                 <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b', textAlign: 'center' }}>Badges</th>
                 <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b', textAlign: 'center' }}>Status</th>
@@ -283,7 +287,7 @@ export default function ProductsPage() {
                     {prod.fragrance && <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>{prod.fragrance}</div>}
                   </td>
                   <td style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#475569' }}>
-                    {prod.categories?.title || 'Candles'}
+                    {prod.fragrance_tag || prod.categories?.title || <span style={{ color: '#cbd5e1' }}>—</span>}
                   </td>
                   <td style={{ padding: '14px 16px', fontSize: '0.92rem', color: '#1a1a1a', fontWeight: '600' }}>
                     ₹{prod.price}
@@ -373,10 +377,10 @@ export default function ProductsPage() {
                         <input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required style={inputStyle} placeholder="e.g. Jasmine &amp; Oakwood" />
                       </div>
                       <div>
-                        <label style={labelStyle}>Category</label>
-                        <select value={formData.category_id} onChange={e => setFormData({...formData, category_id: e.target.value})} style={inputStyle}>
-                          <option value="">-- Select Category --</option>
-                          {categories.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+                        <label style={labelStyle}>Fragrance Tag <span style={{fontWeight:'normal', color:'#94a3b8'}}>(links to homepage circle filter)</span></label>
+                        <select value={formData.fragrance_tag} onChange={e => setFormData({...formData, fragrance_tag: e.target.value})} style={inputStyle}>
+                          <option value="">-- Select Fragrance --</option>
+                          {categories.map(c => <option key={c.id} value={c.slug || c.title.toLowerCase()}>{c.title}</option>)}
                         </select>
                       </div>
                     </div>
@@ -398,7 +402,7 @@ export default function ProductsPage() {
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                       <div>
-                        <label style={labelStyle}>Fragrance Notes</label>
+                        <label style={labelStyle}>Fragrance Notes <span style={{fontWeight:'normal', color:'#94a3b8'}}>(display on product page)</span></label>
                         <input type="text" value={formData.fragrance} onChange={e => setFormData({...formData, fragrance: e.target.value})} style={inputStyle} placeholder="e.g. Night Jasmine, Smoked Oakwood, Amber Resin" />
                       </div>
                       <div>

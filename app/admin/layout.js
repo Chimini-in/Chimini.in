@@ -81,7 +81,7 @@ export default function AdminLayout({ children }) {
         <nav style={{ flex: 1, padding: '20px 0', display: 'flex', flexDirection: 'column', gap: '5px' }}>
           <SidebarLink href="/admin/dashboard" current={pathname}>Dashboard</SidebarLink>
           <SidebarLink href="/admin/banners" current={pathname}>Banners & Hero</SidebarLink>
-          <SidebarLink href="/admin/categories" current={pathname}>Categories</SidebarLink>
+          <SidebarLink href="/admin/categories" current={pathname}>Fragrances (Home Circles)</SidebarLink>
           <SidebarLink href="/admin/collections" current={pathname}>Collections</SidebarLink>
           <SidebarLink href="/admin/products" current={pathname}>Products & Shop</SidebarLink>
           <SidebarLink href="/admin/pages" current={pathname}>Static Pages</SidebarLink>
