@@ -181,6 +181,7 @@ let storeState = {
   wishlist: JSON.parse(localStorage.getItem("chimini_wishlist")) || [],
   searchQuery: "",
   activeCategory: "all",
+  activeFragrance: null,
   currentTestimonialIndex: 0,
   adminSettings: JSON.parse(localStorage.getItem("chimini_admin_settings")) || JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),
   shopLayout: "grid-3",
@@ -352,13 +353,16 @@ function renderFragranceCategories() {
       </div>
       <span class="category-title">${name}</span>
     `;
-    item.addEventListener("click", () => {
-      // Navigate to shop with fragrance filter
-      const shopUrl = '/shop?fragrance=' + encodeURIComponent(slug);
-      // If we are already on the shop page, filter in-place instead of navigating
+    item.addEventListener("click", (e) => {
+      e.preventDefault();
+      const cleanSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const isHtmlExt = window.location.pathname.endsWith('.html');
+      const shopUrl = (isHtmlExt ? 'shop.html' : '/shop') + '?fragrance=' + encodeURIComponent(cleanSlug);
+      
       const shopContainer = document.getElementById("shop-page-container");
       if (shopContainer && shopContainer.offsetParent !== null) {
-        storeState.activeFragrance = slug;
+        storeState.activeFragrance = cleanSlug;
+        storeState.activeCategory = "all";
         storeState.searchQuery = "";
         if (DOM.searchInput) DOM.searchInput.value = "";
         renderShopProducts();
@@ -1568,14 +1572,13 @@ function renderShopPage() {
   const params = new URLSearchParams(window.location.search);
   const catQuery = params.get("category");
   const fragranceQuery = params.get("fragrance");
-  if (!storeState.shopInitialized) {
-    if (fragranceQuery) {
-      storeState.activeFragrance = fragranceQuery.toLowerCase();
-      storeState.activeCategory = "all";
-    } else if (catQuery) {
-      storeState.activeCategory = catQuery.toLowerCase();
-      storeState.activeFragrance = null;
-    }
+  if (fragranceQuery) {
+    storeState.activeFragrance = decodeURIComponent(fragranceQuery).toLowerCase();
+    storeState.activeCategory = "all";
+    storeState.shopInitialized = true;
+  } else if (catQuery) {
+    storeState.activeCategory = decodeURIComponent(catQuery).toLowerCase();
+    storeState.activeFragrance = null;
     storeState.shopInitialized = true;
   }
   
@@ -1722,9 +1725,33 @@ function renderShopProducts() {
     products = products.filter(p => p.name.toLowerCase().includes(q));
   }
   
-  // Apply category tag filter
-  if (storeState.activeCategory !== "all") {
-    products = products.filter(p => p.category === storeState.activeCategory);
+  // Apply fragrance filter (from homepage circle click or ?fragrance= query param)
+  if (storeState.activeFragrance && storeState.activeFragrance !== "all") {
+    const fTarget = storeState.activeFragrance.toLowerCase().trim();
+    const fTargetNormalized = fTarget.replace(/-/g, " ");
+    products = products.filter(p => {
+      const pFragTag = (p.fragrance_tag || "").toLowerCase().trim();
+      const pFragNotes = (p.fragrance || "").toLowerCase().trim();
+      const pName = (p.name || p.title || "").toLowerCase().trim();
+      const pCat = (p.category || "").toLowerCase().trim();
+      const pCatTitle = (p.categoryTitle || "").toLowerCase().trim();
+      
+      return (
+        pFragTag === fTarget ||
+        pFragTag.replace(/-/g, " ") === fTargetNormalized ||
+        (pFragTag && (pFragTag.includes(fTarget) || fTarget.includes(pFragTag))) ||
+        pFragNotes.includes(fTarget) ||
+        pFragNotes.includes(fTargetNormalized) ||
+        pName.includes(fTarget) ||
+        pName.includes(fTargetNormalized) ||
+        pCat.includes(fTarget) ||
+        pCatTitle.includes(fTarget)
+      );
+    });
+  } else if (storeState.activeCategory && storeState.activeCategory !== "all") {
+    // Apply category tag filter
+    const cTarget = storeState.activeCategory.toLowerCase();
+    products = products.filter(p => (p.category || "").toLowerCase() === cTarget);
   }
   
   // Apply price filter
@@ -1738,7 +1765,24 @@ function renderShopProducts() {
   // Update count in middle toolbar
   const countEl = document.getElementById("catalog-product-count");
   if (countEl) {
-    countEl.textContent = `${products.length} product${products.length !== 1 ? 's' : ''} found`;
+    let countText = `${products.length} product${products.length !== 1 ? 's' : ''} found`;
+    if (storeState.activeFragrance && storeState.activeFragrance !== "all") {
+      const displayFrag = storeState.activeFragrance.charAt(0).toUpperCase() + storeState.activeFragrance.slice(1);
+      countEl.innerHTML = `${countText} <span style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:3px 10px;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:12px;font-size:0.78rem;color:#334155;">Fragrance: <strong>${displayFrag}</strong> <button id="clear-fragrance-filter" style="border:none;background:none;cursor:pointer;color:#64748b;font-weight:bold;padding:0 2px;line-height:1;" title="Clear filter">&times;</button></span>`;
+      const clearBtn = document.getElementById("clear-fragrance-filter");
+      if (clearBtn) {
+        clearBtn.addEventListener("click", () => {
+          storeState.activeFragrance = null;
+          if (window.history.replaceState) {
+            const cleanUrl = window.location.pathname;
+            window.history.replaceState(null, '', cleanUrl);
+          }
+          renderShopProducts();
+        });
+      }
+    } else {
+      countEl.textContent = countText;
+    }
   }
   
   // Sync the sort dropdown UI to match persisted state

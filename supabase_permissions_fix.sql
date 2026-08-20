@@ -29,6 +29,14 @@ ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "full_access_categories" ON public.categories;
 CREATE POLICY "full_access_categories" ON public.categories FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 
+-- Ensure categories table has all required columns
+ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS slug text DEFAULT '';
+ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS image_url text DEFAULT '';
+ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS icon text DEFAULT '';
+ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS sort_order integer DEFAULT 0;
+ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS is_published boolean DEFAULT true;
+ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS created_at timestamp with time zone DEFAULT timezone('utc'::text, now());
+
 ALTER TABLE public.testimonials ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "full_access_testimonials" ON public.testimonials;
 CREATE POLICY "full_access_testimonials" ON public.testimonials FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
