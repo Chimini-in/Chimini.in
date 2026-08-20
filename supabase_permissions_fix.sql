@@ -59,6 +59,7 @@ ALTER TABLE public.collections ADD COLUMN IF NOT EXISTS image_url text;
 ALTER TABLE public.collections ADD COLUMN IF NOT EXISTS link_url text;
 ALTER TABLE public.collections ADD COLUMN IF NOT EXISTS sort_order integer DEFAULT 0;
 ALTER TABLE public.collections ADD COLUMN IF NOT EXISTS is_published boolean DEFAULT true;
+ALTER TABLE public.collections ADD COLUMN IF NOT EXISTS is_featured boolean DEFAULT false;
 
 ALTER TABLE public.collections ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "full_access_collections" ON public.collections;

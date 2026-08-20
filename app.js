@@ -369,25 +369,42 @@ function renderFeaturedCollections() {
   if (!DOM.collectionsGrid) return;
   DOM.collectionsGrid.innerHTML = "";
   
-  const colls = storeState.adminSettings.collections;
-  colls.forEach(coll => {
+  const rawList = (storeState.collections && storeState.collections.length > 0)
+    ? storeState.collections
+    : ((storeState.adminSettings && storeState.adminSettings.collections) || []);
+  
+  // Filter for collections explicitly marked as featured for the homepage
+  let featuredColls = rawList.filter(c => c.is_published !== false && (c.is_featured === true || c.is_featured === 'true'));
+  
+  // Fallback: If no collections are explicitly marked as featured, show the first 4 published collections
+  if (featuredColls.length === 0) {
+    featuredColls = rawList.filter(c => c.is_published !== false).slice(0, 4);
+  } else {
+    featuredColls = featuredColls.slice(0, 4);
+  }
+  
+  featuredColls.forEach(coll => {
     const card = document.createElement("div");
     card.className = "collection-card";
+    const name = coll.title || coll.name || "Collection";
+    const image = coll.image_url || coll.image || "assets/campaign_banner.png";
+    const link = coll.link_url || coll.link || "/shop?category=all";
+
     card.innerHTML = `
-      <img src="${coll.image}" alt="${coll.name}" onerror="this.src='assets/campaign_banner.png'">
+      <img src="${image}" alt="${name}" onerror="this.src='assets/campaign_banner.png'">
       <div class="collection-overlay">
-        <span class="collection-title-overlay">${coll.name}</span>
+        <span class="collection-title-overlay">${name}</span>
       </div>
     `;
     card.addEventListener("click", () => {
-      if (coll.link && coll.link.startsWith('#')) {
+      if (link && link.startsWith('#')) {
         storeState.activeCategory = "all";
-        storeState.searchQuery = coll.name;
-        if (DOM.searchInput) DOM.searchInput.value = coll.name;
+        storeState.searchQuery = name;
+        if (DOM.searchInput) DOM.searchInput.value = name;
         renderBestSellers();
         document.getElementById("best-sellers").scrollIntoView({ behavior: "smooth" });
-      } else if (coll.link) {
-        window.location.href = coll.link;
+      } else if (link) {
+        window.location.href = link;
       }
     });
     DOM.collectionsGrid.appendChild(card);
@@ -2424,6 +2441,7 @@ async function fetchSupabaseData() {
         link: c.link_url || c.link || '/shop?category=all',
         link_url: c.link_url || c.link || '/shop?category=all',
         is_published: c.is_published !== false,
+        is_featured: c.is_featured === true || c.is_featured === "true",
         sort_order: c.sort_order || 0
       }));
     }

@@ -9,7 +9,7 @@ export default function CollectionsAdminPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
-    title: '', description: '', image_url: '', link_url: '', sort_order: 0, is_published: true
+    title: '', description: '', image_url: '', link_url: '', sort_order: 0, is_published: true, is_featured: false
   });
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
@@ -50,7 +50,8 @@ export default function CollectionsAdminPage() {
       image_url: formData.image_url?.trim() || '',
       link_url: formData.link_url?.trim() || '',
       sort_order: parseInt(formData.sort_order) || 0,
-      is_published: formData.is_published !== false
+      is_published: formData.is_published !== false,
+      is_featured: formData.is_featured === true
     };
 
     if (!payload.title) {
@@ -98,7 +99,8 @@ export default function CollectionsAdminPage() {
         image_url: item.image_url || item.image || '',
         link_url: item.link_url || item.link || '',
         sort_order: item.sort_order || 0,
-        is_published: item.is_published !== false
+        is_published: item.is_published !== false,
+        is_featured: item.is_featured === true || item.is_featured === 'true'
       });
     } else {
       setEditingId(null);
@@ -108,7 +110,8 @@ export default function CollectionsAdminPage() {
         image_url: '',
         link_url: '',
         sort_order: collections.length,
-        is_published: true
+        is_published: true,
+        is_featured: false
       });
     }
     setShowModal(true);
@@ -141,6 +144,23 @@ export default function CollectionsAdminPage() {
       const { error } = await supabaseClient
         .from('collections')
         .update({ is_published: !current })
+        .eq('id', id);
+
+      if (error) {
+        alert('Update failed: ' + error.message);
+      } else {
+        fetchData();
+      }
+    } catch (err) {
+      alert('Update failed: ' + err.message);
+    }
+  };
+
+  const toggleFeatured = async (id, current) => {
+    try {
+      const { error } = await supabaseClient
+        .from('collections')
+        .update({ is_featured: !current })
         .eq('id', id);
 
       if (error) {
@@ -192,13 +212,15 @@ export default function CollectionsAdminPage() {
     boxSizing: 'border-box'
   };
 
+  const featuredCount = collections.filter(c => c.is_featured === true || c.is_featured === 'true').length;
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <div>
           <h3 style={{ margin: 0, color: '#1a1a1a', fontSize: '1.2rem' }}>Featured Collections</h3>
           <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '0.85rem' }}>
-            Manage collections displayed on the Collections page and storefront.
+            Manage collections. Collections marked as <strong>★ Featured</strong> (up to 4) appear on the Home page grid; all published collections appear on the /collections page.
           </p>
         </div>
         <button
@@ -228,6 +250,7 @@ export default function CollectionsAdminPage() {
                 <th style={{ padding: '15px', fontSize: '0.85rem', color: '#64748b' }}>Image</th>
                 <th style={{ padding: '15px', fontSize: '0.85rem', color: '#64748b' }}>Title</th>
                 <th style={{ padding: '15px', fontSize: '0.85rem', color: '#64748b' }}>Link</th>
+                <th style={{ padding: '15px', fontSize: '0.85rem', color: '#64748b', textAlign: 'center' }}>Home Featured</th>
                 <th style={{ padding: '15px', fontSize: '0.85rem', color: '#64748b', textAlign: 'center' }}>Status</th>
                 <th style={{ padding: '15px', fontSize: '0.85rem', color: '#64748b', textAlign: 'right' }}>Actions</th>
               </tr>
@@ -235,68 +258,89 @@ export default function CollectionsAdminPage() {
             <tbody>
               {collections.length === 0 ? (
                 <tr>
-                  <td colSpan="6" style={{ padding: '30px', textAlign: 'center', color: '#94a3b8' }}>
+                  <td colSpan="7" style={{ padding: '30px', textAlign: 'center', color: '#94a3b8' }}>
                     No collections yet. Click "+ Add Collection" above!
                   </td>
                 </tr>
-              ) : collections.map(item => (
-                <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                  <td style={{ padding: '15px', fontSize: '0.9rem', color: '#64748b' }}>{item.sort_order ?? 0}</td>
-                  <td style={{ padding: '15px' }}>
-                    {item.image_url || item.image ? (
-                      <img
-                        src={item.image_url || item.image}
-                        alt={item.title || item.name}
-                        style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px' }}
-                      />
-                    ) : (
-                      <div style={{ width: '60px', height: '60px', backgroundColor: '#f1f5f9', borderRadius: '6px' }} />
-                    )}
-                  </td>
-                  <td style={{ padding: '15px', fontSize: '0.9rem', fontWeight: '500', color: '#1a1a1a' }}>
-                    {item.title || item.name}
-                    {item.description && (
-                      <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 400, marginTop: '2px' }}>
-                        {item.description}
-                      </div>
-                    )}
-                  </td>
-                  <td style={{ padding: '15px', fontSize: '0.82rem', color: '#64748b' }}>
-                    {item.link_url || item.link || '—'}
-                  </td>
-                  <td style={{ padding: '15px', textAlign: 'center' }}>
-                    <button
-                      onClick={() => togglePublish(item.id, item.is_published !== false)}
-                      style={{
-                        padding: '4px 10px',
-                        borderRadius: '12px',
-                        fontSize: '0.75rem',
-                        border: 'none',
-                        cursor: 'pointer',
-                        fontWeight: '600',
-                        backgroundColor: item.is_published !== false ? '#dcfce7' : '#f1f5f9',
-                        color: item.is_published !== false ? '#166534' : '#64748b'
-                      }}
-                    >
-                      {item.is_published !== false ? 'Published' : 'Hidden'}
-                    </button>
-                  </td>
-                  <td style={{ padding: '15px', textAlign: 'right' }}>
-                    <button
-                      onClick={() => openModal(item)}
-                      style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer', marginRight: '15px', fontSize: '0.85rem', fontWeight: '500' }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '500' }}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              ) : collections.map(item => {
+                const isItemFeatured = item.is_featured === true || item.is_featured === 'true';
+                return (
+                  <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '15px', fontSize: '0.9rem', color: '#64748b' }}>{item.sort_order ?? 0}</td>
+                    <td style={{ padding: '15px' }}>
+                      {item.image_url || item.image ? (
+                        <img
+                          src={item.image_url || item.image}
+                          alt={item.title || item.name}
+                          style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px' }}
+                        />
+                      ) : (
+                        <div style={{ width: '60px', height: '60px', backgroundColor: '#f1f5f9', borderRadius: '6px' }} />
+                      )}
+                    </td>
+                    <td style={{ padding: '15px', fontSize: '0.9rem', fontWeight: '500', color: '#1a1a1a' }}>
+                      {item.title || item.name}
+                      {item.description && (
+                        <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 400, marginTop: '2px' }}>
+                          {item.description}
+                        </div>
+                      )}
+                    </td>
+                    <td style={{ padding: '15px', fontSize: '0.82rem', color: '#64748b' }}>
+                      {item.link_url || item.link || '—'}
+                    </td>
+                    <td style={{ padding: '15px', textAlign: 'center' }}>
+                      <button
+                        onClick={() => toggleFeatured(item.id, isItemFeatured)}
+                        title="Click to toggle homepage featured status (max 4 on home)"
+                        style={{
+                          padding: '5px 12px',
+                          borderRadius: '12px',
+                          fontSize: '0.75rem',
+                          border: 'none',
+                          cursor: 'pointer',
+                          fontWeight: '600',
+                          backgroundColor: isItemFeatured ? '#fef3c7' : '#f1f5f9',
+                          color: isItemFeatured ? '#b45309' : '#94a3b8'
+                        }}
+                      >
+                        {isItemFeatured ? '★ Featured' : '☆ Not on Home'}
+                      </button>
+                    </td>
+                    <td style={{ padding: '15px', textAlign: 'center' }}>
+                      <button
+                        onClick={() => togglePublish(item.id, item.is_published !== false)}
+                        style={{
+                          padding: '4px 10px',
+                          borderRadius: '12px',
+                          fontSize: '0.75rem',
+                          border: 'none',
+                          cursor: 'pointer',
+                          fontWeight: '600',
+                          backgroundColor: item.is_published !== false ? '#dcfce7' : '#f1f5f9',
+                          color: item.is_published !== false ? '#166534' : '#64748b'
+                        }}
+                      >
+                        {item.is_published !== false ? 'Published' : 'Hidden'}
+                      </button>
+                    </td>
+                    <td style={{ padding: '15px', textAlign: 'right' }}>
+                      <button
+                        onClick={() => openModal(item)}
+                        style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer', marginRight: '15px', fontSize: '0.85rem', fontWeight: '500' }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '500' }}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
@@ -420,16 +464,30 @@ export default function CollectionsAdminPage() {
                 )}
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                <input
-                  type="checkbox"
-                  id="col_pub"
-                  checked={formData.is_published}
-                  onChange={e => setFormData({ ...formData, is_published: e.target.checked })}
-                />
-                <label htmlFor="col_pub" style={{ fontSize: '0.9rem', color: '#334155' }}>
-                  Published (visible on Collections page and storefront)
-                </label>
+              {/* Featured & Published checkboxes */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '6px', padding: '12px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <input
+                    type="checkbox"
+                    id="col_featured"
+                    checked={formData.is_featured}
+                    onChange={e => setFormData({ ...formData, is_featured: e.target.checked })}
+                  />
+                  <label htmlFor="col_featured" style={{ fontSize: '0.9rem', fontWeight: '600', color: '#1e293b', cursor: 'pointer' }}>
+                    ★ Feature on Homepage (Display in 4-card grid on Home)
+                  </label>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <input
+                    type="checkbox"
+                    id="col_pub"
+                    checked={formData.is_published}
+                    onChange={e => setFormData({ ...formData, is_published: e.target.checked })}
+                  />
+                  <label htmlFor="col_pub" style={{ fontSize: '0.9rem', color: '#334155', cursor: 'pointer' }}>
+                    Published (visible on Collections page and storefront)
+                  </label>
+                </div>
               </div>
 
               <div style={{ display: 'flex', gap: '10px', marginTop: '15px', justifyContent: 'flex-end' }}>
