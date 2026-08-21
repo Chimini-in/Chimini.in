@@ -2503,7 +2503,7 @@ function renderContactPage() {
         </div>
         <div class="contact-detail-item">
           <h3>Corporate & Events Gifting</h3>
-          <p>partners@chimini.com</p>
+          <p>chiminiofficial@gmail.com</p>
         </div>
       </div>
 
