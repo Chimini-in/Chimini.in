@@ -820,28 +820,45 @@ function toggleWishlist(productId) {
 
 // Drawer Open/Close utilities
 function openDrawer(drawerElement) {
+  if (!drawerElement) return;
   closeAllDrawers();
   drawerElement.classList.add("active");
   drawerElement.setAttribute("aria-hidden", "false");
-  DOM.drawerOverlay.classList.add("active");
+  const overlay = DOM.drawerOverlay || document.getElementById("drawer-overlay");
+  if (overlay) overlay.classList.add("active");
   document.body.style.overflow = "hidden"; // disable body scrolling
 }
 
 function closeAllDrawers() {
-  DOM.cartDrawer.classList.remove("active");
-  DOM.cartDrawer.setAttribute("aria-hidden", "true");
-  DOM.wishlistDrawer.classList.remove("active");
-  DOM.wishlistDrawer.setAttribute("aria-hidden", "true");
-  DOM.adminDrawer.classList.remove("active");
-  DOM.adminDrawer.setAttribute("aria-hidden", "true");
-  
+  const cart = DOM.cartDrawer || document.getElementById("cart-drawer");
+  if (cart) {
+    cart.classList.remove("active");
+    cart.setAttribute("aria-hidden", "true");
+  }
+  const wish = DOM.wishlistDrawer || document.getElementById("wishlist-drawer");
+  if (wish) {
+    wish.classList.remove("active");
+    wish.setAttribute("aria-hidden", "true");
+  }
+  const admin = DOM.adminDrawer || document.getElementById("admin-drawer");
+  if (admin) {
+    admin.classList.remove("active");
+    admin.setAttribute("aria-hidden", "true");
+  }
   const filterDrawer = document.getElementById("filter-drawer");
   if (filterDrawer) {
     filterDrawer.classList.remove("active");
     filterDrawer.setAttribute("aria-hidden", "true");
   }
-  
-  DOM.drawerOverlay.classList.remove("active");
+  const authModal = document.getElementById("auth-modal");
+  if (authModal) {
+    authModal.classList.remove("active");
+    authModal.setAttribute("aria-hidden", "true");
+  }
+  const overlay = DOM.drawerOverlay || document.getElementById("drawer-overlay");
+  if (overlay) {
+    overlay.classList.remove("active");
+  }
   document.body.style.overflow = "";
 }
 
@@ -1342,21 +1359,55 @@ function resetAdminSettings() {
 // --- 7. EVENT BINDING & HANDLERS ---
 function bindEvents() {
   
-  // Drawer Toggles
-  if (DOM.cartBtn) DOM.cartBtn.addEventListener("click", () => openDrawer(DOM.cartDrawer));
-  if (DOM.closeCartBtn) DOM.closeCartBtn.addEventListener("click", closeAllDrawers);
-  
-  if (DOM.wishlistBtn) DOM.wishlistBtn.addEventListener("click", () => openDrawer(DOM.wishlistDrawer));
-  if (DOM.closeWishlistBtn) DOM.closeWishlistBtn.addEventListener("click", closeAllDrawers);
-  
+  // Drawer Toggles (Cart, Wishlist, Account, Overlay)
+  const cartBtns = document.querySelectorAll("#cart-btn, .cart-toggle-btn");
+  cartBtns.forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const drawer = document.getElementById("cart-drawer");
+      if (drawer) openDrawer(drawer);
+    });
+  });
+
+  const wishlistBtns = document.querySelectorAll("#wishlist-btn, .wishlist-header-btn");
+  wishlistBtns.forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const drawer = document.getElementById("wishlist-drawer");
+      if (drawer) openDrawer(drawer);
+    });
+  });
+
+  const accountBtns = document.querySelectorAll("#account-btn, .account-toggle-btn");
+  accountBtns.forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (storeState.currentUser) {
+        openAuthModal('profile', false);
+      } else {
+        openAuthModal('login', false);
+      }
+    });
+  });
+
+  const closeCartBtn = document.getElementById("close-cart-btn");
+  if (closeCartBtn) closeCartBtn.addEventListener("click", closeAllDrawers);
+
+  const closeWishlistBtn = document.getElementById("close-wishlist-btn");
+  if (closeWishlistBtn) closeWishlistBtn.addEventListener("click", closeAllDrawers);
+
+  const overlay = document.getElementById("drawer-overlay");
+  if (overlay) overlay.addEventListener("click", closeAllDrawers);
+
   if (DOM.adminToggleBtn) DOM.adminToggleBtn.addEventListener("click", () => {
-    initAdminFields(); // load values before opening
-    openDrawer(DOM.adminDrawer);
+    initAdminFields();
+    if (DOM.adminDrawer) openDrawer(DOM.adminDrawer);
   });
   if (DOM.closeAdminBtn) DOM.closeAdminBtn.addEventListener("click", closeAllDrawers);
-  
-  if (DOM.drawerOverlay) DOM.drawerOverlay.addEventListener("click", closeAllDrawers);
-  
+
   // Checkout simulation
   if (DOM.checkoutBtn) {
     DOM.checkoutBtn.addEventListener("click", () => {
