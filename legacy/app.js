@@ -15,7 +15,7 @@ const DEFAULT_SETTINGS = {
       name: "Jasmine & Oakwood",
       price: 28.00,
       originalPrice: 38.00,
-      badge: "BEST SELLER",
+      badge: null,
       image: "assets/product_jasmine.png",
       secondaryImage: "assets/product_sandalwood.png",
       images: [
@@ -39,7 +39,7 @@ const DEFAULT_SETTINGS = {
       name: "Sandalwood & Amber",
       price: 32.00,
       originalPrice: null,
-      badge: "NEW ARRIVAL",
+      badge: null,
       image: "assets/product_sandalwood.png",
       secondaryImage: "assets/product_jasmine.png",
       images: [
@@ -63,7 +63,7 @@ const DEFAULT_SETTINGS = {
       name: "Velvet Rose & Oud",
       price: 34.00,
       originalPrice: 48.00,
-      badge: "FAST MOVING",
+      badge: null,
       image: "assets/product_rose.png",
       secondaryImage: "assets/product_fig.png",
       images: [
@@ -87,7 +87,7 @@ const DEFAULT_SETTINGS = {
       name: "Wild Fig & Honey",
       price: 29.00,
       originalPrice: null,
-      badge: "LIMITED EDITION",
+      badge: null,
       image: "assets/product_fig.png",
       secondaryImage: "assets/product_rose.png",
       images: [
@@ -1874,7 +1874,7 @@ function renderShopProducts() {
     const isWishlisted = storeState.wishlist.includes(product.id);
     
     // Dynamic premium badge text
-    const badgeText = product.badge ? product.badge.trim() : null;
+    const badgeText = (product.badge && product.badge.trim() !== '') ? product.badge.trim() : null;
     
     // Dynamic discount calculations
     const priceNum = parseFloat(product.price);
@@ -2606,7 +2606,7 @@ async function fetchSupabaseData() {
         name: p.title,
         price: p.price,
         originalPrice: p.original_price || null,
-        badge: p.badges || (p.is_best_seller ? 'BEST SELLER' : null),
+        badge: (p.badges && p.badges.trim() !== '') ? p.badges.trim() : null,
         image: p.image_url || 'assets/product_jasmine.png',
         secondaryImage: p.secondary_image_url || p.image_url || 'assets/product_sandalwood.png',
         images: (Array.isArray(p.images) && p.images.length > 0) 
@@ -2697,7 +2697,7 @@ function renderProductDetailPage() {
   const swatches = getScentSwatches(product.name);
 
   // Badge text
-  const badgeText = product.badge ? product.badge.trim() : (product.is_best_seller ? 'BEST SELLER' : null);
+  const badgeText = (product.badge && product.badge.trim() !== '') ? product.badge.trim() : null;
 
   // Wishlist state
   const isWishlisted = storeState.wishlist.includes(product.id);
