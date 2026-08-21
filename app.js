@@ -256,10 +256,65 @@ const DOM = {
 
 // --- 4. RENDERERS & LAYOUT BUILDERS ---
 
-// A. Announcement Bar
+// A. Announcement Bar (Auto-rotating 2-second slider, single line)
+let announcementInterval = null;
+let currentAnnouncementIndex = 0;
+
+function getAnnouncementList() {
+  const settings = storeState.adminSettings || {};
+  if (Array.isArray(settings.announcements) && settings.announcements.length > 0) {
+    return settings.announcements.map(s => String(s).trim()).filter(Boolean);
+  }
+  const text = settings.announcementText || "";
+  if (text.includes("•")) {
+    return text.split("•").map(s => s.trim()).filter(Boolean);
+  }
+  if (text.includes("\n")) {
+    return text.split("\n").map(s => s.trim()).filter(Boolean);
+  }
+  if (text.trim()) {
+    return [text.trim()];
+  }
+  return ["Complimentary shipping on orders over ₹100 • Use code LUXE15 for 15% off"];
+}
+
 function renderAnnouncement() {
-  if (DOM.announcementText) {
-    DOM.announcementText.textContent = storeState.adminSettings.announcementText;
+  const el = DOM.announcementText || document.getElementById("announcement-text");
+  if (!el) return;
+
+  const list = getAnnouncementList();
+  if (list.length === 0) return;
+
+  if (announcementInterval) {
+    clearInterval(announcementInterval);
+    announcementInterval = null;
+  }
+
+  currentAnnouncementIndex = 0;
+  el.textContent = list[0];
+  el.style.opacity = "1";
+  el.style.transform = "translateY(0)";
+  el.style.transition = "transform 0.4s ease, opacity 0.4s ease";
+
+  // Cycle continuously through all announcements every 2 seconds
+  if (list.length > 1) {
+    announcementInterval = setInterval(() => {
+      el.style.transition = "transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease";
+      el.style.transform = "translateY(-100%)";
+      el.style.opacity = "0";
+
+      setTimeout(() => {
+        currentAnnouncementIndex = (currentAnnouncementIndex + 1) % list.length;
+        el.textContent = list[currentAnnouncementIndex];
+        el.style.transition = "none";
+        el.style.transform = "translateY(100%)";
+
+        void el.offsetWidth; // Force layout reflow
+        el.style.transition = "transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease";
+        el.style.transform = "translateY(0)";
+        el.style.opacity = "1";
+      }, 350);
+    }, 2000);
   }
 }
 

@@ -296,19 +296,41 @@ img {
 .announcement-bar {
   background-color: var(--dark-charcoal);
   color: var(--bg-primary);
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   font-weight: 400;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  padding: 10px 20px;
+  padding: 0 20px;
   text-align: center;
   position: relative;
   z-index: 1002;
+  height: 38px;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .announcement-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  max-width: 1200px;
+  position: relative;
+}
+
+#announcement-text {
+  font-family: var(--font-sans);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   display: inline-block;
-  animation: fadeIn 0.5s ease-out;
+  line-height: 38px;
+  will-change: transform, opacity;
 }
 
 .sticky-header-container {
@@ -2194,7 +2216,12 @@ section.full-width-banner-section {
 
   .announcement-bar {
     font-size: 0.65rem;
-    padding: 6px 10px;
+    padding: 0 10px;
+    height: 36px;
+    min-height: 36px;
+  }
+  #announcement-text {
+    line-height: 36px;
   }
 
   .shop-products-grid {
