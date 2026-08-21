@@ -194,6 +194,9 @@ let storeState = {
   searchQuery: "",
   activeCategory: "all",
   activeFragrance: null,
+  currentUser: null,
+  pendingCheckout: false,
+  otpEmail: "",
   currentTestimonialIndex: 0,
   adminSettings: cachedAdminSettings || JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),
   banners: cachedBanners || [],
@@ -1312,6 +1315,7 @@ function saveAdminSettings() {
   // Close drawers & refresh page renderers
   closeAllDrawers();
   initStore();
+  initAuth();
   showToast("Customizer changes applied successfully!");
 }
 
@@ -3329,4 +3333,539 @@ function renderProductDetailPage() {
       if (id) toggleWishlist(id);
     });
   });
+}
+
+
+// ==========================================================================
+// 8. CUSTOMER AUTHENTICATION ENGINE (Supabase Auth + Email OTP + Session)
+// ==========================================================================
+
+let supabaseAuthClient = null;
+try {
+  if (typeof supabase !== 'undefined' && supabase.createClient) {
+    supabaseAuthClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  }
+} catch (e) {
+  console.warn("Supabase Auth client initialization deferred:", e);
+}
+
+let otpCountdownInterval = null;
+
+function initAuth() {
+  if (!supabaseAuthClient) {
+    try {
+      if (typeof supabase !== 'undefined' && supabase.createClient) {
+        supabaseAuthClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      }
+    } catch (e) {}
+  }
+
+  if (supabaseAuthClient) {
+    // Listen to real-time auth changes
+    supabaseAuthClient.auth.onAuthStateChange((event, session) => {
+      if (session && session.user) {
+        storeState.currentUser = session.user;
+        updateAccountUI(session.user);
+      } else {
+        storeState.currentUser = null;
+        updateAccountUI(null);
+      }
+    });
+
+    // Check existing session
+    supabaseAuthClient.auth.getSession().then(({ data: { session } }) => {
+      if (session && session.user) {
+        storeState.currentUser = session.user;
+        updateAccountUI(session.user);
+      } else {
+        storeState.currentUser = null;
+        updateAccountUI(null);
+      }
+    }).catch(err => console.warn("Session check error:", err));
+  }
+
+  bindAuthModalEvents();
+}
+
+function updateAccountUI(user) {
+  const accountBtns = document.querySelectorAll("#account-btn");
+  accountBtns.forEach(btn => {
+    let indicator = btn.querySelector(".user-logged-in-indicator");
+    if (user) {
+      btn.style.position = "relative";
+      if (!indicator) {
+        indicator = document.createElement("span");
+        indicator.className = "user-logged-in-indicator";
+        btn.appendChild(indicator);
+      }
+      btn.setAttribute("title", user.user_metadata?.full_name || user.email);
+    } else {
+      if (indicator) indicator.remove();
+      btn.removeAttribute("title");
+    }
+  });
+}
+
+function openAuthModal(view = 'login', isGate = false) {
+  const modal = document.getElementById("auth-modal");
+  if (!modal) return;
+
+  const gateNotice = document.getElementById("auth-gate-notice");
+  if (gateNotice) {
+    gateNotice.style.display = isGate ? "block" : "none";
+  }
+
+  clearAuthAlert();
+  switchAuthView(view);
+
+  modal.classList.add("active");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
+
+function closeAuthModal() {
+  const modal = document.getElementById("auth-modal");
+  if (!modal) return;
+
+  modal.classList.remove("active");
+  modal.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+  clearAuthAlert();
+  if (otpCountdownInterval) {
+    clearInterval(otpCountdownInterval);
+    otpCountdownInterval = null;
+  }
+}
+
+function switchAuthView(viewName) {
+  clearAuthAlert();
+  const views = document.querySelectorAll(".auth-view");
+  views.forEach(v => v.classList.remove("active"));
+
+  const targetView = document.getElementById("auth-view-" + viewName);
+  if (targetView) targetView.classList.add("active");
+
+  const subtitle = document.getElementById("auth-modal-subtitle");
+  if (subtitle) {
+    if (viewName === 'signup') subtitle.textContent = "Join Chimini Sanctuary";
+    else if (viewName === 'otp') subtitle.textContent = "Verify Security Code";
+    else if (viewName === 'profile') subtitle.textContent = "Artisanal Client Account";
+    else subtitle.textContent = "Welcome to Artisanal Luxury";
+  }
+
+  // Populate profile info if viewing profile
+  if (viewName === 'profile' && storeState.currentUser) {
+    const user = storeState.currentUser;
+    const meta = user.user_metadata || {};
+    const name = meta.full_name || user.email.split('@')[0];
+    const phone = meta.phone || "Not provided";
+
+    const nameEl = document.getElementById("profile-user-name");
+    const emailEl = document.getElementById("profile-user-email");
+    const phoneEl = document.getElementById("profile-user-phone");
+    const avatarEl = document.getElementById("user-avatar-initials");
+
+    if (nameEl) nameEl.textContent = name;
+    if (emailEl) emailEl.textContent = user.email;
+    if (phoneEl) phoneEl.textContent = phone;
+    if (avatarEl) avatarEl.textContent = name.charAt(0).toUpperCase();
+  }
+
+  // Auto focus OTP first digit
+  if (viewName === 'otp') {
+    const firstDigit = document.querySelector(".otp-digit[data-idx='0']");
+    if (firstDigit) setTimeout(() => firstDigit.focus(), 100);
+  }
+}
+
+function setAuthAlert(message, type = 'error') {
+  const alert = document.getElementById("auth-alert");
+  if (!alert) return;
+  alert.textContent = message;
+  alert.className = "auth-alert " + type;
+  alert.style.display = "block";
+}
+
+function clearAuthAlert() {
+  const alert = document.getElementById("auth-alert");
+  if (alert) {
+    alert.style.display = "none";
+    alert.textContent = "";
+    alert.className = "auth-alert";
+  }
+}
+
+function startOtpTimer() {
+  const countdownEl = document.getElementById("resend-countdown");
+  const resendBtn = document.getElementById("btn-resend-otp");
+  if (!countdownEl || !resendBtn) return;
+
+  if (otpCountdownInterval) clearInterval(otpCountdownInterval);
+
+  let seconds = 60;
+  resendBtn.disabled = true;
+  countdownEl.textContent = seconds;
+
+  otpCountdownInterval = setInterval(() => {
+    seconds--;
+    countdownEl.textContent = seconds;
+    if (seconds <= 0) {
+      clearInterval(otpCountdownInterval);
+      otpCountdownInterval = null;
+      resendBtn.disabled = false;
+      resendBtn.textContent = "Resend Code";
+    }
+  }, 1000);
+}
+
+function bindAuthModalEvents() {
+  // Close Modal
+  const closeBtn = document.getElementById("close-auth-modal");
+  if (closeBtn) closeBtn.addEventListener("click", closeAuthModal);
+
+  const modal = document.getElementById("auth-modal");
+  if (modal) {
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeAuthModal();
+    });
+  }
+
+  // Header Account Button Click
+  const accountBtns = document.querySelectorAll("#account-btn");
+  accountBtns.forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (storeState.currentUser) {
+        openAuthModal('profile', false);
+      } else {
+        openAuthModal('login', false);
+      }
+    });
+  });
+
+  // Tab & Switch Buttons
+  document.querySelectorAll(".auth-tab, .auth-switch-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const target = btn.getAttribute("data-tab") || btn.getAttribute("data-switch");
+      if (target) switchAuthView(target);
+    });
+  });
+
+  // Toggle Password Visibility
+  document.querySelectorAll(".auth-toggle-pwd").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const targetId = btn.getAttribute("data-target");
+      const input = document.getElementById(targetId);
+      if (input) {
+        input.type = input.type === "password" ? "text" : "password";
+        btn.textContent = input.type === "password" ? "👁️" : "🙈";
+      }
+    });
+  });
+
+  // Sign Up Form Submission
+  const signupForm = document.getElementById("auth-signup-form");
+  if (signupForm) {
+    signupForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearAuthAlert();
+
+      const name = document.getElementById("signup-name").value.trim();
+      const phone = document.getElementById("signup-phone").value.trim();
+      const email = document.getElementById("signup-email").value.trim().toLowerCase();
+      const password = document.getElementById("signup-password").value;
+      const submitBtn = document.getElementById("btn-signup-submit");
+
+      if (!name || !phone || !email || !password) {
+        setAuthAlert("Please fill in all required fields.", "error");
+        return;
+      }
+
+      if (password.length < 6) {
+        setAuthAlert("Password must be at least 6 characters.", "error");
+        return;
+      }
+
+      if (!supabaseAuthClient) {
+        setAuthAlert("Authentication service is temporarily unavailable. Please try again later.", "error");
+        return;
+      }
+
+      const originalBtnText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = "<span>Sending OTP...</span>";
+
+      try {
+        const { data, error } = await supabaseAuthClient.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: name,
+              phone: phone
+            }
+          }
+        });
+
+        if (error) throw error;
+
+        storeState.otpEmail = email;
+        const targetEmailEl = document.getElementById("otp-target-email");
+        if (targetEmailEl) targetEmailEl.textContent = email;
+
+        // Reset digits
+        document.querySelectorAll(".otp-digit").forEach(d => d.value = "");
+
+        switchAuthView('otp');
+        startOtpTimer();
+        setAuthAlert("Verification code sent! Please check your email inbox (and spam folder).", "success");
+
+      } catch (err) {
+        console.error("Signup error:", err);
+        setAuthAlert(err.message || "Failed to create account. Please try again.", "error");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+      }
+    });
+  }
+
+  // OTP Form Submission & Verification
+  const otpForm = document.getElementById("auth-otp-form");
+  if (otpForm) {
+    otpForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearAuthAlert();
+
+      const digits = Array.from(document.querySelectorAll(".otp-digit")).map(d => d.value.trim()).join("");
+      if (digits.length !== 6) {
+        setAuthAlert("Please enter the complete 6-digit verification code.", "error");
+        return;
+      }
+
+      if (!storeState.otpEmail) {
+        setAuthAlert("Session expired. Please sign up again.", "error");
+        switchAuthView('signup');
+        return;
+      }
+
+      const submitBtn = document.getElementById("btn-verify-otp-submit");
+      const originalBtnText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = "<span>Verifying...</span>";
+
+      try {
+        const { data, error } = await supabaseAuthClient.auth.verifyOtp({
+          email: storeState.otpEmail,
+          token: digits,
+          type: 'signup'
+        });
+
+        if (error) {
+          // Fallback verify type for email confirmation token
+          const fallback = await supabaseAuthClient.auth.verifyOtp({
+            email: storeState.otpEmail,
+            token: digits,
+            type: 'email'
+          });
+          if (fallback.error) throw error;
+        }
+
+        const user = data?.user || (await supabaseAuthClient.auth.getUser()).data?.user;
+        storeState.currentUser = user;
+        updateAccountUI(user);
+
+        closeAuthModal();
+        const userName = user?.user_metadata?.full_name || "Valued Client";
+        showToast("✨ Welcome to Chimini, " + userName + "! Your account is verified.");
+
+        // Check if there is a pending checkout
+        if (storeState.pendingCheckout) {
+          storeState.pendingCheckout = false;
+          triggerCheckoutSuccess();
+        }
+
+      } catch (err) {
+        console.error("OTP verification error:", err);
+        setAuthAlert(err.message || "Invalid or expired verification code. Please check your email or request a new code.", "error");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+      }
+    });
+  }
+
+  // OTP Digits Auto-focus & Paste Handling
+  const digitInputs = document.querySelectorAll(".otp-digit");
+  digitInputs.forEach((input, idx) => {
+    input.addEventListener("input", (e) => {
+      const val = e.target.value;
+      if (val.length >= 1) {
+        e.target.value = val.slice(0, 1);
+        if (idx < digitInputs.length - 1) {
+          digitInputs[idx + 1].focus();
+        }
+      }
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Backspace" && !e.target.value && idx > 0) {
+        digitInputs[idx - 1].focus();
+      }
+    });
+
+    input.addEventListener("paste", (e) => {
+      e.preventDefault();
+      const pasted = (e.clipboardData || window.clipboardData).getData("text").trim();
+      if (/^\d{6}$/.test(pasted)) {
+        pasted.split("").forEach((char, i) => {
+          if (digitInputs[i]) digitInputs[i].value = char;
+        });
+        digitInputs[digitInputs.length - 1].focus();
+      }
+    });
+  });
+
+  // Resend OTP Button
+  const resendBtn = document.getElementById("btn-resend-otp");
+  if (resendBtn) {
+    resendBtn.addEventListener("click", async () => {
+      if (!storeState.otpEmail || !supabaseAuthClient) return;
+      resendBtn.disabled = true;
+      try {
+        const { error } = await supabaseAuthClient.auth.resend({
+          type: 'signup',
+          email: storeState.otpEmail
+        });
+        if (error) throw error;
+        startOtpTimer();
+        setAuthAlert("A fresh 6-digit code has been dispatched to your email from support@chimini.in.", "success");
+      } catch (err) {
+        setAuthAlert(err.message || "Could not resend OTP. Please wait a moment and try again.", "error");
+        resendBtn.disabled = false;
+      }
+    });
+  }
+
+  // Change Email Button
+  const changeEmailBtn = document.getElementById("btn-change-email");
+  if (changeEmailBtn) {
+    changeEmailBtn.addEventListener("click", () => switchAuthView('signup'));
+  }
+
+  // Login Form Submission
+  const loginForm = document.getElementById("auth-login-form");
+  if (loginForm) {
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearAuthAlert();
+
+      const email = document.getElementById("login-email").value.trim().toLowerCase();
+      const password = document.getElementById("login-password").value;
+      const submitBtn = document.getElementById("btn-login-submit");
+
+      if (!email || !password) {
+        setAuthAlert("Please enter your email and password.", "error");
+        return;
+      }
+
+      if (!supabaseAuthClient) {
+        setAuthAlert("Authentication service is temporarily unavailable. Please try again later.", "error");
+        return;
+      }
+
+      const originalBtnText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = "<span>Signing In...</span>";
+
+      try {
+        const { data, error } = await supabaseAuthClient.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (error) throw error;
+
+        storeState.currentUser = data.user;
+        updateAccountUI(data.user);
+
+        closeAuthModal();
+        const userName = data.user?.user_metadata?.full_name || "Valued Client";
+        showToast("✨ Welcome back, " + userName + "!");
+
+        // Check if there is a pending checkout
+        if (storeState.pendingCheckout) {
+          storeState.pendingCheckout = false;
+          triggerCheckoutSuccess();
+        }
+
+      } catch (err) {
+        console.error("Login error:", err);
+        if (err.message && err.message.toLowerCase().includes("email not confirmed")) {
+          storeState.otpEmail = email;
+          const targetEmailEl = document.getElementById("otp-target-email");
+          if (targetEmailEl) targetEmailEl.textContent = email;
+          switchAuthView('otp');
+          startOtpTimer();
+          setAuthAlert("Your email is not verified yet. A verification code is required.", "error");
+        } else {
+          setAuthAlert("Invalid email or password. Please check your credentials.", "error");
+        }
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+      }
+    });
+  }
+
+  // Sign Out Button
+  const signoutBtn = document.getElementById("btn-user-signout");
+  if (signoutBtn) {
+    signoutBtn.addEventListener("click", async () => {
+      if (supabaseAuthClient) {
+        await supabaseAuthClient.auth.signOut();
+      }
+      storeState.currentUser = null;
+      updateAccountUI(null);
+      closeAuthModal();
+      showToast("Signed out successfully.");
+    });
+  }
+
+  // Checkout Gate Button Binding
+  if (DOM.checkoutBtn) {
+    // Replace old simple checkout simulation with authenticated checkout gate
+    DOM.checkoutBtn.replaceWith(DOM.checkoutBtn.cloneNode(true));
+    DOM.checkoutBtn = document.getElementById("checkout-btn");
+
+    DOM.checkoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+
+      if (storeState.cart.length === 0) {
+        showToast("Your cart is empty.");
+        return;
+      }
+
+      // If user is not logged in, prompt authentication gate modal
+      if (!storeState.currentUser) {
+        storeState.pendingCheckout = true;
+        closeAllDrawers();
+        openAuthModal('login', true);
+        return;
+      }
+
+      // If logged in, complete checkout
+      triggerCheckoutSuccess();
+    });
+  }
+}
+
+function triggerCheckoutSuccess() {
+  const user = storeState.currentUser;
+  const userName = user?.user_metadata?.full_name || "Valued Client";
+  alert("Thank you for your order, " + userName + "! Your luxury artisan selection is being prepared.");
+  storeState.cart = [];
+  localStorage.removeItem("chimini_cart");
+  renderCart();
+  closeAllDrawers();
 }

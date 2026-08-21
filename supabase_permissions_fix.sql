@@ -78,7 +78,21 @@ ALTER TABLE public.products ADD COLUMN IF NOT EXISTS images text[] DEFAULT ARRAY
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS fragrance_tag text DEFAULT '';
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS collection_tag text DEFAULT '';
 
--- 5. Reload Supabase PostgREST Schema Cache
+-- 7. Ensure profiles table for customer accounts
+CREATE TABLE IF NOT EXISTS public.profiles (
+  id uuid REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
+  full_name text DEFAULT '',
+  phone text DEFAULT '',
+  email text DEFAULT '',
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "public_profiles_access" ON public.profiles;
+CREATE POLICY "public_profiles_access" ON public.profiles FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+GRANT ALL ON public.profiles TO anon, authenticated;
+
+-- 8. Reload Supabase PostgREST Schema Cache
 NOTIFY pgrst, 'reload schema';
 
 

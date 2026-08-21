@@ -214,10 +214,154 @@
     </div>
   </div>
 
+  
+  <!-- Customer Auth Modal -->
+  <div id="auth-modal" class="auth-modal-overlay" aria-hidden="true">
+    <div class="auth-modal-card animate-scale-up">
+      <button type="button" class="auth-modal-close" id="close-auth-modal" aria-label="Close modal">&times;</button>
+      
+      <!-- Brand Crest & Header -->
+      <div class="auth-modal-header">
+        <div class="auth-modal-brand">CHIMINI</div>
+        <p class="auth-modal-subtitle" id="auth-modal-subtitle">Sanctuary of Fragrance</p>
+      </div>
+
+      <!-- Purchase Gate Alert -->
+      <div id="auth-gate-notice" class="auth-gate-notice" style="display: none;">
+        <span>✨ Please sign in or create an account to proceed with your order.</span>
+      </div>
+
+      <!-- Status / Alert Message -->
+      <div id="auth-alert" class="auth-alert" style="display: none;"></div>
+
+      <!-- VIEW 1: Login -->
+      <div id="auth-view-login" class="auth-view active">
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab active" data-tab="login">Sign In</button>
+          <button type="button" class="auth-tab" data-tab="signup">Create Account</button>
+        </div>
+        
+        <form id="auth-login-form" class="auth-form">
+          <div class="auth-form-group">
+            <label for="login-email">Email Address</label>
+            <input type="email" id="login-email" placeholder="name@domain.com" required autocomplete="email">
+          </div>
+          <div class="auth-form-group">
+            <div class="auth-label-row">
+              <label for="login-password">Password</label>
+            </div>
+            <div class="auth-password-wrapper">
+              <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
+              <button type="button" class="auth-toggle-pwd" data-target="login-password" aria-label="Toggle password">👁️</button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary auth-submit-btn" id="btn-login-submit">
+            <span class="btn-text">Sign In</span>
+          </button>
+        </form>
+
+        <div class="auth-footer-prompt">
+          <span>New to Chimini?</span>
+          <button type="button" class="auth-switch-btn" data-switch="signup">Create an Account</button>
+        </div>
+      </div>
+
+      <!-- VIEW 2: Sign Up -->
+      <div id="auth-view-signup" class="auth-view">
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab" data-tab="login">Sign In</button>
+          <button type="button" class="auth-tab active" data-tab="signup">Create Account</button>
+        </div>
+
+        <form id="auth-signup-form" class="auth-form">
+          <div class="auth-form-group">
+            <label for="signup-name">Full Name</label>
+            <input type="text" id="signup-name" placeholder="e.g. Maya Sharma" required autocomplete="name">
+          </div>
+          <div class="auth-form-group">
+            <label for="signup-phone">Mobile Number</label>
+            <input type="tel" id="signup-phone" placeholder="+91 98765 43210" required autocomplete="tel">
+          </div>
+          <div class="auth-form-group">
+            <label for="signup-email">Email Address</label>
+            <input type="email" id="signup-email" placeholder="name@domain.com" required autocomplete="email">
+            <small class="auth-hint">A 6-digit verification code will be sent to this email from support@chimini.in.</small>
+          </div>
+          <div class="auth-form-group">
+            <label for="signup-password">Password</label>
+            <div class="auth-password-wrapper">
+              <input type="password" id="signup-password" placeholder="Minimum 6 characters" required minlength="6" autocomplete="new-password">
+              <button type="button" class="auth-toggle-pwd" data-target="signup-password" aria-label="Toggle password">👁️</button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary auth-submit-btn" id="btn-signup-submit">
+            <span class="btn-text">Send Verification OTP</span>
+          </button>
+        </form>
+
+        <div class="auth-footer-prompt">
+          <span>Already have an account?</span>
+          <button type="button" class="auth-switch-btn" data-switch="login">Sign In</button>
+        </div>
+      </div>
+
+      <!-- VIEW 3: OTP Verification -->
+      <div id="auth-view-otp" class="auth-view">
+        <div class="auth-otp-header">
+          <div class="auth-otp-icon">✉️</div>
+          <h3>Verify Your Email</h3>
+          <p>We've sent a 6-digit verification code to <br><strong id="otp-target-email">user@email.com</strong></p>
+        </div>
+
+        <form id="auth-otp-form" class="auth-form">
+          <div class="otp-inputs-row" id="otp-inputs-row">
+            <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="otp-digit" data-idx="0" required autofocus>
+            <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="otp-digit" data-idx="1" required>
+            <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="otp-digit" data-idx="2" required>
+            <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="otp-digit" data-idx="3" required>
+            <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="otp-digit" data-idx="4" required>
+            <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="otp-digit" data-idx="5" required>
+          </div>
+          
+          <button type="submit" class="btn btn-primary auth-submit-btn" id="btn-verify-otp-submit">
+            <span class="btn-text">Verify & Continue</span>
+          </button>
+        </form>
+
+        <div class="auth-resend-wrapper">
+          <span>Didn't receive the code?</span>
+          <button type="button" class="auth-resend-btn" id="btn-resend-otp" disabled>Resend in <span id="resend-countdown">60</span>s</button>
+        </div>
+        
+        <div class="auth-change-email-row">
+          <button type="button" class="auth-text-link" id="btn-change-email">&larr; Change email address</button>
+        </div>
+      </div>
+
+      <!-- VIEW 4: User Profile (Logged-In) -->
+      <div id="auth-view-profile" class="auth-view">
+        <div class="auth-profile-card">
+          <div class="auth-avatar-circle" id="user-avatar-initials">U</div>
+          <h3 id="profile-user-name" class="profile-name">Customer Name</h3>
+          <p id="profile-user-email" class="profile-email">email@domain.com</p>
+          <p id="profile-user-phone" class="profile-phone">+91 98765 43210</p>
+          <div class="profile-badge-verified">✓ Verified Account</div>
+        </div>
+
+        <div class="profile-actions-list">
+          <button type="button" class="btn btn-secondary btn-block auth-signout-btn" id="btn-user-signout">Sign Out</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
   <!-- Notification Toast -->
   <div id="toast" class="toast">Added to Cart</div>
 
   <!-- Main JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 </body>
 </html>
