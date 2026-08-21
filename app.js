@@ -1334,6 +1334,7 @@ function resetAdminSettings() {
     closeAllDrawers();
     initStore();
     initAdminFields();
+  initAuth();
     showToast("Defaults restored successfully!");
   }
 }
@@ -1416,7 +1417,7 @@ function bindEvents() {
       let html = matches.map(p => {
         const price = '₹' + Number(p.price).toLocaleString('en-IN', { maximumFractionDigits: 0 });
         return '<a class="search-dropdown-item" href="' + pdpBase + '?id=' + p.id + '">' +
-          '<img src="' + (p.image || 'assets/product_jasmine.png') + '" alt="' + p.name + '" onerror="this.src='assets/product_jasmine.png'">' +
+          '<img src="' + (p.image || 'assets/product_jasmine.png') + '" alt="' + p.name + '" onerror="this.src=\'assets/product_jasmine.png\'">' +
           '<div class="search-dropdown-item-info">' +
             '<div class="search-dropdown-item-name">' + p.name + '</div>' +
             '<div class="search-dropdown-item-price">' + price + '</div>' +
