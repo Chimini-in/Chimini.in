@@ -1363,13 +1363,129 @@ function bindEvents() {
     });
   }
   
-  // Search filtering
+  // ── Live Search: dropdown + navigate to /shop on Enter ──
   if (DOM.searchInput) {
-    DOM.searchInput.addEventListener("input", (e) => {
-      storeState.searchQuery = e.target.value;
-      storeState.activeCategory = "all";
-      DOM.navLinks.forEach(l => l.classList.remove("active"));
-      renderBestSellers();
+    const dropdown = document.getElementById('search-dropdown');
+    let searchDebounceTimer = null;
+
+    // Helper: get shop URL respecting .html extension
+    function getShopUrl(q) {
+      const isHtml = window.location.pathname.endsWith('.html');
+      return (isHtml ? 'shop.html' : '/shop') + (q ? '?q=' + encodeURIComponent(q) : '');
+    }
+
+    // Helper: is shop page currently visible?
+    function isOnShopPage() {
+      const shopContainer = document.getElementById('shop-page-container');
+      return shopContainer && shopContainer.offsetParent !== null;
+    }
+
+    // Render live dropdown results
+    function renderSearchDropdown(query) {
+      if (!dropdown) return;
+      const q = (query || '').trim().toLowerCase();
+      if (!q) {
+        dropdown.classList.remove('active');
+        dropdown.innerHTML = '';
+        return;
+      }
+
+      const products = (storeState.adminSettings && storeState.adminSettings.products) || [];
+      const matches = products.filter(p => {
+        const name = (p.name || '').toLowerCase();
+        const frag = (p.fragrance || '').toLowerCase();
+        const cat = (p.category || '').toLowerCase();
+        const catTitle = (p.categoryTitle || '').toLowerCase();
+        const desc = (p.description || '').toLowerCase();
+        return name.includes(q) || frag.includes(q) || cat.includes(q) || catTitle.includes(q) || desc.includes(q);
+      }).slice(0, 6);
+
+      const isHtml = window.location.pathname.endsWith('.html');
+      const pdpBase = isHtml ? 'product.html' : '/product';
+
+      if (matches.length === 0) {
+        dropdown.innerHTML = '<div class="search-dropdown-empty">No products found for "' + query + '"</div>';
+        dropdown.classList.add('active');
+        return;
+      }
+
+      let html = matches.map(p => {
+        const price = '₹' + Number(p.price).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+        return '<a class="search-dropdown-item" href="' + pdpBase + '?id=' + p.id + '">' +
+          '<img src="' + (p.image || 'assets/product_jasmine.png') + '" alt="' + p.name + '" onerror="this.src='assets/product_jasmine.png'">' +
+          '<div class="search-dropdown-item-info">' +
+            '<div class="search-dropdown-item-name">' + p.name + '</div>' +
+            '<div class="search-dropdown-item-price">' + price + '</div>' +
+          '</div>' +
+        '</a>';
+      }).join('');
+
+      const totalMatches = products.filter(p =>
+        (p.name || '').toLowerCase().includes(q) ||
+        (p.fragrance || '').toLowerCase().includes(q) ||
+        (p.category || '').toLowerCase().includes(q) ||
+        (p.description || '').toLowerCase().includes(q)
+      ).length;
+
+      if (totalMatches > 6) {
+        html += '<div class="search-dropdown-footer" id="search-see-all">See all results for &ldquo;' + query + '&rdquo; &rarr;</div>';
+      }
+
+      dropdown.innerHTML = html;
+      dropdown.classList.add('active');
+
+      const seeAll = document.getElementById('search-see-all');
+      if (seeAll) {
+        seeAll.addEventListener('click', () => {
+          dropdown.classList.remove('active');
+          window.location.href = getShopUrl(query);
+        });
+      }
+    }
+
+    // Input: live dropdown + filter current page
+    DOM.searchInput.addEventListener('input', (e) => {
+      const q = e.target.value;
+      storeState.searchQuery = q;
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        renderSearchDropdown(q);
+        if (isOnShopPage()) {
+          renderShopProducts();
+        } else {
+          renderBestSellers();
+        }
+      }, 120);
+    });
+
+    // Enter key: navigate to /shop?q=... (or filter in-place if on shop)
+    DOM.searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const q = DOM.searchInput.value.trim();
+        if (!q) return;
+        if (dropdown) dropdown.classList.remove('active');
+        if (isOnShopPage()) {
+          storeState.searchQuery = q;
+          renderShopProducts();
+        } else {
+          window.location.href = getShopUrl(q);
+        }
+      }
+      if (e.key === 'Escape') {
+        if (dropdown) dropdown.classList.remove('active');
+        DOM.searchInput.blur();
+      }
+    });
+
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+      if (dropdown) {
+        const wrapper = DOM.searchInput.closest('.header-search') || DOM.searchInput.parentElement;
+        if (!wrapper.contains(e.target)) {
+          dropdown.classList.remove('active');
+        }
+      }
     });
   }
   
@@ -1650,14 +1766,25 @@ function renderShopPage() {
   const params = new URLSearchParams(window.location.search);
   const catQuery = params.get("category");
   const fragranceQuery = params.get("fragrance");
+  const searchQuery = params.get("q");
   if (fragranceQuery) {
     storeState.activeFragrance = decodeURIComponent(fragranceQuery).toLowerCase();
     storeState.activeCategory = "all";
+    storeState.searchQuery = "";
     storeState.shopInitialized = true;
   } else if (catQuery) {
     storeState.activeCategory = decodeURIComponent(catQuery).toLowerCase();
     storeState.activeFragrance = null;
+    storeState.searchQuery = "";
     storeState.shopInitialized = true;
+  } else if (searchQuery) {
+    storeState.searchQuery = decodeURIComponent(searchQuery);
+    storeState.activeCategory = "all";
+    storeState.activeFragrance = null;
+    storeState.shopInitialized = true;
+    // Pre-fill the search input if it exists
+    const si = document.getElementById("search-input");
+    if (si) si.value = storeState.searchQuery;
   }
   
   
