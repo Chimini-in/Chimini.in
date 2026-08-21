@@ -73,7 +73,8 @@ ALTER TABLE public.collections ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "full_access_collections" ON public.collections;
 CREATE POLICY "full_access_collections" ON public.collections FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 
--- 6. Add fragrance_tag column to products (links products to fragrance circle filter)
+-- 6. Add columns to products (images array, tags)
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS images text[] DEFAULT ARRAY[]::text[];
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS fragrance_tag text DEFAULT '';
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS collection_tag text DEFAULT '';
 

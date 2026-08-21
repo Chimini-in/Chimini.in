@@ -23,6 +23,15 @@ async function uploadProductImage(file) {
   return data.publicUrl;
 }
 
+const SLOT_LABELS = [
+  { title: "1. Cover / Main Image *", desc: "Default image across catalog & homepage", required: true },
+  { title: "2. Secondary Hover Image", desc: "Shown on product card hover & PDP", required: false },
+  { title: "3. Gallery Image 3", desc: "Shown in Product Detail Page gallery", required: false },
+  { title: "4. Gallery Image 4", desc: "Shown in Product Detail Page gallery", required: false },
+  { title: "5. Gallery Image 5", desc: "Shown in Product Detail Page gallery", required: false },
+  { title: "6. Gallery Image 6", desc: "Shown in Product Detail Page gallery", required: false }
+];
+
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -40,9 +49,9 @@ export default function ProductsPage() {
     description: '',
     price: '',
     original_price: '',
+    images: ['', '', '', '', '', ''], // Up to 6 product images
     image_url: '',
     secondary_image_url: '',
-    gallery_images: '', // newline or comma separated
     category_id: '',
     collection_tags: [],
     collection_tag: '',
@@ -58,13 +67,13 @@ export default function ProductsPage() {
     is_gift: false
   });
 
-  const [uploadingMain, setUploadingMain] = useState(false);
-  const [uploadingSecondary, setUploadingSecondary] = useState(false);
+  const [uploadingSlots, setUploadingSlots] = useState({ 0: false, 1: false, 2: false, 3: false, 4: false, 5: false });
+  const [uploadingBatch, setUploadingBatch] = useState(false);
   const [uploadError, setUploadError] = useState(null);
   const [saveLoading, setSaveLoading] = useState(false);
 
-  const mainFileRef = useRef(null);
-  const secondaryFileRef = useRef(null);
+  const slotFileRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
+  const batchFileInputRef = useRef(null);
 
   useEffect(() => {
     fetchData();
@@ -98,19 +107,16 @@ export default function ProductsPage() {
     setUploadError(null);
 
     try {
-      // Parse gallery images
-      const galleryArr = formData.gallery_images
-        ? formData.gallery_images.split(/[\\n,]+/).map(s => s.trim()).filter(Boolean)
-        : [];
+      const cleanImages = (formData.images || []).map(s => (s || '').trim()).filter(Boolean);
 
       const payload = {
         title: formData.title,
         description: formData.description || '',
         price: parseFloat(formData.price) || 0,
         original_price: formData.original_price ? parseFloat(formData.original_price) : null,
-        image_url: formData.image_url || '',
-        secondary_image_url: formData.secondary_image_url || '',
-        images: galleryArr.length > 0 ? galleryArr : (formData.image_url ? [formData.image_url] : []),
+        image_url: cleanImages[0] || formData.image_url || '',
+        secondary_image_url: cleanImages[1] || formData.secondary_image_url || '',
+        images: cleanImages.length > 0 ? cleanImages : (formData.image_url ? [formData.image_url] : []),
         category_id: formData.category_id || null,
         collection_tag: (formData.collection_tags && formData.collection_tags.length > 0) ? formData.collection_tags.join(', ') : (formData.collection_tag || ''),
         fragrance_tag: formData.fragrance_tag || '',
@@ -147,18 +153,30 @@ export default function ProductsPage() {
     setActiveTab('basic');
     if (prod) {
       setEditingId(prod.id);
-      const galleryStr = Array.isArray(prod.images) ? prod.images.join('\\n') : '';
+      
+      let initialImages = [];
+      if (Array.isArray(prod.images) && prod.images.length > 0) {
+        initialImages = [...prod.images];
+      } else {
+        if (prod.image_url) initialImages.push(prod.image_url);
+        if (prod.secondary_image_url) initialImages.push(prod.secondary_image_url);
+      }
+      while (initialImages.length < 6) {
+        initialImages.push('');
+      }
+
       const rawCollTags = prod.collection_tag 
         ? (Array.isArray(prod.collection_tag) ? prod.collection_tag : prod.collection_tag.split(',').map(s => s.trim()).filter(Boolean))
         : [];
+
       setFormData({
         title: prod.title || '',
         description: prod.description || '',
         price: prod.price || '',
         original_price: prod.original_price || '',
+        images: initialImages.slice(0, 6),
         image_url: prod.image_url || '',
         secondary_image_url: prod.secondary_image_url || '',
-        gallery_images: galleryStr,
         category_id: prod.category_id || '',
         collection_tags: rawCollTags,
         collection_tag: prod.collection_tag || '',
@@ -180,9 +198,9 @@ export default function ProductsPage() {
         description: '',
         price: '',
         original_price: '',
+        images: ['', '', '', '', '', ''],
         image_url: '',
         secondary_image_url: '',
-        gallery_images: '',
         category_id: '',
         collection_tags: [],
         collection_tag: '',
@@ -218,53 +236,102 @@ export default function ProductsPage() {
     fetchData();
   };
 
-  const handleMainUpload = async (e) => {
+  const handleSlotUpload = async (index, e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploadingMain(true);
+    setUploadingSlots(prev => ({ ...prev, [index]: true }));
     setUploadError(null);
     try {
       const url = await uploadProductImage(file);
-      setFormData(prev => ({
-        ...prev,
-        image_url: url,
-        gallery_images: prev.gallery_images ? `${url}\\n${prev.gallery_images}` : url
-      }));
+      setFormData(prev => {
+        const newImages = [...(prev.images || ['', '', '', '', '', ''])];
+        newImages[index] = url;
+        return {
+          ...prev,
+          images: newImages,
+          image_url: index === 0 ? url : prev.image_url,
+          secondary_image_url: index === 1 ? url : prev.secondary_image_url
+        };
+      });
     } catch (err) {
       setUploadError(err.message);
     } finally {
-      setUploadingMain(false);
-      if (mainFileRef.current) mainFileRef.current.value = '';
+      setUploadingSlots(prev => ({ ...prev, [index]: false }));
+      if (slotFileRefs[index]?.current) slotFileRefs[index].current.value = '';
     }
   };
 
-  const handleSecondaryUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadingSecondary(true);
+  const handleBatchUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    setUploadingBatch(true);
     setUploadError(null);
     try {
-      const url = await uploadProductImage(file);
-      setFormData(prev => ({
-        ...prev,
-        secondary_image_url: url,
-        gallery_images: prev.gallery_images ? `${prev.gallery_images}\\n${url}` : url
-      }));
+      const uploadPromises = files.slice(0, 6).map(f => uploadProductImage(f));
+      const uploadedUrls = await Promise.all(uploadPromises);
+
+      setFormData(prev => {
+        const currentImages = [...(prev.images || ['', '', '', '', '', ''])];
+        let urlIdx = 0;
+        // First fill empty slots
+        for (let i = 0; i < 6 && urlIdx < uploadedUrls.length; i++) {
+          if (!currentImages[i]) {
+            currentImages[i] = uploadedUrls[urlIdx++];
+          }
+        }
+        // If still remaining urls, fill from start
+        for (let i = 0; i < 6 && urlIdx < uploadedUrls.length; i++) {
+          currentImages[i] = uploadedUrls[urlIdx++];
+        }
+        return {
+          ...prev,
+          images: currentImages,
+          image_url: currentImages[0] || prev.image_url,
+          secondary_image_url: currentImages[1] || prev.secondary_image_url
+        };
+      });
     } catch (err) {
       setUploadError(err.message);
     } finally {
-      setUploadingSecondary(false);
-      if (secondaryFileRef.current) secondaryFileRef.current.value = '';
+      setUploadingBatch(false);
+      if (batchFileInputRef.current) batchFileInputRef.current.value = '';
     }
+  };
+
+  const removeSlotImage = (index) => {
+    setFormData(prev => {
+      const newImages = [...(prev.images || ['', '', '', '', '', ''])];
+      newImages[index] = '';
+      return {
+        ...prev,
+        images: newImages,
+        image_url: index === 0 ? '' : prev.image_url,
+        secondary_image_url: index === 1 ? '' : prev.secondary_image_url
+      };
+    });
+  };
+
+  const updateSlotUrl = (index, value) => {
+    setFormData(prev => {
+      const newImages = [...(prev.images || ['', '', '', '', '', ''])];
+      newImages[index] = value;
+      return {
+        ...prev,
+        images: newImages,
+        image_url: index === 0 ? value : prev.image_url,
+        secondary_image_url: index === 1 ? value : prev.secondary_image_url
+      };
+    });
   };
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
+      {/* Header Bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
           <h3 style={{ margin: 0, color: '#1a1a1a', fontSize: '1.2rem' }}>Products &amp; Shop Management</h3>
           <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b' }}>
-            Manage your luxury catalog, pricing, gallery images, care guides, and product details.
+            Manage your luxury catalog, pricing, 6-image gallery, care guides, and product details.
           </p>
         </div>
         <button onClick={() => openModal()} style={{ padding: '10px 20px', backgroundColor: '#1a1a1a', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '500', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
@@ -281,6 +348,7 @@ export default function ProductsPage() {
                 <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b' }}>Title &amp; Fragrance</th>
                 <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b' }}>Collection</th>
                 <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b' }}>Fragrance Tag</th>
+                <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b' }}>Photos</th>
                 <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b' }}>Price</th>
                 <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b', textAlign: 'center' }}>Badges</th>
                 <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b', textAlign: 'center' }}>Status</th>
@@ -289,70 +357,78 @@ export default function ProductsPage() {
             </thead>
             <tbody>
               {products.length === 0 ? (
-                <tr><td colSpan="7" style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>No products found. Create your first product above!</td></tr>
-              ) : products.map(prod => (
-                <tr key={prod.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                  <td style={{ padding: '14px 16px' }}>
-                    <div style={{ width: '48px', height: '48px', backgroundColor: '#f1f5f9', borderRadius: '6px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-                      <img src={prod.image_url || 'assets/product_jasmine.png'} alt={prod.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.target.src='assets/product_jasmine.png'; }} />
-                    </div>
-                  </td>
-                  <td style={{ padding: '14px 16px' }}>
-                    <div style={{ fontSize: '0.92rem', color: '#1a1a1a', fontWeight: '600' }}>{prod.title}</div>
-                    {prod.fragrance && <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>{prod.fragrance}</div>}
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#475569' }}>
-                    {(() => {
-                      const tags = prod.collection_tag ? prod.collection_tag.split(',').map(s => s.trim()).filter(Boolean) : [];
-                      if (tags.length === 0) return <span style={{ color: '#cbd5e1' }}>—</span>;
-                      return (
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                          {tags.map(t => (
-                            <span key={t} style={{ padding: '2px 7px', borderRadius: '4px', backgroundColor: '#f1f5f9', color: '#334155', fontSize: '0.74rem', fontWeight: '500' }}>
-                              {t.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                            </span>
-                          ))}
-                        </div>
-                      );
-                    })()}
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#475569' }}>
-                    {prod.fragrance_tag || prod.categories?.title ? (
-                      <span style={{ padding: '3px 8px', borderRadius: '4px', backgroundColor: '#fdf4ff', color: '#86198f', fontSize: '0.78rem', fontWeight: '500' }}>
-                        {(prod.fragrance_tag || prod.categories?.title).replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                <tr><td colSpan="9" style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>No products found. Create your first product above!</td></tr>
+              ) : products.map(prod => {
+                const totalPhotos = Array.isArray(prod.images) ? prod.images.filter(Boolean).length : (prod.image_url ? (prod.secondary_image_url ? 2 : 1) : 0);
+                return (
+                  <tr key={prod.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '14px 16px' }}>
+                      <div style={{ width: '48px', height: '48px', backgroundColor: '#f1f5f9', borderRadius: '6px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+                        <img src={prod.image_url || 'assets/product_jasmine.png'} alt={prod.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.target.src='assets/product_jasmine.png'; }} />
+                      </div>
+                    </td>
+                    <td style={{ padding: '14px 16px' }}>
+                      <div style={{ fontSize: '0.92rem', color: '#1a1a1a', fontWeight: '600' }}>{prod.title}</div>
+                      {prod.fragrance && <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>{prod.fragrance}</div>}
+                    </td>
+                    <td style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#475569' }}>
+                      {(() => {
+                        const tags = prod.collection_tag ? prod.collection_tag.split(',').map(s => s.trim()).filter(Boolean) : [];
+                        if (tags.length === 0) return <span style={{ color: '#cbd5e1' }}>—</span>;
+                        return (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                            {tags.map(t => (
+                              <span key={t} style={{ padding: '2px 7px', borderRadius: '4px', backgroundColor: '#f1f5f9', color: '#334155', fontSize: '0.74rem', fontWeight: '500' }}>
+                                {t.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                              </span>
+                            ))}
+                          </div>
+                        );
+                      })()}
+                    </td>
+                    <td style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#475569' }}>
+                      {prod.fragrance_tag || prod.categories?.title ? (
+                        <span style={{ padding: '3px 8px', borderRadius: '4px', backgroundColor: '#fdf4ff', color: '#86198f', fontSize: '0.78rem', fontWeight: '500' }}>
+                          {(prod.fragrance_tag || prod.categories?.title).replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        </span>
+                      ) : (
+                        <span style={{ color: '#cbd5e1' }}>—</span>
+                      )}
+                    </td>
+                    <td style={{ padding: '14px 16px', fontSize: '0.82rem', color: '#64748b' }}>
+                      <span style={{ padding: '2px 8px', borderRadius: '12px', backgroundColor: totalPhotos >= 3 ? '#ecfdf5' : '#f8fafc', color: totalPhotos >= 3 ? '#065f46' : '#64748b', fontWeight: '600', border: '1px solid #e2e8f0' }}>
+                        📷 {totalPhotos}/6
                       </span>
-                    ) : (
-                      <span style={{ color: '#cbd5e1' }}>—</span>
-                    )}
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: '0.92rem', color: '#1a1a1a', fontWeight: '600' }}>
-                    ₹{prod.price}
-                    {prod.original_price && <span style={{ fontSize: '0.75rem', color: '#94a3b8', textDecoration: 'line-through', marginLeft: '6px' }}>₹{prod.original_price}</span>}
-                  </td>
-                  <td style={{ padding: '14px 16px', textAlign: 'center' }}>
-                    {prod.badges ? (
-                      <span style={{ padding: '3px 8px', borderRadius: '4px', backgroundColor: '#fef3c7', color: '#92400e', fontSize: '0.72rem', fontWeight: '600' }}>{prod.badges}</span>
-                    ) : prod.is_best_seller ? (
-                      <span style={{ padding: '3px 8px', borderRadius: '4px', backgroundColor: '#dbeafe', color: '#1e40af', fontSize: '0.72rem', fontWeight: '600' }}>BEST SELLER</span>
-                    ) : (
-                      <span style={{ color: '#cbd5e1', fontSize: '0.75rem' }}>—</span>
-                    )}
-                  </td>
-                  <td style={{ padding: '14px 16px', textAlign: 'center' }}>
-                    <button 
-                      onClick={() => togglePublish(prod.id, prod.is_published)}
-                      style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', border: 'none', cursor: 'pointer', fontWeight: '500', backgroundColor: prod.is_published !== false ? '#dcfce7' : '#f1f5f9', color: prod.is_published !== false ? '#166534' : '#64748b' }}
-                    >
-                      {prod.is_published !== false ? 'Published' : 'Hidden'}
-                    </button>
-                  </td>
-                  <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                    <a href={`/product?id=${prod.id}`} target="_blank" rel="noreferrer" style={{ color: '#0369a1', textDecoration: 'none', marginRight: '14px', fontSize: '0.85rem' }}>View Live</a>
-                    <button onClick={() => openModal(prod)} style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', marginRight: '14px', fontSize: '0.85rem', fontWeight: '500' }}>Edit</button>
-                    <button onClick={() => handleDelete(prod.id)} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '0.85rem' }}>Delete</button>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td style={{ padding: '14px 16px', fontSize: '0.92rem', color: '#1a1a1a', fontWeight: '600' }}>
+                      ₹{prod.price}
+                      {prod.original_price && <span style={{ fontSize: '0.75rem', color: '#94a3b8', textDecoration: 'line-through', marginLeft: '6px' }}>₹{prod.original_price}</span>}
+                    </td>
+                    <td style={{ padding: '14px 16px', textAlign: 'center' }}>
+                      {prod.badges ? (
+                        <span style={{ padding: '3px 8px', borderRadius: '4px', backgroundColor: '#fef3c7', color: '#92400e', fontSize: '0.72rem', fontWeight: '600' }}>{prod.badges}</span>
+                      ) : prod.is_best_seller ? (
+                        <span style={{ padding: '3px 8px', borderRadius: '4px', backgroundColor: '#dbeafe', color: '#1e40af', fontSize: '0.72rem', fontWeight: '600' }}>BEST SELLER</span>
+                      ) : (
+                        <span style={{ color: '#cbd5e1', fontSize: '0.75rem' }}>—</span>
+                      )}
+                    </td>
+                    <td style={{ padding: '14px 16px', textAlign: 'center' }}>
+                      <button 
+                        onClick={() => togglePublish(prod.id, prod.is_published)}
+                        style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', border: 'none', cursor: 'pointer', fontWeight: '500', backgroundColor: prod.is_published !== false ? '#dcfce7' : '#f1f5f9', color: prod.is_published !== false ? '#166534' : '#64748b' }}
+                      >
+                        {prod.is_published !== false ? 'Published' : 'Hidden'}
+                      </button>
+                    </td>
+                    <td style={{ padding: '14px 16px', textAlign: 'right' }}>
+                      <a href={`/product?id=${prod.id}`} target="_blank" rel="noreferrer" style={{ color: '#0369a1', textDecoration: 'none', marginRight: '14px', fontSize: '0.85rem' }}>View Live</a>
+                      <button onClick={() => openModal(prod)} style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', marginRight: '14px', fontSize: '0.85rem', fontWeight: '500' }}>Edit</button>
+                      <button onClick={() => handleDelete(prod.id)} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '0.85rem' }}>Delete</button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
@@ -361,11 +437,11 @@ export default function ProductsPage() {
       {/* Modal for Add / Edit Product */}
       {showModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px' }}>
-          <div style={{ backgroundColor: '#fff', borderRadius: '12px', width: '100%', maxWidth: '720px', maxHeight: '92vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.2)' }}>
+          <div style={{ backgroundColor: '#fff', borderRadius: '12px', width: '100%', maxWidth: '820px', maxHeight: '92vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.2)' }}>
             
             {/* Modal Header */}
             <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#1a1a1a' }}>{editingId ? 'Edit Product & PDP Details' : 'Add New Luxury Product'}</h3>
+              <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#1a1a1a' }}>{editingId ? 'Edit Product & 6-Image Gallery' : 'Add New Luxury Product'}</h3>
               <button onClick={closeModal} style={{ background: 'none', border: 'none', fontSize: '1.4rem', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
             </div>
 
@@ -381,9 +457,12 @@ export default function ProductsPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab('media')}
-                style={{ padding: '12px 16px', background: 'none', border: 'none', borderBottom: activeTab === 'media' ? '2px solid #1a1a1a' : '2px solid transparent', fontWeight: activeTab === 'media' ? '600' : '400', color: activeTab === 'media' ? '#1a1a1a' : '#64748b', cursor: 'pointer', fontSize: '0.88rem' }}
+                style={{ padding: '12px 16px', background: 'none', border: 'none', borderBottom: activeTab === 'media' ? '2px solid #1a1a1a' : '2px solid transparent', fontWeight: activeTab === 'media' ? '600' : '400', color: activeTab === 'media' ? '#1a1a1a' : '#64748b', cursor: 'pointer', fontSize: '0.88rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                2. Media &amp; Gallery
+                2. 6-Image Gallery
+                <span style={{ fontSize: '0.72rem', backgroundColor: '#e2e8f0', color: '#475569', padding: '2px 6px', borderRadius: '10px' }}>
+                  {(formData.images || []).filter(Boolean).length}/6
+                </span>
               </button>
               <button
                 type="button"
@@ -517,54 +596,107 @@ export default function ProductsPage() {
                   </>
                 )}
 
-                {/* TAB 2: MEDIA & GALLERY */}
+                {/* TAB 2: 6-IMAGE GALLERY */}
                 {activeTab === 'media' && (
                   <>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                      {/* Main Image */}
-                      <div style={{ padding: '14px', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
-                        <label style={labelStyle}>Main Image *</label>
-                        {formData.image_url && (
-                          <div style={{ marginBottom: '8px', width: '100%', height: '140px', backgroundColor: '#f8fafc', borderRadius: '6px', overflow: 'hidden' }}>
-                            <img src={formData.image_url} alt="Main" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                          </div>
-                        )}
-                        <input type="text" value={formData.image_url} onChange={e => setFormData({...formData, image_url: e.target.value})} style={{ ...inputStyle, marginBottom: '8px' }} placeholder="Image URL or upload below" />
-                        <input ref={mainFileRef} type="file" accept="image/png,image/jpeg,image/webp" style={{ display: 'none' }} onChange={handleMainUpload} />
-                        <button type="button" onClick={() => mainFileRef.current?.click()} disabled={uploadingMain} style={uploadBtnStyle}>
-                          {uploadingMain ? '⏳ Uploading...' : '⬆ Upload Main Image from File'}
-                        </button>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f0f9ff', padding: '12px 16px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
+                      <div>
+                        <div style={{ fontSize: '0.88rem', fontWeight: '600', color: '#0369a1' }}>
+                          📷 6-Image Product Gallery System
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: '#0284c7', marginTop: '2px' }}>
+                          Upload up to 6 high-resolution product photos. Slot 1 is Cover Photo, Slot 2 is Hover Photo, and all 6 appear in the interactive PDP thumbnail gallery.
+                        </div>
                       </div>
-
-                      {/* Secondary Hover Image */}
-                      <div style={{ padding: '14px', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
-                        <label style={labelStyle}>Secondary Image (Card Hover)</label>
-                        {formData.secondary_image_url && (
-                          <div style={{ marginBottom: '8px', width: '100%', height: '140px', backgroundColor: '#f8fafc', borderRadius: '6px', overflow: 'hidden' }}>
-                            <img src={formData.secondary_image_url} alt="Secondary" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                          </div>
-                        )}
-                        <input type="text" value={formData.secondary_image_url} onChange={e => setFormData({...formData, secondary_image_url: e.target.value})} style={{ ...inputStyle, marginBottom: '8px' }} placeholder="Secondary Image URL" />
-                        <input ref={secondaryFileRef} type="file" accept="image/png,image/jpeg,image/webp" style={{ display: 'none' }} onChange={handleSecondaryUpload} />
-                        <button type="button" onClick={() => secondaryFileRef.current?.click()} disabled={uploadingSecondary} style={uploadBtnStyle}>
-                          {uploadingSecondary ? '⏳ Uploading...' : '⬆ Upload Hover Image from File'}
+                      <div>
+                        <input
+                          ref={batchFileInputRef}
+                          type="file"
+                          multiple
+                          accept="image/png,image/jpeg,image/webp"
+                          style={{ display: 'none' }}
+                          onChange={handleBatchUpload}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => batchFileInputRef.current?.click()}
+                          disabled={uploadingBatch}
+                          style={{ padding: '8px 14px', backgroundColor: '#0284c7', color: '#fff', border: 'none', borderRadius: '6px', cursor: uploadingBatch ? 'wait' : 'pointer', fontSize: '0.82rem', fontWeight: '600', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                        >
+                          {uploadingBatch ? '⏳ Uploading...' : '⚡ Multi-Upload (Select multiple files)'}
                         </button>
                       </div>
                     </div>
 
-                    {/* Gallery Thumbnails List */}
-                    <div>
-                      <label style={labelStyle}>Gallery Thumbnails (1 URL per line for Product Detail Page thumbnails)</label>
-                      <textarea
-                        value={formData.gallery_images}
-                        onChange={e => setFormData({...formData, gallery_images: e.target.value})}
-                        style={{ ...inputStyle, minHeight: '100px', fontFamily: 'monospace', fontSize: '0.82rem' }}
-                        placeholder={"https://.../img1.jpg\\nhttps://.../img2.jpg\\nhttps://.../img3.jpg"}
-                      />
-                      <p style={{ margin: '4px 0 0', fontSize: '0.75rem', color: '#94a3b8' }}>
-                        These images display as interactive thumbnails on the Product Detail Page gallery.
-                      </p>
+                    {/* 6 Image Slots Grid */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
+                      {SLOT_LABELS.map((slot, index) => {
+                        const imgUrl = (formData.images && formData.images[index]) || '';
+                        const isSlotUploading = uploadingSlots[index];
+
+                        return (
+                          <div key={index} style={{ padding: '12px', border: imgUrl ? '1px solid #cbd5e1' : '1px dashed #cbd5e1', borderRadius: '8px', backgroundColor: imgUrl ? '#ffffff' : '#f8fafc', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <label style={{ ...labelStyle, margin: 0, fontSize: '0.8rem' }}>
+                                {slot.title}
+                              </label>
+                              {imgUrl && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeSlotImage(index)}
+                                  style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '0.72rem', fontWeight: '600', padding: 0 }}
+                                  title="Remove image"
+                                >
+                                  ✕ Remove
+                                </button>
+                              )}
+                            </div>
+
+                            {/* Thumbnail Preview Box */}
+                            <div style={{ width: '100%', height: '110px', backgroundColor: '#f1f5f9', borderRadius: '6px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #e2e8f0', position: 'relative' }}>
+                              {imgUrl ? (
+                                <img src={imgUrl} alt={`Slot ${index + 1}`} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={e => { e.target.style.opacity = '0.3'; }} />
+                              ) : (
+                                <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.75rem' }}>
+                                  <div style={{ fontSize: '1.2rem', marginBottom: '2px' }}>📷</div>
+                                  <div>Empty Slot {index + 1}</div>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Direct URL Input */}
+                            <input
+                              type="text"
+                              value={imgUrl}
+                              onChange={e => updateSlotUrl(index, e.target.value)}
+                              style={{ ...inputStyle, padding: '6px 8px', fontSize: '0.78rem' }}
+                              placeholder={`Image ${index + 1} URL or upload`}
+                            />
+
+                            {/* Single Slot Upload Button */}
+                            <input
+                              ref={slotFileRefs[index]}
+                              type="file"
+                              accept="image/png,image/jpeg,image/webp"
+                              style={{ display: 'none' }}
+                              onChange={e => handleSlotUpload(index, e)}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => slotFileRefs[index].current?.click()}
+                              disabled={isSlotUploading || uploadingBatch}
+                              style={{ ...uploadBtnStyle, padding: '6px 8px', fontSize: '0.78rem' }}
+                            >
+                              {isSlotUploading ? '⏳ Uploading...' : `⬆ Upload Image ${index + 1}`}
+                            </button>
+                          </div>
+                        );
+                      })}
                     </div>
+
+                    <p style={{ margin: '4px 0 0', fontSize: '0.78rem', color: '#64748b' }}>
+                      💡 Tip: You can upload up to 6 images per product. You can either click <strong>Multi-Upload</strong> to pick all images at once or use the individual upload buttons for each slot.
+                    </p>
                   </>
                 )}
 
@@ -598,7 +730,7 @@ export default function ProductsPage() {
                           value={formData.shipping_info}
                           onChange={e => setFormData({...formData, shipping_info: e.target.value})}
                           style={{ ...inputStyle, minHeight: '70px' }}
-                          placeholder="• Complimentary shipping on orders over ₹100&#10;• Dispatched within 24-48 business hours..."
+                          placeholder="• Complimentary shipping on orders over ₹1100&#10;• Dispatched within 24-48 business hours..."
                         />
                       </div>
                       <div>
@@ -627,7 +759,7 @@ export default function ProductsPage() {
                   </button>
                   <button
                     type="submit"
-                    disabled={saveLoading || uploadingMain || uploadingSecondary}
+                    disabled={saveLoading || uploadingBatch || Object.values(uploadingSlots).some(Boolean)}
                     style={{ padding: '9px 22px', backgroundColor: '#1a1a1a', color: '#fff', border: 'none', borderRadius: '6px', cursor: saveLoading ? 'wait' : 'pointer', fontWeight: '600', fontSize: '0.88rem' }}
                   >
                     {saveLoading ? 'Saving...' : editingId ? 'Save Changes' : 'Create Product'}
