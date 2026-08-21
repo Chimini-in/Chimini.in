@@ -176,6 +176,18 @@ const DEFAULT_SETTINGS = {
 };
 
 // --- 2. APPLICATION STATE ---
+let cachedAdminSettings = null;
+let cachedBanners = null;
+let cachedCollections = null;
+try {
+  const s = localStorage.getItem("chimini_admin_settings");
+  if (s) cachedAdminSettings = JSON.parse(s);
+  const b = localStorage.getItem("chimini_banners");
+  if (b) cachedBanners = JSON.parse(b);
+  const c = localStorage.getItem("chimini_collections");
+  if (c) cachedCollections = JSON.parse(c);
+} catch (e) {}
+
 let storeState = {
   cart: JSON.parse(localStorage.getItem("chimini_cart")) || [],
   wishlist: JSON.parse(localStorage.getItem("chimini_wishlist")) || [],
@@ -183,7 +195,9 @@ let storeState = {
   activeCategory: "all",
   activeFragrance: null,
   currentTestimonialIndex: 0,
-  adminSettings: JSON.parse(localStorage.getItem("chimini_admin_settings")) || JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),
+  adminSettings: cachedAdminSettings || JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),
+  banners: cachedBanners || [],
+  collections: cachedCollections || [],
   shopLayout: "grid-3",
   shopSort: "default",
   priceMin: null,
@@ -2628,8 +2642,19 @@ async function fetchSupabaseData() {
       }));
     }
 
-    // Overwrite global store
+    // Overwrite global store and persist in localStorage to prevent image flash on future page loads
     storeState.adminSettings = newSettings;
+    try {
+      localStorage.setItem("chimini_admin_settings", JSON.stringify(newSettings));
+      if (Array.isArray(banners) && banners.length > 0) {
+        localStorage.setItem("chimini_banners", JSON.stringify(banners));
+      }
+      if (Array.isArray(collections) && collections.length > 0) {
+        localStorage.setItem("chimini_collections", JSON.stringify(collections));
+      }
+    } catch (cacheErr) {
+      console.warn("Could not save store cache to localStorage:", cacheErr);
+    }
     
   } catch (err) {
     console.error("Failed to load live Supabase data. Falling back to local data.", err);
