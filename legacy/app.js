@@ -3255,6 +3255,7 @@ function initAuth() {
   }
 
   bindAuthModalEvents();
+  bindCheckoutModalEvents();
 }
 
 function updateAccountUI(user) {
@@ -3767,11 +3768,521 @@ function bindAuthModalEvents() {
 }
 
 function triggerCheckoutSuccess() {
+  openCheckoutModal();
+}
+
+// ==========================================================================
+// 9. MULTI-STEP CHECKOUT & WHATSAPP CONCIERGE ENGINE
+// ==========================================================================
+
+const STARTER_COUPONS = {
+  'CHIMINI10': { code: 'CHIMINI10', discount_percentage: 10, discount_type: 'percentage', description: '10% off on all collections' },
+  'WELCOME15': { code: 'WELCOME15', discount_percentage: 15, discount_type: 'percentage', description: '15% off for sanctuary members' },
+  'LUXURY20': { code: 'LUXURY20', discount_percentage: 20, discount_type: 'percentage', description: '20% VIP privilege discount' }
+};
+
+function openCheckoutModal() {
+  if (!storeState.cart || storeState.cart.length === 0) {
+    showToast("Your cart is empty. Please add luxury pieces to proceed.");
+    return;
+  }
+
+  // Mandatory login check
+  if (!storeState.currentUser) {
+    storeState.pendingCheckout = true;
+    closeAllDrawers();
+    openAuthModal('login', true);
+    return;
+  }
+
+  const modal = document.getElementById("checkout-modal");
+  if (!modal) return;
+
+  closeAllDrawers();
+
+  // Pre-fill user details if available
   const user = storeState.currentUser;
-  const userName = user?.user_metadata?.full_name || "Valued Client";
-  alert("Thank you for your order, " + userName + "! Your luxury artisan selection is being prepared.");
+  const nameInput = document.getElementById("checkout-name");
+  const phoneInput = document.getElementById("checkout-phone");
+  const emailInput = document.getElementById("checkout-email");
+
+  if (user) {
+    const meta = user.user_metadata || {};
+    if (nameInput && !nameInput.value) nameInput.value = meta.full_name || '';
+    if (phoneInput && !phoneInput.value) phoneInput.value = meta.phone || '';
+    if (emailInput && !emailInput.value) emailInput.value = user.email || '';
+  }
+
+  switchCheckoutStep(1);
+
+  modal.classList.add("active");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
+
+function closeCheckoutModal() {
+  const modal = document.getElementById("checkout-modal");
+  if (!modal) return;
+
+  modal.classList.remove("active");
+  modal.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+
+function calculateCheckoutTotals() {
+  const cart = storeState.cart || [];
+  const subtotal = cart.reduce((sum, item) => sum + (parseFloat(item.price || 0) * (item.quantity || 1)), 0);
+  
+  let discount = 0;
+  if (storeState.appliedCoupon) {
+    const c = storeState.appliedCoupon;
+    if (c.discount_type === 'flat' && c.discount_amount) {
+      discount = Math.min(subtotal, parseFloat(c.discount_amount) || 0);
+    } else {
+      const pct = parseInt(c.discount_percentage || 10);
+      discount = Math.round(subtotal * (pct / 100));
+    }
+  }
+
+  const total = Math.max(0, subtotal - discount);
+  return { subtotal, discount, total, shipping: 0 };
+}
+
+function renderCheckoutItemsList(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const cart = storeState.cart || [];
+  if (cart.length === 0) {
+    container.innerHTML = '<div style="padding: 12px; color: var(--text-secondary); font-size: 0.8rem; text-align: center;">No items in cart</div>';
+    return;
+  }
+
+  container.innerHTML = cart.map(item => {
+    const itemImg = item.image || (Array.isArray(item.images) ? item.images[0] : 'assets/product_jasmine.png');
+    const itemPrice = parseFloat(item.price || 0) * (item.quantity || 1);
+    const scentNote = item.scent || item.fragrance || item.name;
+
+    return `
+      <div class="checkout-item-row">
+        <img src="${itemImg}" alt="${item.name}" class="checkout-item-thumb" onerror="this.src='assets/product_jasmine.png'">
+        <div class="checkout-item-info">
+          <div class="checkout-item-name">${item.name}</div>
+          <div class="checkout-item-meta">Qty: ${item.quantity} · ${scentNote}</div>
+        </div>
+        <div class="checkout-item-price">₹${itemPrice.toLocaleString('en-IN')}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateCheckoutTotalsUI() {
+  const totals = calculateCheckoutTotals();
+
+  // Step 1 UI
+  const subtotalStep1 = document.getElementById("checkout-subtotal-step1");
+  const discountRowStep1 = document.getElementById("checkout-discount-row-step1");
+  const discountValStep1 = document.getElementById("checkout-discount-val-step1");
+  const discountLabelStep1 = document.getElementById("checkout-discount-label-step1");
+  const totalStep1 = document.getElementById("checkout-total-step1");
+
+  if (subtotalStep1) subtotalStep1.textContent = '₹' + totals.subtotal.toLocaleString('en-IN');
+  if (totalStep1) totalStep1.textContent = '₹' + totals.total.toLocaleString('en-IN');
+
+  if (discountRowStep1 && discountValStep1) {
+    if (totals.discount > 0 && storeState.appliedCoupon) {
+      discountRowStep1.style.display = "flex";
+      discountValStep1.textContent = '-₹' + totals.discount.toLocaleString('en-IN');
+      if (discountLabelStep1) discountLabelStep1.textContent = 'Coupon (' + storeState.appliedCoupon.code + ')';
+    } else {
+      discountRowStep1.style.display = "none";
+    }
+  }
+
+  // Step 2 UI
+  const subtotalStep2 = document.getElementById("checkout-subtotal-step2");
+  const discountRowStep2 = document.getElementById("checkout-discount-row-step2");
+  const discountValStep2 = document.getElementById("checkout-discount-val-step2");
+  const discountLabelStep2 = document.getElementById("checkout-discount-label-step2");
+  const totalStep2 = document.getElementById("checkout-total-step2");
+
+  if (subtotalStep2) subtotalStep2.textContent = '₹' + totals.subtotal.toLocaleString('en-IN');
+  if (totalStep2) totalStep2.textContent = '₹' + totals.total.toLocaleString('en-IN');
+
+  if (discountRowStep2 && discountValStep2) {
+    if (totals.discount > 0 && storeState.appliedCoupon) {
+      discountRowStep2.style.display = "flex";
+      discountValStep2.textContent = '-₹' + totals.discount.toLocaleString('en-IN');
+      if (discountLabelStep2) discountLabelStep2.textContent = 'Coupon (' + storeState.appliedCoupon.code + ')';
+    } else {
+      discountRowStep2.style.display = "none";
+    }
+  }
+
+  // Coupon Badge in Step 1
+  const badgeContainer = document.getElementById("checkout-coupon-badge");
+  if (badgeContainer) {
+    if (storeState.appliedCoupon) {
+      badgeContainer.style.display = "block";
+      badgeContainer.innerHTML = `
+        <div class="coupon-active-badge">
+          <span>✨ <strong>${storeState.appliedCoupon.code}</strong> applied (-₹${totals.discount.toLocaleString('en-IN')})</span>
+          <button type="button" class="coupon-remove-btn" id="btn-remove-coupon">Remove</button>
+        </div>
+      `;
+      const removeBtn = document.getElementById("btn-remove-coupon");
+      if (removeBtn) removeBtn.onclick = removeCouponCode;
+    } else {
+      badgeContainer.style.display = "none";
+      badgeContainer.innerHTML = "";
+    }
+  }
+}
+
+async function applyCouponCode(rawCode) {
+  const code = (rawCode || '').trim().toUpperCase();
+  if (!code) {
+    showToast("Please enter a valid promo code.");
+    return;
+  }
+
+  const applyBtn = document.getElementById("btn-apply-coupon");
+  if (applyBtn) {
+    applyBtn.disabled = true;
+    applyBtn.textContent = "...";
+  }
+
+  let matchedCoupon = null;
+
+  // 1. Try querying Supabase
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/coupons?code=eq.${encodeURIComponent(code)}&active=eq.true&select=*`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        matchedCoupon = data[0];
+      }
+    }
+  } catch (err) {
+    console.warn("Coupon database lookup note:", err);
+  }
+
+  // 2. Fallback to starter coupons
+  if (!matchedCoupon && STARTER_COUPONS[code]) {
+    matchedCoupon = STARTER_COUPONS[code];
+  }
+
+  if (applyBtn) {
+    applyBtn.disabled = false;
+    applyBtn.textContent = "Apply";
+  }
+
+  if (matchedCoupon) {
+    storeState.appliedCoupon = matchedCoupon;
+    updateCheckoutTotalsUI();
+    showToast("✨ Coupon " + code + " applied successfully!");
+    const input = document.getElementById("checkout-coupon-input");
+    if (input) input.value = "";
+  } else {
+    showToast("Invalid or expired coupon code: " + code);
+  }
+}
+
+function removeCouponCode() {
+  storeState.appliedCoupon = null;
+  updateCheckoutTotalsUI();
+  showToast("Coupon removed.");
+}
+
+function switchCheckoutStep(stepNumber) {
+  const views = document.querySelectorAll(".checkout-view");
+  views.forEach(v => v.classList.remove("active"));
+
+  const step1Indicator = document.getElementById("step-indicator-1");
+  const step2Indicator = document.getElementById("step-indicator-2");
+
+  if (stepNumber === 1) {
+    const view1 = document.getElementById("checkout-view-step1");
+    if (view1) view1.classList.add("active");
+    if (step1Indicator) {
+      step1Indicator.className = "checkout-step-item active";
+    }
+    if (step2Indicator) {
+      step2Indicator.className = "checkout-step-item";
+    }
+
+    renderCheckoutItemsList("checkout-items-list-step1");
+    updateCheckoutTotalsUI();
+
+  } else if (stepNumber === 2) {
+    // Validate shipping form
+    const name = (document.getElementById("checkout-name")?.value || "").trim();
+    const phone = (document.getElementById("checkout-phone")?.value || "").trim();
+    const email = (document.getElementById("checkout-email")?.value || "").trim();
+    const address1 = (document.getElementById("checkout-address1")?.value || "").trim();
+    const address2 = (document.getElementById("checkout-address2")?.value || "").trim();
+    const city = (document.getElementById("checkout-city")?.value || "").trim();
+    const state = (document.getElementById("checkout-state")?.value || "").trim();
+    const pincode = (document.getElementById("checkout-pincode")?.value || "").trim();
+
+    if (!name || !phone || !email || !address1 || !city || !state || !pincode) {
+      showToast("Please fill in all required shipping fields marked with *");
+      return;
+    }
+
+    if (pincode.length < 5) {
+      showToast("Please enter a valid postal pincode.");
+      return;
+    }
+
+    storeState.shippingDetails = {
+      name, phone, email, address1, address2, city, state, pincode
+    };
+
+    // Populate Review Details
+    const revName = document.getElementById("review-recipient-name");
+    const revContact = document.getElementById("review-recipient-contact");
+    const revAddress = document.getElementById("review-recipient-address");
+
+    if (revName) revName.textContent = name;
+    if (revContact) revContact.textContent = phone + " · " + email;
+    if (revAddress) {
+      revAddress.textContent = address1 + (address2 ? ", " + address2 : "") + ", " + city + ", " + state + " - " + pincode;
+    }
+
+    const view2 = document.getElementById("checkout-view-step2");
+    if (view2) view2.classList.add("active");
+
+    if (step1Indicator) {
+      step1Indicator.className = "checkout-step-item completed";
+    }
+    if (step2Indicator) {
+      step2Indicator.className = "checkout-step-item active";
+    }
+
+    renderCheckoutItemsList("checkout-items-list-step2");
+    updateCheckoutTotalsUI();
+
+  } else if (stepNumber === 3) {
+    const view3 = document.getElementById("checkout-view-step3");
+    if (view3) view3.classList.add("active");
+
+    if (step1Indicator) step1Indicator.className = "checkout-step-item completed";
+    if (step2Indicator) step2Indicator.className = "checkout-step-item completed";
+  }
+}
+
+async function submitOrderAndOpenWhatsApp() {
+  const shipping = storeState.shippingDetails;
+  if (!shipping) {
+    switchCheckoutStep(1);
+    return;
+  }
+
+  const totals = calculateCheckoutTotals();
+  const orderRefId = "CHM-" + Math.floor(100000 + Math.random() * 900000);
+  const user = storeState.currentUser;
+
+  const orderPayload = {
+    order_id: orderRefId,
+    customer_id: user?.id || null,
+    customer_name: shipping.name,
+    customer_phone: shipping.phone,
+    customer_email: shipping.email,
+    shipping_details: shipping,
+    items: storeState.cart.map(item => ({
+      id: item.id,
+      name: item.name,
+      scent: item.scent || item.fragrance || item.name,
+      price: parseFloat(item.price || 0),
+      quantity: parseInt(item.quantity || 1),
+      image: item.image || (Array.isArray(item.images) ? item.images[0] : '')
+    })),
+    subtotal: totals.subtotal,
+    discount_amount: totals.discount,
+    coupon_code: storeState.appliedCoupon ? storeState.appliedCoupon.code : '',
+    total_amount: totals.total,
+    status: 'pending'
+  };
+
+  const submitBtn = document.getElementById("btn-place-order-whatsapp");
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = "<span>Preparing WhatsApp Order...</span>";
+  }
+
+  // 1. Save order to Supabase orders table
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(orderPayload)
+    });
+  } catch (err) {
+    console.warn("Could not record order in database:", err);
+  }
+
+  // 2. Format WhatsApp Message
+  const dateStr = new Date().toLocaleDateString('en-IN', {
+    day: '2-digit', month: 'short', year: 'numeric'
+  });
+
+  let itemsListText = '';
+  storeState.cart.forEach((item, index) => {
+    const itemTotal = parseFloat(item.price || 0) * (item.quantity || 1);
+    itemsListText += `${index + 1}. *${item.name}* (x${item.quantity}) — ₹${itemTotal.toLocaleString('en-IN')}\n`;
+  });
+
+  const couponLine = totals.discount > 0 && storeState.appliedCoupon
+    ? `• Coupon (${storeState.appliedCoupon.code}): -₹${totals.discount.toLocaleString('en-IN')}\n`
+    : '';
+
+  const whatsAppMessage = 
+`🕯️ *NEW ORDER — CHIMINI ARTISANAL LUXURY*
+*Order Ref:* #${orderRefId}
+*Date:* ${dateStr}
+
+👤 *Client Details:*
+• Name: ${shipping.name}
+• Phone: ${shipping.phone}
+• Email: ${shipping.email}
+
+📍 *Shipping Destination:*
+• ${shipping.address1}${shipping.address2 ? ', ' + shipping.address2 : ''}
+• ${shipping.city}, ${shipping.state} - ${shipping.pincode}
+
+🛍️ *Order Items:*
+${itemsListText}
+💰 *Payment Summary:*
+• Subtotal: ₹${totals.subtotal.toLocaleString('en-IN')}
+${couponLine}• Luxury Shipping: Complimentary (₹0)
+• *Grand Total: ₹${totals.total.toLocaleString('en-IN')}*
+
+Please confirm my order and share payment instructions! ✨`;
+
+  const conciergePhone = "917411865577";
+  const whatsappUrl = `https://wa.me/${conciergePhone}?text=${encodeURIComponent(whatsAppMessage)}`;
+
+  // 3. Clear cart
   storeState.cart = [];
+  storeState.appliedCoupon = null;
   localStorage.removeItem("chimini_cart");
   renderCart();
-  closeAllDrawers();
+
+  // 4. Setup Step 3 Confirmation UI
+  const confOrderEl = document.getElementById("conf-order-id");
+  const confWaBtn = document.getElementById("conf-whatsapp-btn");
+
+  if (confOrderEl) confOrderEl.textContent = "ORDER #" + orderRefId;
+  if (confWaBtn) confWaBtn.href = whatsappUrl;
+
+  switchCheckoutStep(3);
+
+  // 5. Open WhatsApp
+  try {
+    window.open(whatsappUrl, '_blank');
+  } catch (e) {
+    window.location.href = whatsappUrl;
+  }
+}
+
+function bindCheckoutModalEvents() {
+  // Close Checkout Modal
+  const closeBtn = document.getElementById("close-checkout-modal");
+  if (closeBtn) {
+    closeBtn.onclick = (e) => {
+      e.preventDefault();
+      closeCheckoutModal();
+    };
+  }
+
+  const modal = document.getElementById("checkout-modal");
+  if (modal) {
+    modal.onclick = (e) => {
+      if (e.target === modal) closeCheckoutModal();
+    };
+  }
+
+  // Apply Coupon Button
+  const applyCouponBtn = document.getElementById("btn-apply-coupon");
+  if (applyCouponBtn) {
+    applyCouponBtn.onclick = (e) => {
+      e.preventDefault();
+      const input = document.getElementById("checkout-coupon-input");
+      if (input) applyCouponCode(input.value);
+    };
+  }
+
+  const couponInput = document.getElementById("checkout-coupon-input");
+  if (couponInput) {
+    couponInput.onkeydown = (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        applyCouponCode(couponInput.value);
+      }
+    };
+  }
+
+  // Continue to Step 2 (Review)
+  const gotoStep2Btn = document.getElementById("btn-goto-step2");
+  if (gotoStep2Btn) {
+    gotoStep2Btn.onclick = (e) => {
+      e.preventDefault();
+      switchCheckoutStep(2);
+    };
+  }
+
+  // Back to Step 1
+  const backToStep1Btn = document.getElementById("btn-back-to-step1");
+  if (backToStep1Btn) {
+    backToStep1Btn.onclick = (e) => {
+      e.preventDefault();
+      switchCheckoutStep(1);
+    };
+  }
+
+  const editShippingBtn = document.getElementById("btn-edit-shipping");
+  if (editShippingBtn) {
+    editShippingBtn.onclick = (e) => {
+      e.preventDefault();
+      switchCheckoutStep(1);
+    };
+  }
+
+  // Place Order Button (WhatsApp)
+  const placeOrderBtn = document.getElementById("btn-place-order-whatsapp");
+  if (placeOrderBtn) {
+    placeOrderBtn.onclick = (e) => {
+      e.preventDefault();
+      submitOrderAndOpenWhatsApp();
+    };
+  }
+
+  // Step 3 Close Button
+  const confCloseBtn = document.getElementById("btn-conf-close");
+  if (confCloseBtn) {
+    confCloseBtn.onclick = (e) => {
+      e.preventDefault();
+      closeCheckoutModal();
+    };
+  }
+
+  // Proceed to Checkout Button in Cart Drawer
+  const checkoutBtn = document.getElementById("checkout-btn");
+  if (checkoutBtn) {
+    checkoutBtn.onclick = (e) => {
+      e.preventDefault();
+      openCheckoutModal();
+    };
+  }
 }

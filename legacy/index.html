@@ -383,6 +383,228 @@
 
   <!-- Main JavaScript -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Multi-Step Checkout Modal -->
+  <div id="checkout-modal" class="checkout-modal-overlay" aria-hidden="true">
+    <div class="checkout-modal-card animate-scale-up">
+      <!-- Modal Header -->
+      <div class="checkout-modal-header">
+        <div class="checkout-header-title">
+          <h2 class="checkout-brand-title">CHIMINI</h2>
+          <span class="checkout-header-subtitle">Artisanal Luxury Checkout</span>
+        </div>
+        <button type="button" class="checkout-modal-close" id="close-checkout-modal" aria-label="Close checkout">&times;</button>
+      </div>
+
+      <!-- Step Indicator -->
+      <div class="checkout-steps-bar" id="checkout-steps-bar">
+        <div class="checkout-step-item active" id="step-indicator-1">
+          <span class="checkout-step-num">1</span>
+          <span>Shipping & Details</span>
+        </div>
+        <div class="checkout-step-divider"></div>
+        <div class="checkout-step-item" id="step-indicator-2">
+          <span class="checkout-step-num">2</span>
+          <span>Review & Place Order</span>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="checkout-modal-body">
+        
+        <!-- STEP 1: Details & Shipping -->
+        <div id="checkout-view-step1" class="checkout-view active">
+          <div class="checkout-grid">
+            <!-- Left: Shipping Address & Coupon -->
+            <div class="checkout-form-column">
+              <h3 class="checkout-section-title">📍 Shipping Destination</h3>
+              <form id="checkout-shipping-form">
+                <div class="checkout-form-grid">
+                  <div class="checkout-input-group checkout-form-full">
+                    <label for="checkout-name">Full Name *</label>
+                    <input type="text" id="checkout-name" placeholder="Recipient's full name" required autocomplete="name">
+                  </div>
+                  <div class="checkout-input-group">
+                    <label for="checkout-phone">Mobile Number *</label>
+                    <input type="tel" id="checkout-phone" placeholder="+91 98765 43210" required autocomplete="tel">
+                  </div>
+                  <div class="checkout-input-group">
+                    <label for="checkout-email">Email Address *</label>
+                    <input type="email" id="checkout-email" placeholder="name@domain.com" required autocomplete="email">
+                  </div>
+                  <div class="checkout-input-group checkout-form-full">
+                    <label for="checkout-address1">Street Address Line 1 *</label>
+                    <input type="text" id="checkout-address1" placeholder="House/Flat No., Building Name, Street" required autocomplete="address-line1">
+                  </div>
+                  <div class="checkout-input-group checkout-form-full">
+                    <label for="checkout-address2">Address Line 2 (Optional)</label>
+                    <input type="text" id="checkout-address2" placeholder="Apartment, Suite, Landmark" autocomplete="address-line2">
+                  </div>
+                  <div class="checkout-input-group">
+                    <label for="checkout-city">City *</label>
+                    <input type="text" id="checkout-city" placeholder="e.g. Bangalore" required autocomplete="address-level2">
+                  </div>
+                  <div class="checkout-input-group">
+                    <label for="checkout-state">State *</label>
+                    <input type="text" id="checkout-state" placeholder="e.g. Karnataka" required autocomplete="address-level1">
+                  </div>
+                  <div class="checkout-input-group checkout-form-full">
+                    <label for="checkout-pincode">Pincode / Postal Code *</label>
+                    <input type="text" id="checkout-pincode" placeholder="e.g. 560038" required pattern="[0-9]{6}" maxlength="6" autocomplete="postal-code">
+                  </div>
+                </div>
+              </form>
+
+              <!-- Coupon Box -->
+              <div class="checkout-coupon-card">
+                <label for="checkout-coupon-input" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--dark-charcoal, #2C221E); margin-bottom: 6px; display: block;">🏷️ Promotional Coupon Code</label>
+                <div class="checkout-coupon-row">
+                  <input type="text" id="checkout-coupon-input" placeholder="e.g. CHIMINI10">
+                  <button type="button" class="checkout-coupon-btn" id="btn-apply-coupon">Apply</button>
+                </div>
+                <div id="checkout-coupon-badge" style="display: none;"></div>
+              </div>
+            </div>
+
+            <!-- Right: Order Summary -->
+            <div class="checkout-summary-column">
+              <h3 class="checkout-section-title">🛍️ Order Summary</h3>
+              <div class="checkout-summary-card">
+                <div class="checkout-items-list" id="checkout-items-list-step1">
+                  <!-- Dynamically Rendered Cart Items -->
+                </div>
+
+                <div class="checkout-totals-block">
+                  <div class="checkout-total-row">
+                    <span>Subtotal</span>
+                    <span id="checkout-subtotal-step1">₹0</span>
+                  </div>
+                  <div class="checkout-total-row discount" id="checkout-discount-row-step1" style="display: none;">
+                    <span id="checkout-discount-label-step1">Coupon Discount</span>
+                    <span id="checkout-discount-val-step1">-₹0</span>
+                  </div>
+                  <div class="checkout-total-row">
+                    <span>Luxury Shipping</span>
+                    <span style="color: #389E0D; font-weight: 500;">Complimentary</span>
+                  </div>
+                  <div class="checkout-total-row grand-total">
+                    <span>Estimated Total</span>
+                    <span id="checkout-total-step1">₹0</span>
+                  </div>
+                </div>
+
+                <div class="checkout-actions-row">
+                  <button type="button" class="btn-checkout-primary" id="btn-goto-step2">
+                    <span>Continue to Review</span>
+                    <span>→</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: Review & Place Order -->
+        <div id="checkout-view-step2" class="checkout-view">
+          <div class="checkout-grid">
+            <!-- Left: Order Review Details -->
+            <div class="checkout-review-column">
+              <h3 class="checkout-section-title">📋 Verify Order Details</h3>
+              
+              <!-- Shipping Destination Review -->
+              <div class="checkout-review-box">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(197,168,128,0.2); padding-bottom: 6px;">
+                  <strong style="font-size: 0.85rem; color: var(--dark-charcoal, #2C221E);">Shipping Address</strong>
+                  <button type="button" class="auth-text-link" id="btn-edit-shipping" style="font-size: 0.75rem;">Edit</button>
+                </div>
+                <div class="checkout-review-row">
+                  <span class="checkout-review-label">Recipient:</span>
+                  <span class="checkout-review-val" id="review-recipient-name">-</span>
+                </div>
+                <div class="checkout-review-row">
+                  <span class="checkout-review-label">Contact:</span>
+                  <span class="checkout-review-val" id="review-recipient-contact">-</span>
+                </div>
+                <div class="checkout-review-row">
+                  <span class="checkout-review-label">Deliver To:</span>
+                  <span class="checkout-review-val" id="review-recipient-address">-</span>
+                </div>
+              </div>
+
+              <!-- Payment & Order Mode -->
+              <div class="whatsapp-notice-banner">
+                <div style="font-size: 20px; line-height: 1;">💬</div>
+                <div>
+                  <strong>Direct Concierge Confirmation:</strong>
+                  <p style="margin: 2px 0 0 0; font-size: 0.78rem;">
+                    When you click "Place Order via WhatsApp", your complete order summary will be securely transferred into WhatsApp to connect with the Chimini Concierge team (+91 74118 65577) to confirm availability and share payment instructions.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Final Items & Place Order CTA -->
+            <div class="checkout-summary-column">
+              <h3 class="checkout-section-title">✨ Final Summary</h3>
+              <div class="checkout-summary-card">
+                <div class="checkout-items-list" id="checkout-items-list-step2">
+                  <!-- Dynamically Rendered Cart Items in Step 2 -->
+                </div>
+
+                <div class="checkout-totals-block">
+                  <div class="checkout-total-row">
+                    <span>Subtotal</span>
+                    <span id="checkout-subtotal-step2">₹0</span>
+                  </div>
+                  <div class="checkout-total-row discount" id="checkout-discount-row-step2" style="display: none;">
+                    <span id="checkout-discount-label-step2">Coupon Discount</span>
+                    <span id="checkout-discount-val-step2">-₹0</span>
+                  </div>
+                  <div class="checkout-total-row">
+                    <span>Luxury Shipping</span>
+                    <span style="color: #389E0D; font-weight: 500;">Complimentary</span>
+                  </div>
+                  <div class="checkout-total-row grand-total">
+                    <span>Grand Total</span>
+                    <span id="checkout-total-step2">₹0</span>
+                  </div>
+                </div>
+
+                <div class="checkout-actions-row">
+                  <button type="button" class="btn-checkout-back" id="btn-back-to-step1">← Edit</button>
+                  <button type="button" class="btn-checkout-whatsapp" id="btn-place-order-whatsapp">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                    <span>Place Order via WhatsApp</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3: Order Confirmation Overlay -->
+        <div id="checkout-view-step3" class="checkout-view">
+          <div class="checkout-confirmation-card">
+            <div class="checkout-success-icon">✓</div>
+            <div class="checkout-order-ref" id="conf-order-id">ORDER #CHM-XXXXX</div>
+            <h3 class="checkout-conf-title">Your Luxury Order is Ready!</h3>
+            <p class="checkout-conf-desc">
+              We've prepared your complete order details. Please complete the final step by sending the generated order message on WhatsApp to confirm with our concierge team.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 10px; max-width: 360px; margin: 0 auto;">
+              <a href="#" id="conf-whatsapp-btn" target="_blank" rel="noopener noreferrer" class="btn-checkout-whatsapp" style="text-decoration: none;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                <span>Open WhatsApp Chat</span>
+              </a>
+              <button type="button" class="btn btn-primary" id="btn-conf-close" style="width: 100%; padding: 12px;">Return to Boutique</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>
