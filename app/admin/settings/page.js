@@ -91,6 +91,17 @@ export default function SettingsPage() {
               <button type="button" onClick={addAnnouncement} style={{ padding: '8px 15px', backgroundColor: '#f1f5f9', color: '#475569', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', marginTop: '5px' }}>+ Add Message</button>
             </div>
 
+            <div style={{ marginBottom: '30px' }}>
+              <h4 style={{ margin: '0 0 15px 0', fontSize: '1rem', color: '#1a1a1a', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>📊 Google Sheets Lead Capture</h4>
+              <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '10px' }}>
+                All user signups (Name, Phone, Email) and logins are automatically synchronized to your connected Google Sheet:
+                <br />
+                <a href="https://docs.google.com/spreadsheets/d/1KpVARxf7_lAdQtFDOt7gWpAWRpTF8L246YfJeq3cbsg" target="_blank" rel="noopener noreferrer" style={{ color: '#8C6A3D', fontWeight: '600' }}>
+                  Open Google Sheet (1KpVARxf7_lAdQtFDOt7gWpAWRpTF8L246YfJeq3cbsg) ↗
+                </a>
+              </p>
+            </div>
+
             <button type="submit" style={{ padding: '12px 25px', backgroundColor: 'var(--color-text-dark)', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' }}>Save All Settings</button>
           </form>
         )}

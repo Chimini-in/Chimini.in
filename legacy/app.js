@@ -3517,6 +3517,7 @@ function bindAuthModalEvents() {
         if (error) throw error;
 
         storeState.otpEmail = email;
+        storeState.pendingSignupMeta = { name, phone, email };
         const targetEmailEl = document.getElementById("otp-target-email");
         if (targetEmailEl) targetEmailEl.textContent = email;
 
@@ -3581,6 +3582,15 @@ function bindAuthModalEvents() {
         const user = data?.user || (await supabaseAuthClient.auth.getUser()).data?.user;
         storeState.currentUser = user;
         updateAccountUI(user);
+
+        // Sync new verified user to Google Sheet
+        const meta = (user && user.user_metadata) || storeState.pendingSignupMeta || {};
+        syncUserToGoogleSheet({
+          name: meta.full_name || meta.name || user?.email?.split('@')[0] || "Valued Client",
+          phone: meta.phone || "Not provided",
+          email: user?.email || storeState.otpEmail,
+          type: "Signup (Verified)"
+        });
 
         closeAuthModal();
         const userName = user?.user_metadata?.full_name || "Valued Client";
@@ -3695,6 +3705,15 @@ function bindAuthModalEvents() {
 
         storeState.currentUser = data.user;
         updateAccountUI(data.user);
+
+        // Sync logged in user to Google Sheet
+        const loginMeta = data.user.user_metadata || {};
+        syncUserToGoogleSheet({
+          name: loginMeta.full_name || loginMeta.name || data.user.email.split('@')[0],
+          phone: loginMeta.phone || "Not provided",
+          email: data.user.email,
+          type: "Login"
+        });
 
         closeAuthModal();
         const userName = data.user?.user_metadata?.full_name || "Valued Client";
@@ -4271,5 +4290,51 @@ function bindCheckoutModalEvents() {
       e.preventDefault();
       openCheckoutModal();
     };
+  }
+}
+
+// ==========================================================================
+// 10. GOOGLE SHEETS REAL-TIME SYNC ENGINE
+// ==========================================================================
+
+const DEFAULT_SHEET_WEBHOOK = "https://script.google.com/macros/s/AKfycbz_your_deployment_id/exec";
+
+async function syncUserToGoogleSheet(userData) {
+  if (!userData || !userData.email) return;
+
+  const payload = {
+    name: userData.name || "Valued Client",
+    phone: userData.phone || "Not provided",
+    email: userData.email,
+    date: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
+    time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }),
+    type: userData.type || "Signup/Login"
+  };
+
+  console.log("Syncing client to Google Sheet [1KpVARxf7_lAdQtFDOt7gWpAWRpTF8L246YfJeq3cbsg]:", payload);
+
+  const webhookUrl = window.CHIMINI_GOOGLE_SHEET_WEBHOOK || 
+                     (storeState.adminSettings && storeState.adminSettings.googleSheetWebhook) ||
+                     localStorage.getItem("chimini_google_sheet_webhook");
+
+  if (webhookUrl && webhookUrl.startsWith("http")) {
+    try {
+      await fetch(webhookUrl, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      console.log("Client successfully synchronized to Google Sheet.");
+    } catch (err) {
+      console.warn("Could not sync to Google Sheet webhook:", err);
+    }
+  } else {
+    // Store in pending queue in localStorage so it pushes as soon as webhook URL is configured
+    try {
+      const queue = JSON.parse(localStorage.getItem("chimini_pending_sheet_sync") || "[]");
+      queue.push(payload);
+      localStorage.setItem("chimini_pending_sheet_sync", JSON.stringify(queue));
+    } catch (e) {}
   }
 }
