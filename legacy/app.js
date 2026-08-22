@@ -1351,15 +1351,23 @@ function bindEvents() {
 
   if (DOM.drawerOverlay) DOM.drawerOverlay.addEventListener("click", closeAllDrawers);
 
-  // Checkout simulation
+    // Checkout Action
   if (DOM.checkoutBtn) {
-    DOM.checkoutBtn.addEventListener("click", () => {
-      alert("Thank you for choosing CHIMINI. Checkout simulation complete.");
-      storeState.cart = [];
-      localStorage.removeItem("chimini_cart");
-      renderCart();
-      closeAllDrawers();
-    });
+    DOM.checkoutBtn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!storeState.cart || storeState.cart.length === 0) {
+        showToast("Your cart is empty.");
+        return;
+      }
+      if (!storeState.currentUser) {
+        storeState.pendingCheckout = true;
+        closeAllDrawers();
+        openAuthModal('login', true);
+        return;
+      }
+      openCheckoutModal();
+    };
   }
 
   // Search filtering
@@ -3743,28 +3751,7 @@ function bindAuthModalEvents() {
     };
   }
 
-  // Checkout Gate Button Binding
-  if (DOM.checkoutBtn) {
-    DOM.checkoutBtn.onclick = (e) => {
-      e.preventDefault();
-
-      if (storeState.cart.length === 0) {
-        showToast("Your cart is empty.");
-        return;
-      }
-
-      // If user is not logged in, prompt authentication gate modal
-      if (!storeState.currentUser) {
-        storeState.pendingCheckout = true;
-        closeAllDrawers();
-        openAuthModal('login', true);
-        return;
-      }
-
-      // If logged in, complete checkout
-      triggerCheckoutSuccess();
-    };
-  }
+  
 }
 
 function triggerCheckoutSuccess() {
