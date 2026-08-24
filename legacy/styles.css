@@ -6569,3 +6569,31 @@ section.full-width-banner-section {
 .auth-google-btn svg {
   flex-shrink: 0;
 }
+
+
+/* Checkout Validation Alert & Input Error Highlights */
+.checkout-alert {
+  padding: 10px 14px;
+  background-color: #FEF2F2;
+  border: 1px solid #FCA5A5;
+  border-radius: 6px;
+  color: #991B1B;
+  font-size: 0.82rem;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: shakeAlert 0.35s ease;
+}
+
+@keyframes shakeAlert {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+
+.checkout-input-group input.input-error {
+  border-color: #E53E3E !important;
+  background-color: #FFF5F5 !important;
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.15) !important;
+}

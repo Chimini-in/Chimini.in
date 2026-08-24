@@ -5021,25 +5021,79 @@ function switchCheckoutStep(stepNumber) {
     updateCheckoutTotalsUI();
 
   } else if (stepNumber === 2) {
-    // Validate shipping form
-    const name = (document.getElementById("checkout-name")?.value || "").trim();
-    const phone = (document.getElementById("checkout-phone")?.value || "").trim();
-    const email = (document.getElementById("checkout-email")?.value || "").trim();
-    const address1 = (document.getElementById("checkout-address1")?.value || "").trim();
-    const address2 = (document.getElementById("checkout-address2")?.value || "").trim();
-    const city = (document.getElementById("checkout-city")?.value || "").trim();
-    const state = (document.getElementById("checkout-state")?.value || "").trim();
-    const pincode = (document.getElementById("checkout-pincode")?.value || "").trim();
+    // Comprehensive required fields validation & visual error highlights
+    const requiredFields = [
+      { id: "checkout-name", label: "Full Name" },
+      { id: "checkout-phone", label: "Mobile Number" },
+      { id: "checkout-email", label: "Email Address" },
+      { id: "checkout-address1", label: "Street Address Line 1" },
+      { id: "checkout-city", label: "City" },
+      { id: "checkout-state", label: "State" },
+      { id: "checkout-pincode", label: "Pincode / Postal Code" }
+    ];
 
-    if (!name || !phone || !email || !address1 || !city || !state || !pincode) {
-      showToast("Please fill in all required shipping fields marked with *");
+    let missing = [];
+    let firstEmptyInput = null;
+
+    requiredFields.forEach(field => {
+      const el = document.getElementById(field.id);
+      if (el) {
+        el.classList.remove("input-error");
+        
+        // Remove error highlight dynamically as user types
+        el.oninput = () => {
+          el.classList.remove("input-error");
+          const alertEl = document.getElementById("checkout-alert");
+          if (alertEl && !document.querySelector(".checkout-input-group input.input-error")) {
+            alertEl.style.display = "none";
+          }
+        };
+
+        if (!el.value.trim()) {
+          el.classList.add("input-error");
+          missing.push(field.label);
+          if (!firstEmptyInput) firstEmptyInput = el;
+        }
+      }
+    });
+
+    if (missing.length > 0) {
+      const alertEl = document.getElementById("checkout-alert");
+      if (alertEl) {
+        alertEl.innerHTML = `<span>⚠️ <strong>Please enter all required details</strong> (* marked fields)</span>`;
+        alertEl.style.display = "flex";
+      }
+      showToast("Please enter all required details marked with *");
+      if (firstEmptyInput) firstEmptyInput.focus();
       return;
     }
 
-    if (pincode.length < 5) {
+    // Pincode validation
+    const pincodeEl = document.getElementById("checkout-pincode");
+    if (pincodeEl && pincodeEl.value.trim().length < 5) {
+      pincodeEl.classList.add("input-error");
+      const alertEl = document.getElementById("checkout-alert");
+      if (alertEl) {
+        alertEl.innerHTML = "<span>⚠️ <strong>Please enter a valid 6-digit postal pincode.</strong></span>";
+        alertEl.style.display = "flex";
+      }
       showToast("Please enter a valid postal pincode.");
+      pincodeEl.focus();
       return;
     }
+
+    // Clear alert when all fields are valid
+    const alertEl = document.getElementById("checkout-alert");
+    if (alertEl) alertEl.style.display = "none";
+
+    const name = document.getElementById("checkout-name").value.trim();
+    const phone = document.getElementById("checkout-phone").value.trim();
+    const email = document.getElementById("checkout-email").value.trim();
+    const address1 = document.getElementById("checkout-address1").value.trim();
+    const address2 = (document.getElementById("checkout-address2")?.value || "").trim();
+    const city = document.getElementById("checkout-city").value.trim();
+    const state = document.getElementById("checkout-state").value.trim();
+    const pincode = document.getElementById("checkout-pincode").value.trim();
 
     storeState.shippingDetails = {
       name, phone, email, address1, address2, city, state, pincode
