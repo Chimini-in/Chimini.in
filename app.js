@@ -369,8 +369,10 @@ function renderBestSellers() {
     const card = document.createElement("div");
     card.className = "product-card animate-slide-up";
     card.innerHTML = `
-      <a href="/product?id=${product.id}" class="product-image-wrapper" style="display:block; text-decoration:none;">
-        <img src="${product.image}" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
+      <div class="product-image-wrapper">
+        <a href="/product?id=${product.id}" style="display:block; width:100%; height:100%; text-decoration:none;">
+          <img src="${product.image}" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
+        </a>
         <button class="wishlist-toggle-btn ${isWishlisted ? "active" : ""}" data-id="${product.id}" aria-label="Add to Wishlist">
           <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
         </button>
@@ -384,10 +386,12 @@ function renderBestSellers() {
 
     // Bind button events
     card.querySelector(".wishlist-toggle-btn").addEventListener("click", (e) => {
+      e.preventDefault();
       e.stopPropagation();
       toggleWishlist(product.id);
     });
     card.querySelector(".add-to-cart-btn").addEventListener("click", (e) => {
+      e.preventDefault();
       e.stopPropagation();
       addToCart(product.id);
     });
@@ -2154,8 +2158,10 @@ function renderShopProducts() {
       card.innerHTML = `
         <div class="product-image-wrapper">
           ${badgeText ? `<span class="product-badge">${badgeText}</span>` : ''}
-          <a href="/product?id=${product.id}" style="display:block;"><img src="${product.image}" class="product-image-main" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
-          ${product.secondaryImage ? `<img src="${product.secondaryImage}" class="product-image-hover" alt="${product.name}" onerror="this.style.display='none'">` : ''}
+          <a href="/product?id=${product.id}" style="display:block; width:100%; height:100%; text-decoration:none;">
+            <img src="${product.image}" class="product-image-main" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
+            ${product.secondaryImage ? `<img src="${product.secondaryImage}" class="product-image-hover" alt="${product.name}" onerror="this.style.display='none'">` : ''}
+          </a>
           <button class="wishlist-toggle-btn ${isWishlisted ? "active" : ""}" data-id="${product.id}" aria-label="Add to Wishlist">
             <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
           </button>
@@ -2179,8 +2185,10 @@ function renderShopProducts() {
       card.innerHTML = `
         <div class="product-image-wrapper">
           ${badgeText ? `<span class="product-badge">${badgeText}</span>` : ''}
-          <a href="/product?id=${product.id}" style="display:block;"><img src="${product.image}" class="product-image-main" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
-          ${product.secondaryImage ? `<img src="${product.secondaryImage}" class="product-image-hover" alt="${product.name}" onerror="this.style.display='none'">` : ''}
+          <a href="/product?id=${product.id}" style="display:block; width:100%; height:100%; text-decoration:none;">
+            <img src="${product.image}" class="product-image-main" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
+            ${product.secondaryImage ? `<img src="${product.secondaryImage}" class="product-image-hover" alt="${product.name}" onerror="this.style.display='none'">` : ''}
+          </a>
           <button class="wishlist-toggle-btn ${isWishlisted ? "active" : ""}" data-id="${product.id}" aria-label="Add to Wishlist">
             <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
           </button>
@@ -2198,10 +2206,12 @@ function renderShopProducts() {
     }
 
     card.querySelector(".wishlist-toggle-btn").addEventListener("click", (e) => {
+      e.preventDefault();
       e.stopPropagation();
       toggleWishlist(product.id);
     });
     card.querySelector(".add-to-cart-btn").addEventListener("click", (e) => {
+      e.preventDefault();
       e.stopPropagation();
       addToCart(product.id);
     });
