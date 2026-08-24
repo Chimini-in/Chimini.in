@@ -3860,6 +3860,7 @@ try {
 }
 
 let otpCountdownInterval = null;
+let resetOtpCountdownInterval = null;
 
 function initAuth() {
   if (!supabaseAuthClient) {
@@ -3876,6 +3877,17 @@ function initAuth() {
       if (session && session.user) {
         storeState.currentUser = session.user;
         updateAccountUI(session.user);
+
+        if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+          const userMeta = session.user.user_metadata || {};
+          const isGoogle = session.user.app_metadata?.provider === 'google' || userMeta.avatar_url;
+          syncUserToGoogleSheet({
+            name: userMeta.full_name || userMeta.name || session.user.email.split('@')[0],
+            phone: userMeta.phone || (isGoogle ? "Google Account" : "Not provided"),
+            email: session.user.email,
+            type: isGoogle ? "Google OAuth" : "Login"
+          });
+        }
       } else {
         storeState.currentUser = null;
         updateAccountUI(null);
@@ -3970,6 +3982,8 @@ function switchAuthView(viewName) {
   if (subtitle) {
     if (viewName === 'signup') subtitle.textContent = "Join Chimini Sanctuary";
     else if (viewName === 'otp') subtitle.textContent = "Verify Security Code";
+    else if (viewName === 'forgot') subtitle.textContent = "Recover Your Password";
+    else if (viewName === 'reset') subtitle.textContent = "Create New Password";
     else if (viewName === 'profile') subtitle.textContent = "Artisanal Client Account";
     else subtitle.textContent = "Welcome to Artisanal Luxury";
   }
@@ -3996,6 +4010,12 @@ function switchAuthView(viewName) {
   if (viewName === 'otp') {
     const firstDigit = document.querySelector(".otp-digit[data-idx='0']");
     if (firstDigit) setTimeout(() => firstDigit.focus(), 100);
+  } else if (viewName === 'forgot') {
+    const forgotInput = document.getElementById("forgot-email");
+    if (forgotInput) setTimeout(() => forgotInput.focus(), 100);
+  } else if (viewName === 'reset') {
+    const firstResetDigit = document.querySelector(".reset-otp-digit[data-idx='0']");
+    if (firstResetDigit) setTimeout(() => firstResetDigit.focus(), 100);
   } else if (viewName === 'signup') {
     const nameInput = document.getElementById("signup-name");
     if (nameInput) setTimeout(() => nameInput.focus(), 100);
@@ -4020,6 +4040,29 @@ function clearAuthAlert() {
     alert.textContent = "";
     alert.className = "auth-alert";
   }
+}
+
+
+function startResetOtpTimer() {
+  const countdownEl = document.getElementById("reset-countdown");
+  const resendBtn = document.getElementById("btn-resend-reset-otp");
+  if (!countdownEl || !resendBtn) return;
+
+  if (resetOtpCountdownInterval) clearInterval(resetOtpCountdownInterval);
+
+  let seconds = 60;
+  resendBtn.disabled = true;
+  countdownEl.textContent = seconds;
+
+  resetOtpCountdownInterval = setInterval(() => {
+    seconds--;
+    countdownEl.textContent = seconds;
+    if (seconds <= 0) {
+      clearInterval(resetOtpCountdownInterval);
+      resendBtn.disabled = false;
+      resendBtn.innerHTML = "Resend Code";
+    }
+  }, 1000);
 }
 
 function startOtpTimer() {
@@ -4436,6 +4479,229 @@ function bindAuthModalEvents() {
       }
     };
   }
+
+  
+  // Google OAuth Handlers
+  const handleGoogleAuth = async () => {
+    if (!supabaseAuthClient) {
+      setAuthAlert("Authentication service is temporarily unavailable. Please try again later.", "error");
+      return;
+    }
+    try {
+      const redirectUrl = window.location.origin + window.location.pathname;
+      const { data, error } = await supabaseAuthClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectUrl
+        }
+      });
+      if (error) throw error;
+    } catch (err) {
+      console.error("Google Auth error:", err);
+      setAuthAlert(err.message || "Failed to initiate Google sign in. Please try again.", "error");
+    }
+  };
+
+  const googleLoginBtn = document.getElementById("btn-google-login");
+  if (googleLoginBtn) googleLoginBtn.onclick = handleGoogleAuth;
+  const googleSignupBtn = document.getElementById("btn-google-signup");
+  if (googleSignupBtn) googleSignupBtn.onclick = handleGoogleAuth;
+
+  // Forgot Password Link Click
+  const forgotBtn = document.getElementById("btn-forgot-password");
+  if (forgotBtn) {
+    forgotBtn.onclick = (e) => {
+      e.preventDefault();
+      clearAuthAlert();
+      const loginEmail = document.getElementById("login-email")?.value.trim();
+      const forgotEmailInput = document.getElementById("forgot-email");
+      if (loginEmail && forgotEmailInput) forgotEmailInput.value = loginEmail;
+      switchAuthView('forgot');
+    };
+  }
+
+  // Back to Forgot Email Request
+  const backToForgotBtn = document.getElementById("btn-back-to-forgot");
+  if (backToForgotBtn) {
+    backToForgotBtn.onclick = (e) => {
+      e.preventDefault();
+      switchAuthView('forgot');
+    };
+  }
+
+  // Forgot Password Form Submission (Sends 6-digit Recovery OTP)
+  const forgotForm = document.getElementById("auth-forgot-form");
+  if (forgotForm) {
+    forgotForm.onsubmit = async (e) => {
+      e.preventDefault();
+      clearAuthAlert();
+
+      const email = document.getElementById("forgot-email").value.trim().toLowerCase();
+      const submitBtn = document.getElementById("btn-forgot-submit");
+
+      if (!email) {
+        setAuthAlert("Please enter your registered email address.", "error");
+        return;
+      }
+
+      if (!supabaseAuthClient) {
+        setAuthAlert("Authentication service is temporarily unavailable.", "error");
+        return;
+      }
+
+      const origText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = "<span>Sending Recovery Code...</span>";
+
+      try {
+        const { data, error } = await supabaseAuthClient.auth.resetPasswordForEmail(email);
+        if (error) throw error;
+
+        storeState.resetEmail = email;
+        const targetEmailEl = document.getElementById("reset-target-email");
+        if (targetEmailEl) targetEmailEl.textContent = email;
+
+        // Reset digits & password fields
+        document.querySelectorAll(".reset-otp-digit").forEach(d => d.value = "");
+        const newPwdInput = document.getElementById("reset-new-password");
+        if (newPwdInput) newPwdInput.value = "";
+
+        switchAuthView('reset');
+        startResetOtpTimer();
+        setAuthAlert("A 6-digit recovery code has been sent to your email from support@chimini.in.", "success");
+      } catch (err) {
+        console.error("Forgot password error:", err);
+        setAuthAlert(err.message || "Failed to send recovery code. Please check the email and try again.", "error");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origText;
+      }
+    };
+  }
+
+  // Reset Password Form Submission (Verifies OTP + Sets New Password)
+  const resetForm = document.getElementById("auth-reset-form");
+  if (resetForm) {
+    resetForm.onsubmit = async (e) => {
+      e.preventDefault();
+      clearAuthAlert();
+
+      const email = storeState.resetEmail || document.getElementById("forgot-email")?.value.trim().toLowerCase();
+      const newPassword = document.getElementById("reset-new-password").value;
+      const submitBtn = document.getElementById("btn-reset-submit");
+
+      // Gather 6-digit OTP
+      const resetDigits = document.querySelectorAll(".reset-otp-digit");
+      let token = "";
+      resetDigits.forEach(d => token += d.value.trim());
+
+      if (token.length !== 6) {
+        setAuthAlert("Please enter the complete 6-digit recovery code.", "error");
+        return;
+      }
+
+      if (!newPassword || newPassword.length < 6) {
+        setAuthAlert("New password must be at least 6 characters.", "error");
+        return;
+      }
+
+      if (!supabaseAuthClient) {
+        setAuthAlert("Authentication service is temporarily unavailable.", "error");
+        return;
+      }
+
+      const origText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = "<span>Updating Password...</span>";
+
+      try {
+        // Step 1: Verify OTP token as recovery type
+        const { data: verifyData, error: verifyErr } = await supabaseAuthClient.auth.verifyOtp({
+          email,
+          token,
+          type: 'recovery'
+        });
+
+        if (verifyErr) throw verifyErr;
+
+        // Step 2: Update password for current session
+        const { data: updateData, error: updateErr } = await supabaseAuthClient.auth.updateUser({
+          password: newPassword
+        });
+
+        if (updateErr) throw updateErr;
+
+        const user = updateData?.user || verifyData?.user;
+        if (user) {
+          storeState.currentUser = user;
+          updateAccountUI(user);
+        }
+
+        setAuthAlert("✨ Password successfully updated! Welcome back to Chimini.", "success");
+        setTimeout(() => {
+          closeAuthModal();
+          showToast("✨ Password successfully updated!");
+        }, 1500);
+
+      } catch (err) {
+        console.error("Password reset error:", err);
+        setAuthAlert(err.message || "Invalid or expired recovery code. Please try again.", "error");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origText;
+      }
+    };
+  }
+
+  // Resend Reset OTP Button
+  const resendResetBtn = document.getElementById("btn-resend-reset-otp");
+  if (resendResetBtn) {
+    resendResetBtn.onclick = async () => {
+      const email = storeState.resetEmail || document.getElementById("forgot-email")?.value.trim().toLowerCase();
+      if (!email || !supabaseAuthClient) return;
+      resendResetBtn.disabled = true;
+      try {
+        const { error } = await supabaseAuthClient.auth.resetPasswordForEmail(email);
+        if (error) throw error;
+        startResetOtpTimer();
+        setAuthAlert("A fresh 6-digit recovery code has been sent from support@chimini.in.", "success");
+      } catch (err) {
+        setAuthAlert(err.message || "Could not resend recovery code. Please try again in a moment.", "error");
+        resendResetBtn.disabled = false;
+      }
+    };
+  }
+
+  // Reset OTP Digits Auto-focus & Paste Handling
+  const resetDigitInputs = document.querySelectorAll(".reset-otp-digit");
+  resetDigitInputs.forEach((input, idx) => {
+    input.oninput = (e) => {
+      const val = e.target.value;
+      if (val.length >= 1) {
+        e.target.value = val.slice(0, 1);
+        if (idx < resetDigitInputs.length - 1) {
+          resetDigitInputs[idx + 1].focus();
+        }
+      }
+    };
+
+    input.onkeydown = (e) => {
+      if (e.key === "Backspace" && !e.target.value && idx > 0) {
+        resetDigitInputs[idx - 1].focus();
+      }
+    };
+
+    input.onpaste = (e) => {
+      e.preventDefault();
+      const pasted = (e.clipboardData || window.clipboardData).getData("text").trim();
+      if (/^\d{6}$/.test(pasted)) {
+        pasted.split("").forEach((char, i) => {
+          if (resetDigitInputs[i]) resetDigitInputs[i].value = char;
+        });
+        resetDigitInputs[resetDigitInputs.length - 1].focus();
+      }
+    };
+  });
 
   // Sign Out Button
   const signoutBtn = document.getElementById("btn-user-signout");

@@ -182,7 +182,7 @@
 
   
   <!-- Customer Auth Modal -->
-  <div id="auth-modal" class="auth-modal-overlay" aria-hidden="true">
+    <div id="auth-modal" class="auth-modal-overlay" aria-hidden="true">
     <div class="auth-modal-card animate-scale-up">
       <button type="button" class="auth-modal-close" id="close-auth-modal" aria-label="Close modal">&times;</button>
       
@@ -215,6 +215,7 @@
           <div class="auth-form-group">
             <div class="auth-label-row">
               <label for="login-password">Password</label>
+              <button type="button" class="auth-forgot-link" id="btn-forgot-password">Forgot Password?</button>
             </div>
             <div class="auth-password-wrapper">
               <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
@@ -225,6 +226,13 @@
             <span class="btn-text">Sign In</span>
           </button>
         </form>
+
+        <div class="auth-divider"><span>or</span></div>
+
+        <button type="button" class="btn-google auth-google-btn" id="btn-google-login">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
+          <span>Continue with Google</span>
+        </button>
 
         <div class="auth-footer-prompt">
           <span>New to Chimini?</span>
@@ -265,13 +273,20 @@
           </button>
         </form>
 
+        <div class="auth-divider"><span>or</span></div>
+
+        <button type="button" class="btn-google auth-google-btn" id="btn-google-signup">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
+          <span>Continue with Google</span>
+        </button>
+
         <div class="auth-footer-prompt">
           <span>Already have an account?</span>
           <button type="button" class="auth-switch-btn" data-switch="login">Sign In</button>
         </div>
       </div>
 
-      <!-- VIEW 3: OTP Verification -->
+      <!-- VIEW 3: OTP Verification (Signup) -->
       <div id="auth-view-otp" class="auth-view">
         <div class="auth-otp-header">
           <div class="auth-otp-icon">✉️</div>
@@ -304,7 +319,77 @@
         </div>
       </div>
 
-      <!-- VIEW 4: User Profile (Logged-In) -->
+      <!-- VIEW 4: Forgot Password - Step 1 (Enter Email) -->
+      <div id="auth-view-forgot" class="auth-view">
+        <div class="auth-otp-header">
+          <div class="auth-otp-icon">🔑</div>
+          <h3>Reset Your Password</h3>
+          <p>Enter your registered email address and we'll send a 6-digit recovery OTP.</p>
+        </div>
+
+        <form id="auth-forgot-form" class="auth-form">
+          <div class="auth-form-group">
+            <label for="forgot-email">Email Address</label>
+            <input type="email" id="forgot-email" placeholder="name@domain.com" required autocomplete="email">
+            <small class="auth-hint">A 6-digit password recovery code will be sent from support@chimini.in.</small>
+          </div>
+
+          <button type="submit" class="btn btn-primary auth-submit-btn" id="btn-forgot-submit">
+            <span class="btn-text">Send Recovery OTP</span>
+          </button>
+        </form>
+
+        <div class="auth-footer-prompt">
+          <span>Remember your password?</span>
+          <button type="button" class="auth-switch-btn" data-switch="login">Sign In</button>
+        </div>
+      </div>
+
+      <!-- VIEW 5: Reset Password - Step 2 (Enter OTP + New Password) -->
+      <div id="auth-view-reset" class="auth-view">
+        <div class="auth-otp-header">
+          <div class="auth-otp-icon">✨</div>
+          <h3>Set New Password</h3>
+          <p>Enter the 6-digit recovery code sent to <br><strong id="reset-target-email">user@email.com</strong></p>
+        </div>
+
+        <form id="auth-reset-form" class="auth-form">
+          <div class="auth-form-group">
+            <label>6-Digit Recovery Code</label>
+            <div class="otp-inputs-row" id="reset-otp-inputs-row">
+              <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="otp-digit reset-otp-digit" data-idx="0" required autofocus>
+              <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="otp-digit reset-otp-digit" data-idx="1" required>
+              <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="otp-digit reset-otp-digit" data-idx="2" required>
+              <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="otp-digit reset-otp-digit" data-idx="3" required>
+              <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="otp-digit reset-otp-digit" data-idx="4" required>
+              <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="otp-digit reset-otp-digit" data-idx="5" required>
+            </div>
+          </div>
+
+          <div class="auth-form-group">
+            <label for="reset-new-password">New Password</label>
+            <div class="auth-password-wrapper">
+              <input type="password" id="reset-new-password" placeholder="Minimum 6 characters" required minlength="6" autocomplete="new-password">
+              <button type="button" class="auth-toggle-pwd" data-target="reset-new-password" aria-label="Toggle password"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary auth-submit-btn" id="btn-reset-submit">
+            <span class="btn-text">Update Password & Sign In</span>
+          </button>
+        </form>
+
+        <div class="auth-resend-wrapper">
+          <span>Didn't receive the code?</span>
+          <button type="button" class="auth-resend-btn" id="btn-resend-reset-otp" disabled>Resend in <span id="reset-countdown">60</span>s</button>
+        </div>
+
+        <div class="auth-change-email-row">
+          <button type="button" class="auth-text-link" id="btn-back-to-forgot">&larr; Back to reset request</button>
+        </div>
+      </div>
+
+      <!-- VIEW 6: User Profile (Logged-In) -->
       <div id="auth-view-profile" class="auth-view">
         <div class="auth-profile-card">
           <div class="auth-avatar-circle" id="user-avatar-initials">U</div>
@@ -322,14 +407,6 @@
     </div>
   </div>
 
-
-  <!-- Notification Toast -->
-  <div id="toast" class="toast">Added to Cart</div>
-
-  <!-- Main JavaScript -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
-  <!-- Multi-Step Checkout Modal -->
   <div id="checkout-modal" class="checkout-modal-overlay" aria-hidden="true">
     <div class="checkout-modal-card animate-scale-up">
       <!-- Modal Header -->
