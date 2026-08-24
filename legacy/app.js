@@ -1650,6 +1650,10 @@ function renderPageContent() {
   renderAboutPage();
   renderContactPage();
   renderProductDetailPage();
+  renderSustainabilityPage();
+  renderShippingReturnsPage();
+  renderFaqPage();
+  renderStoreLocatorPage();
 }
 
 function renderShopPage() {
