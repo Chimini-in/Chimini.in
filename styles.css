@@ -2004,6 +2004,71 @@ section.full-width-banner-section {
 
 /* Tablets (widths up to 768px) */
 @media (max-width: 768px) {
+
+  /* --- MOBILE HEADER & NAVIGATION REFINEMENTS --- */
+  .mobile-menu-toggle {
+    display: inline-flex !important;
+  }
+
+  .main-navigation {
+    display: none !important; /* Hide horizontal nav bar on mobile - converted to hamburger */
+  }
+
+  .header-top {
+    padding: 8px 16px !important;
+  }
+
+  .header-actions {
+    gap: 6px !important;
+  }
+
+  .header-actions .action-btn {
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+  }
+
+  /* --- MOBILE HERO BANNER FIT & NO SIDE CROPPING --- */
+  .hero-banner {
+    width: 100% !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+    background-color: var(--bg-primary) !important;
+    overflow: hidden !important;
+  }
+
+  .hero-banner a {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .hero-banner img {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: auto !important;
+    object-fit: contain !important;
+    display: block !important;
+    max-height: none !important;
+    margin: 0 !important;
+  }
+
+  /* --- ELIMINATE LARGE GAP BETWEEN BANNER & BEST SELLERS --- */
+  section#best-sellers.section-container,
+  #best-sellers.section-container {
+    padding-top: 18px !important;
+    padding-bottom: 36px !important;
+  }
+
+  #best-sellers .section-title {
+    margin-top: 0 !important;
+    margin-bottom: 18px !important;
+    font-size: 1.65rem !important;
+  }
+
   body {
     font-size: 15px;
   }
@@ -2048,10 +2113,7 @@ section.full-width-banner-section {
 
   /* Hero slide settings */
   /* Responsive Banner Heights for legibility on mobile */
-  .hero-banner a,
-  .hero-banner img {
-    aspect-ratio: 16 / 10 !important;
-  }
+  /* hero-banner mobile rule moved to refined mobile block */
   
   .products-ads-banner a,
   .products-ads-banner img {
@@ -6596,4 +6658,151 @@ section.full-width-banner-section {
   border-color: #E53E3E !important;
   background-color: #FFF5F5 !important;
   box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.15) !important;
+}
+
+
+/* =========================================================
+   MOBILE NAVIGATION DRAWER & TOGGLE (DESKTOP HIDDEN)
+   ========================================================= */
+.mobile-menu-toggle {
+  display: none; /* Hidden on desktop by default */
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-primary);
+  padding: 6px;
+  border-radius: 50%;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.mobile-menu-toggle:hover {
+  background-color: rgba(197, 168, 128, 0.15);
+  color: var(--accent);
+}
+
+.mobile-menu-toggle svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Mobile Nav Drawer Styles */
+.mobile-nav-drawer {
+  background-color: var(--bg-primary);
+  border-left: 1px solid rgba(197, 168, 128, 0.3);
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-nav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(197, 168, 128, 0.2);
+}
+
+.mobile-nav-logo .mobile-logo-img {
+  height: 42px;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+.mobile-nav-content {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-nav-links {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mobile-nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all var(--transition-fast);
+  border-left: 3px solid transparent;
+}
+
+.mobile-nav-link:hover,
+.mobile-nav-link.active {
+  background-color: rgba(197, 168, 128, 0.12);
+  color: var(--accent);
+  border-left-color: var(--accent);
+  padding-left: 20px;
+}
+
+.mobile-nav-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(197, 168, 128, 0.3), transparent);
+  margin: 16px 0 24px 0;
+}
+
+.mobile-nav-extras {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 28px;
+  padding: 0 8px;
+}
+
+.mobile-extra-link {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: color var(--transition-fast);
+}
+
+.mobile-extra-link:hover {
+  color: var(--accent);
+}
+
+.mobile-nav-concierge {
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.mobile-concierge-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 20px;
+  background-color: #25D366;
+  color: #FFFFFF;
+  border-radius: 30px;
+  text-decoration: none;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+  transition: all var(--transition-fast);
+}
+
+.mobile-concierge-btn:hover {
+  background-color: #20BA56;
+  transform: translateY(-1px);
 }
