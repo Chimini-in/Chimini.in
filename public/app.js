@@ -2606,7 +2606,7 @@ function renderAboutPage() {
   container.innerHTML = `
     ${bannerHtml || ''}
     
-    <div class="about-story-section section-container">
+    <div class="about-story-section section-container" id="our-story">
       <div class="about-story-grid">
         <div class="about-story-text animate-slide-up">
           <h2 class="about-section-heading">Our Origin</h2>
@@ -2741,6 +2741,447 @@ function renderContactPage() {
   }
 }
 
+function renderSustainabilityPage() {
+  const container = document.getElementById("sustainability-page-container");
+  if (!container) return;
+
+  const customContent = storeState.adminSettings.pages?.['sustainability'];
+  if (customContent && typeof customContent === 'string') {
+    container.innerHTML = customContent;
+    return;
+  }
+
+  const s = (typeof customContent === 'object' && customContent) ? customContent : {};
+  const bannerHtml = renderPageHeroHtml("sustainability") || `
+    <div class="page-hero-banner">
+      <div class="section-container">
+        <span class="page-hero-subtitle">${s.subtitle || 'OUR CONSCIOUS COMMITMENT'}</span>
+        <h1 class="page-hero-title">${s.title || 'Crafted with Reverence for Nature'}</h1>
+        <p class="page-hero-desc">${s.desc || 'At Chimini, sustainability is not an afterthought — it is the soul of our artisan craft. Every candle is mindfully created to bring pure warmth to your sanctuary while leaving a gentle footprint on the earth.'}</p>
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = `
+    ${bannerHtml}
+
+    <div class="section-container">
+      <div class="sustainability-pillars-grid">
+        <div class="pillar-card animate-slide-up">
+          <div class="pillar-icon">🌱</div>
+          <h3>100% Botanical Soy Wax</h3>
+          <p>Hand-poured using pure, renewable soy wax free from paraffin, toxic petroleum derivatives, phthalates, and synthetic dyes. Clean, slow-burning, and naturally biodegradable.</p>
+        </div>
+
+        <div class="pillar-card animate-slide-up">
+          <div class="pillar-icon">🕯️</div>
+          <h3>Lead-Free Cotton Wicks</h3>
+          <p>Every wick is spun from organic cotton and natural cellulose fibers, precisely selected to ensure a soot-free, tranquil flame with zero heavy metals.</p>
+        </div>
+
+        <div class="pillar-card animate-slide-up">
+          <div class="pillar-icon">🏺</div>
+          <h3>Zero-Waste Lifetime Vessels</h3>
+          <p>Crafted in reusable glass, ceramic, and concrete vessels engineered for a lifetime beyond candle burning — perfect as luxury decor, planters, or artisanal organizers.</p>
+        </div>
+
+        <div class="pillar-card animate-slide-up">
+          <div class="pillar-icon">📦</div>
+          <h3>Eco-Conscious Packaging</h3>
+          <p>Enclosed in 100% recyclable, plastic-free gift boxes with water-soluble adhesives and biodegradable paper cushioning.</p>
+        </div>
+      </div>
+
+      <div class="eco-stats-banner animate-slide-up">
+        <div class="eco-stats-grid">
+          <div class="eco-stat-item">
+            <div class="eco-stat-val">100%</div>
+            <div class="eco-stat-label">Plant-Based Soy</div>
+          </div>
+          <div class="eco-stat-item">
+            <div class="eco-stat-val">0%</div>
+            <div class="eco-stat-label">Paraffin & Toxins</div>
+          </div>
+          <div class="eco-stat-item">
+            <div class="eco-stat-val">100%</div>
+            <div class="eco-stat-label">Vegan & Cruelty Free</div>
+          </div>
+          <div class="eco-stat-item">
+            <div class="eco-stat-val">Zero</div>
+            <div class="eco-stat-label">Plastic Packaging</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="about-story-section" style="margin-bottom: 60px;">
+        <div class="about-story-grid">
+          <div class="about-story-text">
+            <h2 class="about-section-heading">Our Ethical Philosophy</h2>
+            <p class="about-paragraph">We believe luxury and ecological mindfulness should exist in complete harmony. In our Mangalore atelier, our master candlemakers blend therapeutic botanical essences with responsibly harvested ingredients.</p>
+            <p class="about-paragraph">From our supply chain to your sanctuary, every step honors transparency, fair compensation for regional agricultural partners, and a profound respect for the natural world.</p>
+          </div>
+          <div class="about-story-image">
+            <img src="assets/story_banner.png" alt="Artisanal Sustainable Candle Crafting" onerror="this.src='assets/story_banner.png'">
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderShippingReturnsPage() {
+  const container = document.getElementById("shipping-returns-page-container");
+  if (!container) return;
+
+  const customContent = storeState.adminSettings.pages?.['shipping_returns'];
+  if (customContent && typeof customContent === 'string') {
+    container.innerHTML = customContent;
+    return;
+  }
+
+  const s = (typeof customContent === 'object' && customContent) ? customContent : {};
+  const bannerHtml = renderPageHeroHtml("shipping_returns") || `
+    <div class="page-hero-banner">
+      <div class="section-container">
+        <span class="page-hero-subtitle">${s.subtitle || 'TRANSPARENT & COMPLIMENTARY'}</span>
+        <h1 class="page-hero-title">${s.title || 'Shipping & Returns Policy'}</h1>
+        <p class="page-hero-desc">${s.desc || 'Every handcrafted Chimini creation is packaged with extreme care to arrive safely at your doorstep. Enjoy complimentary luxury delivery across India and dedicated concierge assistance.'}</p>
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = `
+    ${bannerHtml}
+
+    <div class="section-container">
+      <div class="policy-grid">
+        <!-- Shipping Policy -->
+        <div class="policy-box animate-slide-up">
+          <h2>📦 Shipping Policy</h2>
+          
+          <div class="policy-step-item">
+            <div class="policy-step-icon">✨</div>
+            <div class="policy-step-content">
+              <h4>Complimentary Luxury Shipping</h4>
+              <p>We are delighted to offer complimentary express shipping on all orders across India, with zero hidden transit fees.</p>
+            </div>
+          </div>
+
+          <div class="policy-step-item">
+            <div class="policy-step-icon">⏱️</div>
+            <div class="policy-step-content">
+              <h4>Dispatch Timelines</h4>
+              <p>Every candle is freshly inspected and dispatched within <strong>24 to 48 business hours</strong> from our Mangalore atelier.</p>
+            </div>
+          </div>
+
+          <div class="policy-step-item">
+            <div class="policy-step-icon">🚚</div>
+            <div class="policy-step-content">
+              <h4>Delivery Durations</h4>
+              <p><strong>Metro Hubs:</strong> 3 – 5 business days (Bangalore, Mumbai, Delhi, Chennai, Hyderabad, Kolkata).<br><strong>Regional Areas:</strong> 5 – 7 business days.</p>
+            </div>
+          </div>
+
+          <div class="policy-step-item">
+            <div class="policy-step-icon">📱</div>
+            <div class="policy-step-content">
+              <h4>Live WhatsApp & SMS Tracking</h4>
+              <p>You will receive live tracking updates directly on WhatsApp and SMS the moment your order departs our sanctuary.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Returns & Exchange Policy -->
+        <div class="policy-box animate-slide-up">
+          <h2>🔄 Returns & Exchanges</h2>
+
+          <div class="policy-step-item">
+            <div class="policy-step-icon">🛡️</div>
+            <div class="policy-step-content">
+              <h4>7-Day Return Privilege</h4>
+              <p>We honor returns for unburned, undamaged candles in their original gold-embossed packaging within 7 days of delivery.</p>
+            </div>
+          </div>
+
+          <div class="policy-step-item">
+            <div class="policy-step-icon">💔</div>
+            <div class="policy-step-content">
+              <h4>Transit Damage Guarantee</h4>
+              <p>If your vessel arrives broken or defective, we provide an immediate <strong>100% complimentary replacement</strong> upon receiving an unboxing photo within 48 hours.</p>
+            </div>
+          </div>
+
+          <div class="policy-step-item">
+            <div class="policy-step-icon">💬</div>
+            <div class="policy-step-content">
+              <h4>Effortless Concierge Returns</h4>
+              <p>No complicated return portals. Simply message our Concierge at <strong>+91 74118 65577</strong> or email <strong>support@chimini.in</strong> with your Order ID.</p>
+            </div>
+          </div>
+
+          <div class="policy-step-item">
+            <div class="policy-step-icon">💳</div>
+            <div class="policy-step-content">
+              <h4>Refund Timelines</h4>
+              <p>Approved refunds are processed back to your original payment mode (UPI/Bank) within 3 to 5 business days after inspection.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Concierge Banner -->
+      <div class="faq-cta-box" style="margin-bottom: 60px;">
+        <h3>Need Assistance with an Order?</h3>
+        <p>Our dedicated Concierge team is available on WhatsApp to assist you with dispatch inquiries, address updates, or bespoke gifting.</p>
+        <a href="https://wa.me/917411865577?text=Hello%20Chimini%20Concierge,%20I%20have%20a%20question%20about%20shipping%20and%20returns." target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none;">
+          💬 Chat with Concierge (+91 74118 65577)
+        </a>
+      </div>
+    </div>
+  `;
+}
+
+function renderFaqPage() {
+  const container = document.getElementById("faq-page-container");
+  if (!container) return;
+
+  const customContent = storeState.adminSettings.pages?.['faq'];
+  if (customContent && typeof customContent === 'string') {
+    container.innerHTML = customContent;
+    return;
+  }
+
+  const s = (typeof customContent === 'object' && customContent) ? customContent : {};
+  const bannerHtml = renderPageHeroHtml("faq") || `
+    <div class="page-hero-banner">
+      <div class="section-container">
+        <span class="page-hero-subtitle">${s.subtitle || 'FREQUENTLY ASKED QUESTIONS'}</span>
+        <h1 class="page-hero-title">${s.title || 'Everything You Need to Know'}</h1>
+        <p class="page-hero-desc">${s.desc || 'Find quick answers to common questions about our botanical soy candles, candle care, ordering process, WhatsApp checkout, and gifting.'}</p>
+      </div>
+    </div>
+  `;
+
+  const faqs = [
+    {
+      category: "🕯️ Candle Care & Burning",
+      items: [
+        {
+          q: "How do I prevent my candle from tunneling?",
+          a: "On the first burn, always allow the wax melt pool to reach the full circumference of the vessel (approximately 2 to 3 hours). Wax has memory; allowing a full melt pool ensures an even, flat burn throughout the candle's lifetime."
+        },
+        {
+          q: "Why should I trim the wick before every lighting?",
+          a: "Trimming the wick to 1/4 inch (6mm) before every burn prevents excess carbon buildup ('mushrooming'), eliminates black smoke, maintains a calm flame, and extends the burning life of your candle by up to 25%."
+        },
+        {
+          q: "What makes Chimini 100% soy wax superior to paraffin?",
+          a: "Paraffin wax is a byproduct of crude petroleum refinement that emits soot and synthetic chemicals. In contrast, Chimini uses 100% natural botanical soy wax, which burns 40-50% slower, cooler, and cleanly without releasing harmful toxins into your home."
+        },
+        {
+          q: "How can I reuse the candle container when it finishes?",
+          a: "When 1/2 inch of wax remains, pour warm soapy water to clean the vessel and wipe clean with a cloth. Our signature vessels make exquisite vanity brush holders, succulent planters, cocktail glasses, or tea-light holders."
+        }
+      ]
+    },
+    {
+      category: "🛍️ Orders, Shipping & WhatsApp Checkout",
+      items: [
+        {
+          q: "How does the WhatsApp checkout process work?",
+          a: "When you click 'Proceed to Checkout' and confirm your details, your complete order summary is securely formatted and transferred to a WhatsApp chat with our Chimini Concierge team (+91 74118 65577). We confirm item availability and provide instant, verified payment links (UPI, Google Pay, NetBanking)."
+        },
+        {
+          q: "Is shipping complimentary?",
+          a: "Yes! We provide complimentary luxury shipping on all orders across India."
+        },
+        {
+          q: "How long will my order take to arrive?",
+          a: "Orders are freshly handcrafted and dispatched within 24 to 48 business hours. Deliveries to metro hubs take 3–5 business days, while regional pin codes take 5–7 business days with live WhatsApp tracking."
+        },
+        {
+          q: "How do promotional coupon codes work?",
+          a: "You can enter promotional coupon codes (such as CHIMINI10 or WELCOME15) directly in Step 1 of the checkout modal. The discount will instantly reflect on your subtotal before you place your order."
+        }
+      ]
+    },
+    {
+      category: "🎁 Bespoke Hampers & Corporate Gifting",
+      items: [
+        {
+          q: "Can I customize a bespoke gift hamper?",
+          a: "Absolutely. Visit our Gifts page to build a customized gift hamper selecting your vessel style, botanical fragrance, luxury gift box, and personalized greeting card."
+        },
+        {
+          q: "Do you offer corporate or bulk wedding favor discounts?",
+          a: "Yes! We specialize in bespoke corporate gifting, festive hampers, and wedding return gifts with custom branding. Please reach out to us at chiminiofficial@gmail.com or WhatsApp +91 74118 65577 for volume pricing."
+        }
+      ]
+    }
+  ];
+
+  let faqsHtml = '';
+  faqs.forEach((cat, catIdx) => {
+    faqsHtml += `<h3 class="faq-category-header">${cat.category}</h3>`;
+    cat.items.forEach((item, itemIdx) => {
+      faqsHtml += `
+        <div class="faq-accordion-item" data-faq-id="${catIdx}-${itemIdx}">
+          <button type="button" class="faq-question-btn">
+            <span>${item.q}</span>
+            <span class="faq-icon-chevron">▼</span>
+          </button>
+          <div class="faq-answer-panel">
+            <p>${item.a}</p>
+          </div>
+        </div>
+      `;
+    });
+  });
+
+  container.innerHTML = `
+    ${bannerHtml}
+
+    <div class="section-container faq-container">
+      ${faqsHtml}
+
+      <div class="faq-cta-box animate-slide-up">
+        <h3>Still Have a Question?</h3>
+        <p>Our concierge team is available to help you choose fragrances, track shipments, or create custom gifts.</p>
+        <a href="https://wa.me/917411865577?text=Hello%20Chimini%20Concierge,%20I%20have%20a%20question." target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none;">
+          💬 Chat with Concierge (+91 74118 65577)
+        </a>
+      </div>
+    </div>
+  `;
+
+  // Bind accordion clicks
+  container.querySelectorAll(".faq-question-btn").forEach(btn => {
+    btn.onclick = () => {
+      const item = btn.closest(".faq-accordion-item");
+      if (item) {
+        const isActive = item.classList.contains("active");
+        container.querySelectorAll(".faq-accordion-item").forEach(other => other.classList.remove("active"));
+        if (!isActive) item.classList.add("active");
+      }
+    };
+  });
+}
+
+function renderStoreLocatorPage() {
+  const container = document.getElementById("store-locator-page-container");
+  if (!container) return;
+
+  const customContent = storeState.adminSettings.pages?.['store_locator'];
+  if (customContent && typeof customContent === 'string') {
+    container.innerHTML = customContent;
+    return;
+  }
+
+  const s = (typeof customContent === 'object' && customContent) ? customContent : {};
+  const bannerHtml = renderPageHeroHtml("store_locator") || `
+    <div class="page-hero-banner">
+      <div class="section-container">
+        <span class="page-hero-subtitle">${s.subtitle || 'EXPERIENCE THE SANCTUARY'}</span>
+        <h1 class="page-hero-title">${s.title || 'Atelier & Store Locator'}</h1>
+        <p class="page-hero-desc">${s.desc || 'While Chimini operates primarily as a direct-to-consumer digital boutique delivering pan-India, you can learn about our crafting atelier in Mangalore or book a private appointment.'}</p>
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = `
+    ${bannerHtml}
+
+    <div class="section-container">
+      <div class="locator-layout">
+        <!-- Main Atelier Card -->
+        <div class="locator-card animate-slide-up">
+          <span class="locator-badge">Crafting Atelier & Studio</span>
+          <h2>Mangalore Atelier Studio</h2>
+          
+          <div class="locator-item">
+            <div class="locator-icon">📍</div>
+            <div class="locator-info">
+              <strong>Studio Location</strong>
+              <span>Mangalore, Karnataka, India</span>
+            </div>
+          </div>
+
+          <div class="locator-item">
+            <div class="locator-icon">🕒</div>
+            <div class="locator-info">
+              <strong>Operating & Concierge Hours</strong>
+              <span>Monday – Saturday: 10:00 AM – 7:00 PM IST<br>Sunday: Closed for artisanal pouring</span>
+            </div>
+          </div>
+
+          <div class="locator-item">
+            <div class="locator-icon">📞</div>
+            <div class="locator-info">
+              <strong>Concierge Contact</strong>
+              <span>+91 74118 65577 / +91 97418 55293</span>
+            </div>
+          </div>
+
+          <div class="locator-item">
+            <div class="locator-icon">✉️</div>
+            <div class="locator-info">
+              <strong>Direct Inquiries</strong>
+              <span>chiminiofficial@gmail.com / support@chimini.in</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap;">
+            <a href="https://wa.me/917411865577?text=Hello%20Chimini,%20I%20would%20like%20to%20inquire%20about%20a%20studio%20visit%20or%20bulk%20order." target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none;">
+              💬 Book Private Studio Appointment
+            </a>
+            <a href="shop.html" class="btn btn-secondary" style="text-decoration: none;">
+              Explore Boutique Online
+            </a>
+          </div>
+        </div>
+
+        <!-- Online Sanctuary Card -->
+        <div class="locator-perks-box animate-slide-up">
+          <h3>Online Sanctuary Privileges</h3>
+
+          <div class="locator-perk-item">
+            <div class="locator-perk-dot"></div>
+            <div class="locator-perk-text">
+              <h4>Pan-India Express Delivery</h4>
+              <p>Complimentary luxury shipping delivered safely to your doorstep anywhere in India.</p>
+            </div>
+          </div>
+
+          <div class="locator-perk-item">
+            <div class="locator-perk-dot"></div>
+            <div class="locator-perk-text">
+              <h4>Gold-Embossed Gift Packaging</h4>
+              <p>Every order arrives encased in our signature luxury presentation box, ready for gifting.</p>
+            </div>
+          </div>
+
+          <div class="locator-perk-item">
+            <div class="locator-perk-dot"></div>
+            <div class="locator-perk-text">
+              <h4>1-on-1 Fragrance Consultation</h4>
+              <p>Not sure which fragrance notes suit your mood or space? Chat with our scent sommelier on WhatsApp.</p>
+            </div>
+          </div>
+
+          <div class="locator-perk-item">
+            <div class="locator-perk-dot"></div>
+            <div class="locator-perk-text">
+              <h4>Pure Scent Purity Guarantee</h4>
+              <p>100% natural botanical soy wax, zero phthalates, and lead-free cotton wicks.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 // --- 4. SUPABASE DATA FETCHING ---
 const SUPABASE_URL = "https://jvopwqkbtrupkayzfyvl.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2b3B3cWtidHJ1cGtheXpmeXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNDQwMjksImV4cCI6MjA5NjgyMDAyOX0.KHWIko4CvlGHDq8QPdNEFqPMXBFkfiZTn_wr9qXWguw";
@@ -2777,6 +3218,10 @@ async function fetchSupabaseData() {
 
     // Initialize mapped settings object
     const newSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+    if (Array.isArray(pages) && pages.length > 0) {
+      newSettings.pages = {};
+      pages.forEach(p => { if (p.page_name) newSettings.pages[p.page_name] = p.content; });
+    }
 
     // Store raw banners array directly on storeState
     if (Array.isArray(banners)) {
