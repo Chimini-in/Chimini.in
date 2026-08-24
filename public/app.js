@@ -3851,6 +3851,49 @@ function renderProductDetailPage() {
 // ==========================================================================
 
 let supabaseAuthClient = null;
+
+async function ensureSupabaseClient() {
+  if (supabaseAuthClient) return supabaseAuthClient;
+  
+  if (typeof supabase !== 'undefined' && supabase.createClient) {
+    supabaseAuthClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    return supabaseAuthClient;
+  }
+
+  // Dynamically load Supabase CDN if not yet loaded in DOM
+  return new Promise((resolve) => {
+    if (document.querySelector('script[src*="@supabase/supabase-js"]')) {
+      // Script tag exists, wait for it to finish loading
+      let checks = 0;
+      const timer = setInterval(() => {
+        checks++;
+        if (typeof supabase !== 'undefined' && supabase.createClient) {
+          clearInterval(timer);
+          supabaseAuthClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+          resolve(supabaseAuthClient);
+        } else if (checks > 20) {
+          clearInterval(timer);
+          resolve(null);
+        }
+      }, 100);
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+    script.onload = () => {
+      if (typeof supabase !== 'undefined' && supabase.createClient) {
+        supabaseAuthClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        resolve(supabaseAuthClient);
+      } else {
+        resolve(null);
+      }
+    };
+    script.onerror = () => resolve(null);
+    document.head.appendChild(script);
+  });
+}
+
 try {
   if (typeof supabase !== 'undefined' && supabase.createClient) {
     supabaseAuthClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -3862,14 +3905,8 @@ try {
 let otpCountdownInterval = null;
 let resetOtpCountdownInterval = null;
 
-function initAuth() {
-  if (!supabaseAuthClient) {
-    try {
-      if (typeof supabase !== 'undefined' && supabase.createClient) {
-        supabaseAuthClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      }
-    } catch (e) {}
-  }
+async function initAuth() {
+  await ensureSupabaseClient();
 
   if (supabaseAuthClient) {
     // Listen to real-time auth changes
@@ -4149,6 +4186,7 @@ function bindAuthModalEvents() {
   const signupForm = document.getElementById("auth-signup-form");
   if (signupForm) {
     signupForm.onsubmit = async (e) => {
+      await ensureSupabaseClient();
       e.preventDefault();
       clearAuthAlert();
 
@@ -4384,6 +4422,7 @@ function bindAuthModalEvents() {
   const loginForm = document.getElementById("auth-login-form");
   if (loginForm) {
     loginForm.onsubmit = async (e) => {
+      await ensureSupabaseClient();
       e.preventDefault();
       clearAuthAlert();
 
@@ -4483,6 +4522,7 @@ function bindAuthModalEvents() {
   
   // Google OAuth Handlers
   const handleGoogleAuth = async () => {
+    await ensureSupabaseClient();
     if (!supabaseAuthClient) {
       setAuthAlert("Authentication service is temporarily unavailable. Please try again later.", "error");
       return;
@@ -4533,6 +4573,7 @@ function bindAuthModalEvents() {
   const forgotForm = document.getElementById("auth-forgot-form");
   if (forgotForm) {
     forgotForm.onsubmit = async (e) => {
+      await ensureSupabaseClient();
       e.preventDefault();
       clearAuthAlert();
 
@@ -4583,6 +4624,7 @@ function bindAuthModalEvents() {
   const resetForm = document.getElementById("auth-reset-form");
   if (resetForm) {
     resetForm.onsubmit = async (e) => {
+      await ensureSupabaseClient();
       e.preventDefault();
       clearAuthAlert();
 
