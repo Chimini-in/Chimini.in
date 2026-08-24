@@ -416,7 +416,28 @@ function renderFragranceCategories() {
   const cats = (storeState.adminSettings.categories || []).filter(c => c.is_published !== false || c.published !== false);
   if (cats.length === 0) return;
 
-  cats.forEach(cat => {
+  const wrapper = document.querySelector(".categories-scroll-wrapper");
+  const isMarquee = cats.length > 3;
+
+  if (wrapper) {
+    if (isMarquee) {
+      wrapper.classList.add("marquee-mode");
+    } else {
+      wrapper.classList.remove("marquee-mode");
+    }
+  }
+
+  if (isMarquee) {
+    DOM.categoriesList.classList.add("marquee-track");
+    // Dynamic animation duration based on count for silky, consistent luxury pace
+    const duration = Math.max(16, cats.length * 4.5);
+    DOM.categoriesList.style.animationDuration = `${duration}s`;
+  } else {
+    DOM.categoriesList.classList.remove("marquee-track");
+    DOM.categoriesList.style.animationDuration = '';
+  }
+
+  const createCategoryItem = (cat) => {
     const item = document.createElement("div");
     item.className = "category-item";
     const slug = cat.slug || (cat.name || cat.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
@@ -447,7 +468,14 @@ function renderFragranceCategories() {
         window.location.href = shopUrl;
       }
     });
-    DOM.categoriesList.appendChild(item);
+    return item;
+  };
+
+  // When marquee mode is active (> 3 items), duplicate list to create a seamless infinite loop
+  const renderList = isMarquee ? [...cats, ...cats] : cats;
+
+  renderList.forEach(cat => {
+    DOM.categoriesList.appendChild(createCategoryItem(cat));
   });
 }
 

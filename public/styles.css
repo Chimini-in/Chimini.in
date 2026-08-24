@@ -6806,3 +6806,58 @@ section.full-width-banner-section {
   background-color: #20BA56;
   transform: translateY(-1px);
 }
+
+
+/* --- FRAGRANCE CONTINUOUS MARQUEE AUTO-SCROLL (> 3 ITEMS) --- */
+.categories-scroll-wrapper.marquee-mode {
+  overflow: hidden !important;
+  position: relative;
+  width: 100%;
+  padding: 15px 0 25px 0;
+  mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+}
+
+.categories-container.marquee-track {
+  display: flex !important;
+  width: max-content !important;
+  min-width: max-content !important;
+  justify-content: flex-start !important;
+  gap: 40px !important;
+  animation: fragranceMarquee 25s linear infinite;
+  will-change: transform;
+  padding: 0 20px;
+}
+
+.categories-container.marquee-track:hover {
+  animation-play-state: paused !important;
+}
+
+@keyframes fragranceMarquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-50% - 20px));
+  }
+}
+
+@media (max-width: 768px) {
+  .categories-scroll-wrapper.marquee-mode {
+    padding: 10px 0 20px 0;
+    mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
+  }
+  .categories-container.marquee-track {
+    gap: 24px !important;
+    animation: fragranceMarqueeMobile 20s linear infinite;
+  }
+  @keyframes fragranceMarqueeMobile {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(calc(-50% - 12px));
+    }
+  }
+}
