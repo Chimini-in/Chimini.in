@@ -5012,13 +5012,15 @@ function removeCouponCode() {
 }
 
 function switchCheckoutStep(stepNumber) {
-  const views = document.querySelectorAll(".checkout-view");
-  views.forEach(v => v.classList.remove("active"));
+  // NOTE: Do NOT deactivate views here — validation may abort early.
+  // Views are deactivated only after validation succeeds (per-branch below).
 
   const step1Indicator = document.getElementById("step-indicator-1");
   const step2Indicator = document.getElementById("step-indicator-2");
 
   if (stepNumber === 1) {
+    // Deactivate all views only when we're sure we're switching
+    document.querySelectorAll(".checkout-view").forEach(v => v.classList.remove("active"));
     resetCheckoutButtons();
     const view1 = document.getElementById("checkout-view-step1");
     if (view1) view1.classList.add("active");
@@ -5123,6 +5125,8 @@ function switchCheckoutStep(stepNumber) {
     }
 
     resetCheckoutButtons();
+    // Deactivate all views now that validation has passed
+    document.querySelectorAll(".checkout-view").forEach(v => v.classList.remove("active"));
     const view2 = document.getElementById("checkout-view-step2");
     if (view2) view2.classList.add("active");
 
@@ -5137,6 +5141,7 @@ function switchCheckoutStep(stepNumber) {
     updateCheckoutTotalsUI();
 
   } else if (stepNumber === 3) {
+    document.querySelectorAll(".checkout-view").forEach(v => v.classList.remove("active"));
     const view3 = document.getElementById("checkout-view-step3");
     if (view3) view3.classList.add("active");
 
