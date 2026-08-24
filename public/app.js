@@ -4146,7 +4146,42 @@ function bindAuthModalEvents() {
           }
         });
 
-        if (error) throw error;
+        if (error) {
+          // Supabase error code for already-registered emails
+          if (
+            error.message?.toLowerCase().includes("already registered") ||
+            error.message?.toLowerCase().includes("email already") ||
+            error.message?.toLowerCase().includes("user already registered") ||
+            error.code === "user_already_exists" ||
+            error.status === 422
+          ) {
+            // Already-registered — do NOT silently proceed; send user to login
+            setAuthAlert("This email is already registered. Please sign in instead.", "error");
+            setTimeout(() => {
+              switchAuthView('login');
+              const loginEmailEl = document.getElementById("login-email");
+              if (loginEmailEl) loginEmailEl.value = email;
+              const loginPasswordEl = document.getElementById("login-password");
+              if (loginPasswordEl) loginPasswordEl.focus();
+            }, 1400);
+            return;
+          }
+          throw error;
+        }
+
+        // Supabase sometimes returns data.user with identities=[] for already-confirmed emails
+        // (it doesn't error, it just returns an empty identity array)
+        if (data && data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+          setAuthAlert("This email is already registered with Chimini. Please sign in instead.", "error");
+          setTimeout(() => {
+            switchAuthView('login');
+            const loginEmailEl = document.getElementById("login-email");
+            if (loginEmailEl) loginEmailEl.value = email;
+            const loginPasswordEl = document.getElementById("login-password");
+            if (loginPasswordEl) loginPasswordEl.focus();
+          }, 1400);
+          return;
+        }
 
         storeState.otpEmail = email;
         storeState.pendingSignupMeta = { name, phone, email };
@@ -4368,18 +4403,32 @@ function bindAuthModalEvents() {
           switchAuthView('otp');
           startOtpTimer();
           setAuthAlert("Your email is not verified yet. A verification code is required.", "error");
-        } else {
-          // Unregistered email or invalid credentials -> redirect smoothly to the signup tab
+        } else if (
+          errMsg.includes("invalid login credentials") ||
+          errMsg.includes("invalid credentials") ||
+          errMsg.includes("wrong password") ||
+          errMsg.includes("incorrect password")
+        ) {
+          // Registered user, wrong password — stay on login tab
+          setAuthAlert("Incorrect password. Please try again, or use 'Forgot Password' to reset it.", "error");
+        } else if (
+          errMsg.includes("user not found") ||
+          errMsg.includes("no user found") ||
+          errMsg.includes("email not found") ||
+          errMsg.includes("unable to validate") ||
+          errMsg.includes("no account") ||
+          errMsg.includes("does not exist")
+        ) {
+          // Truly unregistered email — guide to signup
           switchAuthView('signup');
           const signupEmailEl = document.getElementById("signup-email");
           if (signupEmailEl) signupEmailEl.value = email;
-          const signupPasswordEl = document.getElementById("signup-password");
-          if (signupPasswordEl && password) signupPasswordEl.value = password;
-
           const signupNameEl = document.getElementById("signup-name");
           if (signupNameEl) setTimeout(() => signupNameEl.focus(), 150);
-
-          setAuthAlert("No account found for this email. Please enter your name and phone number below to create your account.", "info");
+          setAuthAlert("No account found for this email. Please fill in your name and phone number below to create your Chimini account.", "info");
+        } else {
+          // Generic / network error — stay on login, show message
+          setAuthAlert("Login failed: " + (err.message || "Please check your credentials and try again."), "error");
         }
       } finally {
         submitBtn.disabled = false;
