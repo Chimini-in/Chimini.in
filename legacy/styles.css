@@ -2061,18 +2061,18 @@ section.full-width-banner-section {
     height: 16px !important;
   }
 
-  /* Centered "products found" text in Row 1 */
+  /* Right-aligned "products found" text in Row 1 (not next to icons, pushed to right) */
   .product-count {
-    position: absolute !important;
-    left: 50% !important;
-    top: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    font-size: 0.8rem !important;
+    position: static !important;
+    transform: none !important;
+    margin-left: auto !important;
+    text-align: right !important;
+    font-size: 0.82rem !important;
     font-family: var(--font-sans) !important;
     color: var(--text-secondary) !important;
     font-weight: 500 !important;
     white-space: nowrap !important;
-    pointer-events: none !important;
+    pointer-events: auto !important;
   }
 
   /* Row 2: Sort dropdown on left, Filter button on right */
@@ -2112,16 +2112,40 @@ section.full-width-banner-section {
     aspect-ratio: 1 / 1 !important;
   }
 
+  /* 2-column mode: STRICT 50/50 exact equal width split */
   .shop-products-grid.grid-2 {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 14px !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
   .shop-products-grid.grid-2 .product-card {
     width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
   .shop-products-grid.grid-2 .product-image-wrapper {
     width: 100% !important;
     aspect-ratio: 1 / 1 !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+  .shop-products-grid.grid-2 .product-image-wrapper img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+  .shop-products-grid.grid-2 .product-info {
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+  .shop-products-grid.grid-2 .product-name {
+    font-size: 0.95rem !important;
+    white-space: normal !important;
+    word-break: break-word !important;
   }
 
   .shop-products-grid.list {
