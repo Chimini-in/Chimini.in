@@ -1895,6 +1895,13 @@ function renderShopPage() {
   const catQuery = params.get("category");
   const fragranceQuery = params.get("fragrance");
   const searchQuery = params.get("q");
+  // On mobile screens, default layout to grid-2 if not explicitly selected
+  if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+    if (!storeState.shopLayout || storeState.shopLayout === 'grid-3' || storeState.shopLayout === 'grid-4') {
+      storeState.shopLayout = 'grid-2';
+    }
+  }
+
   if (fragranceQuery) {
     storeState.activeFragrance = decodeURIComponent(fragranceQuery).toLowerCase();
     storeState.activeCategory = "all";
@@ -1931,22 +1938,27 @@ function renderShopPage() {
       
       <!-- Catalog Toolbar -->
       <div class="catalog-toolbar section-container">
-        <div class="layout-switchers">
-          <button class="layout-btn ${storeState.shopLayout === 'grid-2' ? 'active' : ''}" id="layout-grid-2" aria-label="2 Column Grid">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="18" rx="1"></rect><rect x="14" y="3" width="7" height="18" rx="1"></rect></svg>
-          </button>
-          <button class="layout-btn ${storeState.shopLayout === 'grid-3' ? 'active' : ''}" id="layout-grid-3" aria-label="3 Column Grid">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="5" height="18" rx="0.5"></rect><rect x="9.5" y="3" width="5" height="18" rx="0.5"></rect><rect x="17" y="3" width="5" height="18" rx="0.5"></rect></svg>
-          </button>
-          <button class="layout-btn ${storeState.shopLayout === 'grid-4' ? 'active' : ''}" id="layout-grid-4" aria-label="4 Column Grid">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="3.5" height="18" rx="0.5"></rect><rect x="7.5" y="3" width="3.5" height="18" rx="0.5"></rect><rect x="13" y="3" width="3.5" height="18" rx="0.5"></rect><rect x="18.5" y="3" width="3.5" height="18" rx="0.5"></rect></svg>
-          </button>
-          <button class="layout-btn ${storeState.shopLayout === 'list' ? 'active' : ''}" id="layout-list" aria-label="List View">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-          </button>
+        <div class="catalog-toolbar-top">
+          <div class="layout-switchers">
+            <button class="layout-btn layout-btn-1 ${storeState.shopLayout === 'grid-1' ? 'active' : ''}" id="layout-grid-1" aria-label="1 Column Grid">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="3" width="16" height="18" rx="1"></rect></svg>
+            </button>
+            <button class="layout-btn layout-btn-2 ${storeState.shopLayout === 'grid-2' ? 'active' : ''}" id="layout-grid-2" aria-label="2 Column Grid">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="18" rx="1"></rect><rect x="14" y="3" width="7" height="18" rx="1"></rect></svg>
+            </button>
+            <button class="layout-btn layout-btn-3 ${storeState.shopLayout === 'grid-3' ? 'active' : ''}" id="layout-grid-3" aria-label="3 Column Grid">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="5" height="18" rx="0.5"></rect><rect x="9.5" y="3" width="5" height="18" rx="0.5"></rect><rect x="17" y="3" width="5" height="18" rx="0.5"></rect></svg>
+            </button>
+            <button class="layout-btn layout-btn-4 ${storeState.shopLayout === 'grid-4' ? 'active' : ''}" id="layout-grid-4" aria-label="4 Column Grid">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="3.5" height="18" rx="0.5"></rect><rect x="7.5" y="3" width="3.5" height="18" rx="0.5"></rect><rect x="13" y="3" width="3.5" height="18" rx="0.5"></rect><rect x="18.5" y="3" width="3.5" height="18" rx="0.5"></rect></svg>
+            </button>
+            <button class="layout-btn layout-btn-list ${storeState.shopLayout === 'list' ? 'active' : ''}" id="layout-list" aria-label="List View">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+          </div>
+          
+          <div class="product-count" id="catalog-product-count">0 products found</div>
         </div>
-        
-        <div class="product-count" id="catalog-product-count">0 products found</div>
         
         <div class="catalog-controls">
           <select id="shop-sort" class="shop-sort-select" aria-label="Sort products">
@@ -1988,6 +2000,7 @@ function renderShopPage() {
         });
       }
     };
+    bindLayout("layout-grid-1", "grid-1");
     bindLayout("layout-grid-2", "grid-2");
     bindLayout("layout-grid-3", "grid-3");
     bindLayout("layout-grid-4", "grid-4");
