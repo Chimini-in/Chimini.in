@@ -2047,7 +2047,7 @@ section.full-width-banner-section {
     display: none !important;
   }
   .layout-btn-list {
-    display: flex !important;
+    display: none !important; /* Hide list view icon on mobile */
   }
 
   .layout-btn {

@@ -1895,9 +1895,9 @@ function renderShopPage() {
   const catQuery = params.get("category");
   const fragranceQuery = params.get("fragrance");
   const searchQuery = params.get("q");
-  // On mobile screens, default layout to grid-2 if not explicitly selected
+  // On mobile screens, default layout to grid-2 (since list view is removed from mobile toolbar)
   if (typeof window !== 'undefined' && window.innerWidth <= 768) {
-    if (!storeState.shopLayout || storeState.shopLayout === 'grid-3' || storeState.shopLayout === 'grid-4') {
+    if (!storeState.shopLayout || storeState.shopLayout === 'grid-3' || storeState.shopLayout === 'grid-4' || storeState.shopLayout === 'list') {
       storeState.shopLayout = 'grid-2';
     }
   }
