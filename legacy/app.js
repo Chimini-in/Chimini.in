@@ -1890,12 +1890,14 @@ function renderPageContent() {
 function renderShopPage() {
   const container = document.getElementById("shop-page-container");
   if (!container) return;
+  
   // Parse URL parameters for initial category/fragrance filter
   const params = new URLSearchParams(window.location.search);
   const catQuery = params.get("category");
   const fragranceQuery = params.get("fragrance");
   const searchQuery = params.get("q");
-  // On mobile screens, default layout to grid-2 (since list view is removed from mobile toolbar)
+
+  // On mobile screens, default layout to grid-2 if not explicitly selected
   if (typeof window !== 'undefined' && window.innerWidth <= 768) {
     if (!storeState.shopLayout || storeState.shopLayout === 'grid-3' || storeState.shopLayout === 'grid-4' || storeState.shopLayout === 'list') {
       storeState.shopLayout = 'grid-2';
@@ -1917,19 +1919,51 @@ function renderShopPage() {
     storeState.activeCategory = "all";
     storeState.activeFragrance = null;
     storeState.shopInitialized = true;
-    // Pre-fill the search input if it exists
     const si = document.getElementById("search-input");
     if (si) si.value = storeState.searchQuery;
   }
-  
-  
+
   const bannerHtml = renderPageHeroHtml("shop");
 
-  // Always refresh the top banner slot after async Supabase data loads
+  // Always refresh top banner slot after async data loads
   const _existingBannerSlot = container.querySelector('.page-top-banner-wrap');
   if (bannerHtml) {
     if (_existingBannerSlot) _existingBannerSlot.outerHTML = bannerHtml;
     else if (container.querySelector('.catalog-toolbar')) container.insertAdjacentHTML('afterbegin', bannerHtml);
+  }
+
+  const getSortLabel = (val) => {
+    const map = {
+      'default': 'Featured',
+      'newest': 'Newest',
+      'price-low': 'Price: Low to High',
+      'price-high': 'Price: High to Low',
+      'name-az': 'Name: A–Z',
+      'name-za': 'Name: Z–A'
+    };
+    return map[val] || 'Featured';
+  };
+
+  const getFilterLabel = (val) => {
+    if (!val || val === 'all') return 'Filter';
+    return 'Filter: ' + val.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  // Build category filter options list
+  const rawCats = (storeState.adminSettings.categories || []).filter(c => c.is_published !== false || c.published !== false);
+  let categoryOptions = [{ slug: 'all', name: 'All Products' }];
+  if (rawCats.length > 0) {
+    rawCats.forEach(c => {
+      const slug = (c.slug || c.name || c.title || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
+      const name = c.name || c.title || slug;
+      if (slug && !categoryOptions.some(o => o.slug === slug)) {
+        categoryOptions.push({ slug, name });
+      }
+    });
+  } else {
+    ['candles', 'gifts', 'signature', 'eco'].forEach(cat => {
+      categoryOptions.push({ slug: cat, name: cat.charAt(0).toUpperCase() + cat.slice(1) });
+    });
   }
 
   if (!container.innerHTML.trim() || !container.querySelector(".catalog-toolbar")) {
@@ -1961,19 +1995,35 @@ function renderShopPage() {
         </div>
         
         <div class="catalog-controls">
-          <select id="shop-sort" class="shop-sort-select" aria-label="Sort products">
-            <option value="default">Featured</option>
-            <option value="newest">Newest</option>
-            <option value="price-low">Price: Low to High</option>
-            <option value="price-high">Price: High to Low</option>
-            <option value="name-az">Name: A&#8211;Z</option>
-            <option value="name-za">Name: Z&#8211;A</option>
-          </select>
+          <!-- 1. Custom Compact Sort Dropdown -->
+          <div class="custom-dropdown sort-dropdown" id="sort-dropdown-container">
+            <button type="button" class="dropdown-trigger-btn sort-trigger-btn" id="sort-trigger-btn" aria-haspopup="listbox" aria-expanded="false">
+              <span class="dropdown-label" id="sort-current-label">${getSortLabel(storeState.shopSort || 'default')}</span>
+              <svg class="dropdown-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="dropdown-menu sort-dropdown-menu" id="sort-dropdown-menu" role="listbox">
+              <div class="dropdown-option ${(storeState.shopSort || 'default') === 'default' ? 'active' : ''}" data-value="default">Featured</div>
+              <div class="dropdown-option ${storeState.shopSort === 'newest' ? 'active' : ''}" data-value="newest">Newest</div>
+              <div class="dropdown-option ${storeState.shopSort === 'price-low' ? 'active' : ''}" data-value="price-low">Price: Low to High</div>
+              <div class="dropdown-option ${storeState.shopSort === 'price-high' ? 'active' : ''}" data-value="price-high">Price: High to Low</div>
+              <div class="dropdown-option ${storeState.shopSort === 'name-az' ? 'active' : ''}" data-value="name-az">Name: A&#8211;Z</div>
+              <div class="dropdown-option ${storeState.shopSort === 'name-za' ? 'active' : ''}" data-value="name-za">Name: Z&#8211;A</div>
+            </div>
+          </div>
           
-          <button class="btn btn-secondary filter-toggle-btn" id="filter-drawer-toggle">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-            <span>Filter</span>
-          </button>
+          <!-- 2. Custom Compact Category Filter Dropdown -->
+          <div class="custom-dropdown filter-dropdown" id="filter-dropdown-container">
+            <button type="button" class="btn btn-secondary filter-trigger-btn" id="filter-trigger-btn" aria-haspopup="listbox" aria-expanded="false">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+              <span class="dropdown-label" id="filter-current-label">${getFilterLabel(storeState.activeCategory || 'all')}</span>
+              <svg class="dropdown-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="dropdown-menu filter-dropdown-menu" id="filter-dropdown-menu" role="listbox">
+              ${categoryOptions.map(opt => `
+                <div class="dropdown-option ${(storeState.activeCategory || 'all') === opt.slug ? 'active' : ''}" data-value="${opt.slug}">${opt.name}</div>
+              `).join('')}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -2006,23 +2056,73 @@ function renderShopPage() {
     bindLayout("layout-grid-4", "grid-4");
     bindLayout("layout-list", "list");
     
-    // Bind filter toggle
-    const filterToggle = document.getElementById("filter-drawer-toggle");
-    const filterDrawer = document.getElementById("filter-drawer");
-    if (filterToggle && filterDrawer) {
-      filterToggle.addEventListener("click", () => openDrawer(filterDrawer));
-    }
-    
-    // Bind sort dropdown — saves selection to storeState.shopSort for persistence across filters
-    const sortSelect = document.getElementById("shop-sort");
-    if (sortSelect) {
-      // Restore previously selected sort option
-      sortSelect.value = storeState.shopSort || "default";
-      sortSelect.addEventListener("change", () => {
-        storeState.shopSort = sortSelect.value;
-        renderShopProducts();
+    // Dropdowns management
+    const sortTrigger = document.getElementById("sort-trigger-btn");
+    const sortMenu = document.getElementById("sort-dropdown-menu");
+    const filterTrigger = document.getElementById("filter-trigger-btn");
+    const filterMenu = document.getElementById("filter-dropdown-menu");
+
+    const closeAllCustomDropdowns = () => {
+      if (sortMenu) sortMenu.classList.remove("active");
+      if (filterMenu) filterMenu.classList.remove("active");
+      if (sortTrigger) sortTrigger.setAttribute("aria-expanded", "false");
+      if (filterTrigger) filterTrigger.setAttribute("aria-expanded", "false");
+    };
+
+    if (sortTrigger && sortMenu) {
+      sortTrigger.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isOpen = sortMenu.classList.contains("active");
+        closeAllCustomDropdowns();
+        if (!isOpen) {
+          sortMenu.classList.add("active");
+          sortTrigger.setAttribute("aria-expanded", "true");
+        }
       });
     }
+
+    if (filterTrigger && filterMenu) {
+      filterTrigger.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isOpen = filterMenu.classList.contains("active");
+        closeAllCustomDropdowns();
+        if (!isOpen) {
+          filterMenu.classList.add("active");
+          filterTrigger.setAttribute("aria-expanded", "true");
+        }
+      });
+    }
+
+    if (sortMenu) {
+      sortMenu.querySelectorAll(".dropdown-option").forEach(opt => {
+        opt.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const val = opt.getAttribute("data-value");
+          storeState.shopSort = val;
+          closeAllCustomDropdowns();
+          renderShopProducts();
+        });
+      });
+    }
+
+    if (filterMenu) {
+      filterMenu.querySelectorAll(".dropdown-option").forEach(opt => {
+        opt.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const val = opt.getAttribute("data-value");
+          storeState.activeCategory = val;
+          storeState.activeFragrance = null;
+          if (window.history.replaceState) {
+            const newUrl = val === 'all' ? window.location.pathname : (window.location.pathname + '?category=' + encodeURIComponent(val));
+            window.history.replaceState(null, '', newUrl);
+          }
+          closeAllCustomDropdowns();
+          renderShopProducts();
+        });
+      });
+    }
+
+    document.addEventListener("click", closeAllCustomDropdowns);
   }
   
   renderShopProducts();
@@ -2180,10 +2280,46 @@ function renderShopProducts() {
     }
   }
   
-  // Sync the sort dropdown UI to match persisted state
-  const sortSelectEl = document.getElementById("shop-sort");
-  if (sortSelectEl) {
-    sortSelectEl.value = storeState.shopSort || "default";
+  // Sync sort and filter trigger labels and active states
+  const sortLabelEl = document.getElementById("sort-current-label");
+  if (sortLabelEl) {
+    const sortMap = {
+      'default': 'Featured',
+      'newest': 'Newest',
+      'price-low': 'Price: Low to High',
+      'price-high': 'Price: High to Low',
+      'name-az': 'Name: A–Z',
+      'name-za': 'Name: Z–A'
+    };
+    sortLabelEl.textContent = sortMap[storeState.shopSort || 'default'] || 'Featured';
+  }
+
+  const sortMenuEl = document.getElementById("sort-dropdown-menu");
+  if (sortMenuEl) {
+    sortMenuEl.querySelectorAll(".dropdown-option").forEach(opt => {
+      if (opt.getAttribute("data-value") === (storeState.shopSort || "default")) {
+        opt.classList.add("active");
+      } else {
+        opt.classList.remove("active");
+      }
+    });
+  }
+
+  const filterLabelEl = document.getElementById("filter-current-label");
+  if (filterLabelEl) {
+    const activeCat = storeState.activeCategory || 'all';
+    filterLabelEl.textContent = activeCat === 'all' ? 'Filter' : ('Filter: ' + activeCat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
+  }
+
+  const filterMenuEl = document.getElementById("filter-dropdown-menu");
+  if (filterMenuEl) {
+    filterMenuEl.querySelectorAll(".dropdown-option").forEach(opt => {
+      if (opt.getAttribute("data-value") === (storeState.activeCategory || "all")) {
+        opt.classList.add("active");
+      } else {
+        opt.classList.remove("active");
+      }
+    });
   }
 
   // Sort products using storeState.shopSort (persists across filter apply/reset)
