@@ -2335,13 +2335,13 @@ section.full-width-banner-section {
   }
 
   .footer-container {
-    grid-template-columns: 1fr;
-    gap: 40px;
-    text-align: center;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px 20px;
+    text-align: left;
   }
   
   .brand-info, .contact-info {
-    align-items: center;
+    align-items: flex-start;
   }
 
   .social-icons {
@@ -7494,32 +7494,138 @@ img, svg, video, canvas, audio, iframe, embed, object {
     max-width: 100% !important;
   }
 
-  /* 7. Footer responsiveness */
+/* =========================================================
+     MOBILE FOOTER: 2-COLUMN LAYOUT & LEFT-ALIGNED TEXT (<= 768px)
+     ========================================================= */
   .main-footer {
     width: 100% !important;
     max-width: 100vw !important;
     overflow-x: hidden !important;
+    padding: 45px 20px 24px !important;
   }
 
   .footer-container {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 32px !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 32px 20px !important;
     width: 100% !important;
     max-width: 100% !important;
-    padding: 40px 18px !important;
+    padding: 0 !important;
     box-sizing: border-box !important;
-    text-align: center !important;
+    text-align: left !important;
+    align-items: start !important;
   }
 
-  .footer-col {
+  /* 1. Brand Info (Full width span across the top of the footer) */
+  .footer-col.brand-info {
+    grid-column: 1 / -1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    text-align: left !important;
     width: 100% !important;
-    max-width: 100% !important;
+    margin-bottom: 4px !important;
+  }
+
+  .brand-info .footer-logo {
+    display: inline-block !important;
+    margin-bottom: 12px !important;
+    text-align: left !important;
+  }
+
+  .brand-info .footer-logo-img {
+    height: 38px !important;
+    width: auto !important;
+  }
+
+  .footer-desc {
+    font-size: 0.84rem !important;
+    line-height: 1.6 !important;
+    color: rgba(250, 249, 246, 0.75) !important;
+    text-align: left !important;
+    margin-bottom: 16px !important;
   }
 
   .social-icons {
-    justify-content: center !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+    gap: 16px !important;
     width: 100% !important;
+  }
+
+  /* 2. Side-by-Side 2-Column Sections (Quick Links & Shop) */
+  .footer-col {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    text-align: left !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .footer-col h3 {
+    font-size: 1.05rem !important;
+    font-family: var(--font-serif) !important;
+    color: var(--bg-primary) !important;
+    margin-bottom: 14px !important;
+    text-align: left !important;
+  }
+
+  .footer-col ul {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    text-align: left !important;
+  }
+
+  .footer-col ul li {
+    margin-bottom: 10px !important;
+    text-align: left !important;
+  }
+
+  .footer-col ul li a {
+    font-size: 0.82rem !important;
+    color: rgba(250, 249, 246, 0.75) !important;
+    text-align: left !important;
+    display: inline-block !important;
+    transition: color 0.15s ease !important;
+  }
+
+  .footer-col ul li a:hover {
+    color: var(--accent) !important;
+  }
+
+  /* 3. Contact Info Column (Left-aligned & cleanly formatted) */
+  .footer-col.contact-info {
+    grid-column: 1 / -1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    text-align: left !important;
+    width: 100% !important;
+    margin-top: 4px !important;
+  }
+
+  .footer-col.contact-info p {
+    font-size: 0.82rem !important;
+    line-height: 1.6 !important;
+    color: rgba(250, 249, 246, 0.75) !important;
+    text-align: left !important;
+    margin-bottom: 8px !important;
+  }
+
+  .footer-bottom {
+    margin-top: 28px !important;
+    padding-top: 20px !important;
+    border-top: 1px solid rgba(197, 168, 128, 0.2) !important;
+    text-align: center !important;
+  }
+
+  .footer-bottom p {
+    font-size: 0.75rem !important;
+    color: rgba(250, 249, 246, 0.5) !important;
+    text-align: center !important;
   }
 
   /* 8. Fix Sliding Drawers to eliminate offscreen canvas stretching */
