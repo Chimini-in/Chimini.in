@@ -204,7 +204,10 @@ let storeState = {
   shopLayout: "grid-3",
   shopSort: "default",
   priceMin: null,
-  priceMax: null
+  priceMax: null,
+  priceBracket: "all",
+  activeDiscount: "all",
+  inStockOnly: false
 };
 
 // Autoplay intervals
@@ -1944,14 +1947,25 @@ function renderShopPage() {
     return map[val] || 'Featured';
   };
 
-  const getFilterLabel = (val) => {
-    if (!val || val === 'all') return 'Filter';
-    return 'Filter: ' + val.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const getActiveFilterCount = () => {
+    let count = 0;
+    if (storeState.activeCategory && storeState.activeCategory !== 'all') count++;
+    if (storeState.activeFragrance && storeState.activeFragrance !== 'all') count++;
+    if (storeState.priceBracket && storeState.priceBracket !== 'all') count++;
+    if ((storeState.priceMin !== null && storeState.priceMin !== undefined) || (storeState.priceMax !== null && storeState.priceMax !== undefined)) count++;
+    if (storeState.activeDiscount && storeState.activeDiscount !== 'all') count++;
+    if (storeState.inStockOnly) count++;
+    return count;
   };
 
-  // Build category filter options list
+  // Build category filter options list dynamically
   const rawCats = (storeState.adminSettings.categories || []).filter(c => c.is_published !== false || c.published !== false);
-  let categoryOptions = [{ slug: 'all', name: 'All Products' }];
+  let categoryOptions = [
+    { slug: 'all', name: 'All Products' },
+    { slug: 'candles', name: 'Candles' },
+    { slug: 'gifts', name: 'Gifts' }
+  ];
+  
   if (rawCats.length > 0) {
     rawCats.forEach(c => {
       const slug = (c.slug || c.name || c.title || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
@@ -1960,11 +1974,38 @@ function renderShopPage() {
         categoryOptions.push({ slug, name });
       }
     });
-  } else {
-    ['candles', 'gifts', 'signature', 'eco'].forEach(cat => {
-      categoryOptions.push({ slug: cat, name: cat.charAt(0).toUpperCase() + cat.slice(1) });
-    });
   }
+
+  // Build fragrance options list dynamically from products
+  let fragranceOptions = [];
+  const prods = storeState.adminSettings.products || [];
+  prods.forEach(p => {
+    const f = (p.fragrance_tag || p.fragrance || '').trim();
+    if (f) {
+      const parts = f.split(',').map(s => s.trim()).filter(Boolean);
+      parts.forEach(part => {
+        const slug = part.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        if (slug && !fragranceOptions.some(o => o.slug === slug)) {
+          fragranceOptions.push({ slug, name: part });
+        }
+      });
+    }
+  });
+
+  // Fallback top fragrances if empty
+  if (fragranceOptions.length === 0) {
+    fragranceOptions = [
+      { slug: 'hibiscus', name: 'Hibiscus' },
+      { slug: 'jasmine', name: 'Jasmine' },
+      { slug: 'rose', name: 'Rose' },
+      { slug: 'tulip', name: 'Tulip' },
+      { slug: 'sunflower', name: 'Sunflower' },
+      { slug: 'sandalwood', name: 'Sandalwood' }
+    ];
+  }
+
+  const activeCount = getActiveFilterCount();
+  const filterLabelText = activeCount > 0 ? `FILTER <span class="filter-badge-count">${activeCount}</span>` : 'FILTER';
 
   if (!container.innerHTML.trim() || !container.querySelector(".catalog-toolbar")) {
     container.innerHTML = `
@@ -2011,17 +2052,80 @@ function renderShopPage() {
             </div>
           </div>
           
-          <!-- 2. Custom Compact Category Filter Dropdown -->
+          <!-- 2. Custom Rich Compact Filter Dropdown -->
           <div class="custom-dropdown filter-dropdown" id="filter-dropdown-container">
-            <button type="button" class="btn btn-secondary filter-trigger-btn" id="filter-trigger-btn" aria-haspopup="listbox" aria-expanded="false">
+            <button type="button" class="btn btn-secondary filter-trigger-btn" id="filter-trigger-btn" aria-haspopup="dialog" aria-expanded="false">
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-              <span class="dropdown-label" id="filter-current-label">${getFilterLabel(storeState.activeCategory || 'all')}</span>
+              <span class="dropdown-label" id="filter-current-label">${filterLabelText}</span>
               <svg class="dropdown-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
-            <div class="dropdown-menu filter-dropdown-menu" id="filter-dropdown-menu" role="listbox">
-              ${categoryOptions.map(opt => `
-                <div class="dropdown-option ${(storeState.activeCategory || 'all') === opt.slug ? 'active' : ''}" data-value="${opt.slug}">${opt.name}</div>
-              `).join('')}
+            <div class="dropdown-menu filter-dropdown-menu" id="filter-dropdown-menu" role="dialog">
+              <div class="filter-menu-header">
+                <span class="filter-menu-title">Filter Products</span>
+                <button type="button" class="filter-reset-link" id="filter-reset-all-btn">Reset All</button>
+              </div>
+
+              <!-- Section 1: Categories -->
+              <div class="filter-section-block">
+                <div class="filter-section-title">Category</div>
+                <div class="filter-chips-grid" id="filter-category-chips">
+                  ${categoryOptions.map(opt => `
+                    <span class="filter-chip ${(storeState.activeCategory || 'all') === opt.slug && !storeState.activeFragrance ? 'active' : ''}" data-type="category" data-value="${opt.slug}">${opt.name}</span>
+                  `).join('')}
+                </div>
+              </div>
+
+              <!-- Section 2: Fragrance -->
+              <div class="filter-section-block">
+                <div class="filter-section-title">Fragrance & Scent</div>
+                <div class="filter-chips-grid" id="filter-fragrance-chips">
+                  ${fragranceOptions.map(opt => `
+                    <span class="filter-chip ${(storeState.activeFragrance || '') === opt.slug ? 'active' : ''}" data-type="fragrance" data-value="${opt.slug}">${opt.name}</span>
+                  `).join('')}
+                </div>
+              </div>
+
+              <!-- Section 3: Price Range -->
+              <div class="filter-section-block">
+                <div class="filter-section-title">Price Range</div>
+                <div class="filter-chips-grid" id="filter-price-chips">
+                  <span class="filter-chip ${(storeState.priceBracket || 'all') === 'all' && storeState.priceMin === null && storeState.priceMax === null ? 'active' : ''}" data-type="price-bracket" data-value="all">All Prices</span>
+                  <span class="filter-chip ${storeState.priceBracket === 'under-500' ? 'active' : ''}" data-type="price-bracket" data-value="under-500">Under ₹500</span>
+                  <span class="filter-chip ${storeState.priceBracket === '500-1000' ? 'active' : ''}" data-type="price-bracket" data-value="500-1000">₹500 – ₹1,000</span>
+                  <span class="filter-chip ${storeState.priceBracket === '1000-2000' ? 'active' : ''}" data-type="price-bracket" data-value="1000-2000">₹1,000 – ₹2,000</span>
+                  <span class="filter-chip ${storeState.priceBracket === 'above-2000' ? 'active' : ''}" data-type="price-bracket" data-value="above-2000">Above ₹2,000</span>
+                </div>
+                <div class="filter-price-inputs">
+                  <input type="number" id="filter-price-min" class="filter-price-input" placeholder="₹ Min" value="${storeState.priceMin !== null && storeState.priceMin !== undefined ? storeState.priceMin : ''}">
+                  <span class="filter-price-separator">–</span>
+                  <input type="number" id="filter-price-max" class="filter-price-input" placeholder="₹ Max" value="${storeState.priceMax !== null && storeState.priceMax !== undefined ? storeState.priceMax : ''}">
+                </div>
+              </div>
+
+              <!-- Section 4: Discount (% off) -->
+              <div class="filter-section-block">
+                <div class="filter-section-title">Discount & Offers</div>
+                <div class="filter-chips-grid" id="filter-discount-chips">
+                  <span class="filter-chip ${(storeState.activeDiscount || 'all') === 'all' ? 'active' : ''}" data-type="discount" data-value="all">All Deals</span>
+                  <span class="filter-chip ${storeState.activeDiscount === '10' ? 'active' : ''}" data-type="discount" data-value="10">10% & Above</span>
+                  <span class="filter-chip ${storeState.activeDiscount === '20' ? 'active' : ''}" data-type="discount" data-value="20">20% & Above</span>
+                  <span class="filter-chip ${storeState.activeDiscount === '30' ? 'active' : ''}" data-type="discount" data-value="30">30% & Above</span>
+                  <span class="filter-chip ${storeState.activeDiscount === '50' ? 'active' : ''}" data-type="discount" data-value="50">50% & Above</span>
+                </div>
+              </div>
+
+              <!-- Section 5: Availability -->
+              <div class="filter-section-block">
+                <div class="filter-section-title">Availability</div>
+                <div class="filter-chips-grid" id="filter-stock-chips">
+                  <span class="filter-chip ${!storeState.inStockOnly ? 'active' : ''}" data-type="stock" data-value="all">All Items</span>
+                  <span class="filter-chip ${storeState.inStockOnly ? 'active' : ''}" data-type="stock" data-value="in-stock">In Stock Only</span>
+                </div>
+              </div>
+
+              <div class="filter-menu-footer">
+                <button type="button" class="filter-apply-btn" id="filter-apply-btn">Apply Filters</button>
+              </div>
             </div>
           </div>
         </div>
@@ -2093,6 +2197,13 @@ function renderShopPage() {
       });
     }
 
+    // Prevent clicks inside the filter menu from closing it prematurely
+    if (filterMenu) {
+      filterMenu.addEventListener("click", (e) => {
+        e.stopPropagation();
+      });
+    }
+
     if (sortMenu) {
       sortMenu.querySelectorAll(".dropdown-option").forEach(opt => {
         opt.addEventListener("click", (e) => {
@@ -2105,20 +2216,158 @@ function renderShopPage() {
       });
     }
 
-    if (filterMenu) {
-      filterMenu.querySelectorAll(".dropdown-option").forEach(opt => {
-        opt.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const val = opt.getAttribute("data-value");
+    // Category Chip Clicks
+    const catChips = document.getElementById("filter-category-chips");
+    if (catChips) {
+      catChips.querySelectorAll(".filter-chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+          const val = chip.getAttribute("data-value");
           storeState.activeCategory = val;
           storeState.activeFragrance = null;
-          if (window.history.replaceState) {
-            const newUrl = val === 'all' ? window.location.pathname : (window.location.pathname + '?category=' + encodeURIComponent(val));
-            window.history.replaceState(null, '', newUrl);
-          }
-          closeAllCustomDropdowns();
-          renderShopProducts();
+          catChips.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+          chip.classList.add("active");
+          const fragChips = document.getElementById("filter-fragrance-chips");
+          if (fragChips) fragChips.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
         });
+      });
+    }
+
+    // Fragrance Chip Clicks
+    const fragChips = document.getElementById("filter-fragrance-chips");
+    if (fragChips) {
+      fragChips.querySelectorAll(".filter-chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+          const val = chip.getAttribute("data-value");
+          if (storeState.activeFragrance === val) {
+            storeState.activeFragrance = null;
+            chip.classList.remove("active");
+          } else {
+            storeState.activeFragrance = val;
+            storeState.activeCategory = "all";
+            fragChips.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+            chip.classList.add("active");
+            if (catChips) catChips.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+          }
+        });
+      });
+    }
+
+    // Price Bracket Chip Clicks
+    const priceChips = document.getElementById("filter-price-chips");
+    if (priceChips) {
+      priceChips.querySelectorAll(".filter-chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+          const val = chip.getAttribute("data-value");
+          storeState.priceBracket = val;
+          storeState.priceMin = null;
+          storeState.priceMax = null;
+          const pMinInput = document.getElementById("filter-price-min");
+          const pMaxInput = document.getElementById("filter-price-max");
+          if (pMinInput) pMinInput.value = "";
+          if (pMaxInput) pMaxInput.value = "";
+          priceChips.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+          chip.classList.add("active");
+        });
+      });
+    }
+
+    // Price Input Changes
+    const pMinInput = document.getElementById("filter-price-min");
+    const pMaxInput = document.getElementById("filter-price-max");
+    const onPriceInput = () => {
+      const minVal = pMinInput && pMinInput.value !== "" ? parseFloat(pMinInput.value) : null;
+      const maxVal = pMaxInput && pMaxInput.value !== "" ? parseFloat(pMaxInput.value) : null;
+      storeState.priceMin = minVal;
+      storeState.priceMax = maxVal;
+      if (minVal !== null || maxVal !== null) {
+        storeState.priceBracket = "custom";
+        if (priceChips) priceChips.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+      }
+    };
+    if (pMinInput) pMinInput.addEventListener("input", onPriceInput);
+    if (pMaxInput) pMaxInput.addEventListener("input", onPriceInput);
+
+    // Discount Chip Clicks
+    const discountChips = document.getElementById("filter-discount-chips");
+    if (discountChips) {
+      discountChips.querySelectorAll(".filter-chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+          const val = chip.getAttribute("data-value");
+          storeState.activeDiscount = val;
+          discountChips.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+          chip.classList.add("active");
+        });
+      });
+    }
+
+    // Stock Chip Clicks
+    const stockChips = document.getElementById("filter-stock-chips");
+    if (stockChips) {
+      stockChips.querySelectorAll(".filter-chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+          const val = chip.getAttribute("data-value");
+          storeState.inStockOnly = (val === "in-stock");
+          stockChips.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+          chip.classList.add("active");
+        });
+      });
+    }
+
+    // Apply Button
+    const applyBtn = document.getElementById("filter-apply-btn");
+    if (applyBtn) {
+      applyBtn.addEventListener("click", () => {
+        closeAllCustomDropdowns();
+        renderShopProducts();
+      });
+    }
+
+    // Reset All Button
+    const resetBtn = document.getElementById("filter-reset-all-btn");
+    if (resetBtn) {
+      resetBtn.addEventListener("click", () => {
+        storeState.activeCategory = "all";
+        storeState.activeFragrance = null;
+        storeState.priceBracket = "all";
+        storeState.priceMin = null;
+        storeState.priceMax = null;
+        storeState.activeDiscount = "all";
+        storeState.inStockOnly = false;
+        
+        // Reset UI chips
+        if (catChips) {
+          catChips.querySelectorAll(".filter-chip").forEach(c => {
+            if (c.getAttribute("data-value") === "all") c.classList.add("active");
+            else c.classList.remove("active");
+          });
+        }
+        if (fragChips) fragChips.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+        if (priceChips) {
+          priceChips.querySelectorAll(".filter-chip").forEach(c => {
+            if (c.getAttribute("data-value") === "all") c.classList.add("active");
+            else c.classList.remove("active");
+          });
+        }
+        if (pMinInput) pMinInput.value = "";
+        if (pMaxInput) pMaxInput.value = "";
+        if (discountChips) {
+          discountChips.querySelectorAll(".filter-chip").forEach(c => {
+            if (c.getAttribute("data-value") === "all") c.classList.add("active");
+            else c.classList.remove("active");
+          });
+        }
+        if (stockChips) {
+          stockChips.querySelectorAll(".filter-chip").forEach(c => {
+            if (c.getAttribute("data-value") === "all") c.classList.add("active");
+            else c.classList.remove("active");
+          });
+        }
+
+        if (window.history.replaceState) {
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+        closeAllCustomDropdowns();
+        renderShopProducts();
       });
     }
 
@@ -2237,12 +2486,39 @@ function renderShopProducts() {
     });
   }
   
-  // Apply price filter
-  if (storeState.priceMin !== null) {
-    products = products.filter(p => p.price >= storeState.priceMin);
+  // Apply price filter (preset bracket or custom min/max)
+  if (storeState.priceBracket && storeState.priceBracket !== "all") {
+    if (storeState.priceBracket === "under-500") {
+      products = products.filter(p => (p.price || 0) < 500);
+    } else if (storeState.priceBracket === "500-1000") {
+      products = products.filter(p => (p.price || 0) >= 500 && (p.price || 0) <= 1000);
+    } else if (storeState.priceBracket === "1000-2000") {
+      products = products.filter(p => (p.price || 0) >= 1000 && (p.price || 0) <= 2000);
+    } else if (storeState.priceBracket === "above-2000") {
+      products = products.filter(p => (p.price || 0) > 2000);
+    }
   }
-  if (storeState.priceMax !== null) {
-    products = products.filter(p => p.price <= storeState.priceMax);
+  if (storeState.priceMin !== null && storeState.priceMin !== undefined && !isNaN(storeState.priceMin)) {
+    products = products.filter(p => (p.price || 0) >= storeState.priceMin);
+  }
+  if (storeState.priceMax !== null && storeState.priceMax !== undefined && !isNaN(storeState.priceMax)) {
+    products = products.filter(p => (p.price || 0) <= storeState.priceMax);
+  }
+
+  // Apply discount filter (% off)
+  if (storeState.activeDiscount && storeState.activeDiscount !== "all") {
+    const minDisc = parseInt(storeState.activeDiscount, 10);
+    products = products.filter(p => {
+      const orig = p.originalPrice || p.mrp || 0;
+      const cur = p.price || 0;
+      const disc = (orig && orig > cur) ? Math.round(((orig - cur) / orig) * 100) : 0;
+      return disc >= minDisc;
+    });
+  }
+
+  // Apply in-stock filter
+  if (storeState.inStockOnly) {
+    products = products.filter(p => p.stock === undefined || p.stock === null || p.stock > 0 || p.in_stock !== false);
   }
   
   // Update count in middle toolbar
@@ -2307,8 +2583,19 @@ function renderShopProducts() {
 
   const filterLabelEl = document.getElementById("filter-current-label");
   if (filterLabelEl) {
-    const activeCat = storeState.activeCategory || 'all';
-    filterLabelEl.textContent = activeCat === 'all' ? 'Filter' : ('Filter: ' + activeCat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
+    let count = 0;
+    if (storeState.activeCategory && storeState.activeCategory !== 'all') count++;
+    if (storeState.activeFragrance && storeState.activeFragrance !== 'all') count++;
+    if (storeState.priceBracket && storeState.priceBracket !== 'all') count++;
+    if ((storeState.priceMin !== null && storeState.priceMin !== undefined) || (storeState.priceMax !== null && storeState.priceMax !== undefined)) count++;
+    if (storeState.activeDiscount && storeState.activeDiscount !== 'all') count++;
+    if (storeState.inStockOnly) count++;
+    
+    if (count > 0) {
+      filterLabelEl.innerHTML = `FILTER <span class="filter-badge-count">${count}</span>`;
+    } else {
+      filterLabelEl.textContent = 'FILTER';
+    }
   }
 
   const filterMenuEl = document.getElementById("filter-dropdown-menu");
