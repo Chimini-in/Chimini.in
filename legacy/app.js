@@ -2944,17 +2944,7 @@ function renderGiftsPage() {
   const occasionTiles = giftsConfig.occasionTiles && giftsConfig.occasionTiles.length > 0 ? giftsConfig.occasionTiles : defaultConfig.occasionTiles;
   const giftCards = giftsConfig.giftCards && giftsConfig.giftCards.length > 0 ? giftsConfig.giftCards : defaultConfig.giftCards;
 
-  // Custom builder state
-  const builderState = {
-    shape: shapes[0] ? shapes[0].name : 'Classic Jar',
-    scent: 'Amber Gold (Sandalwood)',
-    scentImg: 'assets/product_sandalwood.png',
-    note: 'With all my love, always',
-    packaging: 'Signature Textured Box',
-    price: 299
-  };
-
-  container.innerHTML = `
+    container.innerHTML = `
     ${renderPageHeroHtml("gifts")}
 
     <!-- 1. Hero Section -->
@@ -2963,79 +2953,14 @@ function renderGiftsPage() {
       <h1 class="gifts-hero-title">Gifts That Feel Personal</h1>
       <p class="gifts-hero-subtitle">Thoughtfully curated candle hampers, bespoke personalized inscriptions, and hand-poured artisanal sets for every special moment.</p>
       <div class="gifts-hero-actions">
-        <a href="#gift-customizer" class="btn btn-primary">Customise Your Gift &darr;</a>
+        <a href="/shop?category=gifts" class="btn btn-primary">Shop All Gifts &rarr;</a>
         <a href="#gift-cards-section" class="btn btn-secondary">Explore Gift Cards</a>
       </div>
     </section>
 
     <div class="section-container">
 
-      <!-- 2. Interactive Customizer -->
-      <section id="gift-customizer" class="gift-customizer-section animate-slide-up">
-        <div class="customizer-header">
-          <h2>Customise Your Gift</h2>
-          <p style="color: var(--text-secondary);">Select your vessel shape, scent profile, and add a personalized calligraphy card note.</p>
-        </div>
-        
-        <div class="customizer-grid">
-          <div class="customizer-controls">
-            
-            <div class="custom-step-group">
-              <span class="custom-step-label">1. Choose Vessel Shape</span>
-              <div class="custom-option-btns">
-                ${shapes.map((s, idx) => `
-                  <button class="custom-opt-btn ${idx === 0 ? 'active' : ''}" data-type="shape" data-val="${s.name}">${s.name}</button>
-                `).join('')}
-              </div>
-            </div>
-
-            <div class="custom-step-group">
-              <span class="custom-step-label">2. Select Scent &amp; Vessel Shade</span>
-              <div class="swatch-group">
-                <button class="swatch-btn active" data-type="scent" data-val="Amber Gold (Sandalwood)" data-img="assets/product_sandalwood.png" style="background:#D4AF37;" title="Amber Gold"></button>
-                <button class="swatch-btn" data-type="scent" data-val="Rose Quartz (Velvet Rose)" data-img="assets/product_rose.png" style="background:#E8C5C8;" title="Rose Quartz"></button>
-                <button class="swatch-btn" data-type="scent" data-val="Emerald Onyx (Wild Oak)" data-img="assets/product_jasmine.png" style="background:#2E5B4B;" title="Emerald Onyx"></button>
-                <button class="swatch-btn" data-type="scent" data-val="Ivory Soy (Pure Jasmine)" data-img="assets/product_fig.png" style="background:#FDFBF7;" title="Ivory Soy"></button>
-              </div>
-            </div>
-
-            <div class="custom-step-group">
-              <span class="custom-step-label">3. Personal Calligraphy Note</span>
-              <textarea id="custom-gift-note" class="custom-text-input" placeholder="Type your custom gift message here...">With all my love, always</textarea>
-            </div>
-
-            <div class="custom-step-group">
-              <span class="custom-step-label">4. Packaging Style</span>
-              <div class="custom-option-btns">
-                <button class="custom-opt-btn active" data-type="pkg" data-val="Signature Textured Box">Linen Box</button>
-                <button class="custom-opt-btn" data-type="pkg" data-val="Wooden Treasure Crate">Wooden Crate</button>
-              </div>
-            </div>
-
-          </div>
-
-          <!-- Live Preview Card -->
-          <div class="customizer-preview-card">
-            <span style="font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--color-gold, #C5A880); font-weight: 600; margin-bottom: 10px;">LIVE PREVIEW</span>
-            <div class="preview-image-container">
-              <img id="preview-gift-img" src="assets/product_sandalwood.png" alt="Custom Gift Preview" class="preview-img">
-            </div>
-            <div class="preview-details">
-              <h3 id="preview-gift-title" style="font-family: var(--font-serif); font-size: 1.3rem; margin-bottom: 6px;">${builderState.shape} · Amber Gold</h3>
-              <p id="preview-gift-pkg" style="font-size: 0.85rem; color: var(--text-secondary);">Packaged in Signature Textured Box</p>
-              
-              <div class="preview-note-box" id="preview-gift-note-display">
-                "With all my love, always"
-              </div>
-              
-              <div class="preview-price">₹299</div>
-              <button id="add-custom-gift-btn" class="btn btn-primary btn-block">Add Custom Gift to Cart</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 3. Promo Banner 1 -->${renderBannerSlot('gifts_promo_1') ? '<div class="gifts-img-banner">' + renderBannerSlot('gifts_promo_1') + '</div>' : ''}
+      <!-- Promo Banner 1 -->${renderBannerSlot('gifts_promo_1') ? '<div class="gifts-img-banner">' + renderBannerSlot('gifts_promo_1') + '</div>' : ''}
 
       <!-- 4. Shop by Price (Single Unified Row of Round Tiles) -->
       <section class="price-section-block">
@@ -3114,83 +3039,7 @@ function renderGiftsPage() {
     </div>
   `;
 
-  // Interactive Builder Event Bindings
-  const updateBuilderPreview = () => {
-    const titleEl = document.getElementById("preview-gift-title");
-    const pkgEl = document.getElementById("preview-gift-pkg");
-    const noteEl = document.getElementById("preview-gift-note-display");
-    const imgEl = document.getElementById("preview-gift-img");
-
-    if (titleEl) titleEl.textContent = `${builderState.shape} · ${builderState.scent}`;
-    if (pkgEl) pkgEl.textContent = `Packaged in ${builderState.packaging}`;
-    if (noteEl) noteEl.textContent = builderState.note ? `"${builderState.note}"` : '"With all my love"';
-    if (imgEl) imgEl.src = builderState.scentImg;
-  };
-
-  // Shape / Option buttons
-  container.querySelectorAll(".custom-opt-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const type = btn.getAttribute("data-type");
-      const val = btn.getAttribute("data-val");
-      btn.parentElement.querySelectorAll(".custom-opt-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-
-      if (type === "shape") builderState.shape = val;
-      if (type === "pkg") builderState.packaging = val;
-      updateBuilderPreview();
-    });
-  });
-
-  // Swatches
-  container.querySelectorAll(".swatch-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const val = btn.getAttribute("data-val");
-      const img = btn.getAttribute("data-img");
-      container.querySelectorAll(".swatch-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-
-      builderState.scent = val;
-      builderState.scentImg = img;
-      updateBuilderPreview();
-    });
-  });
-
-  // Note input
-  const noteInput = document.getElementById("custom-gift-note");
-  if (noteInput) {
-    noteInput.addEventListener("input", (e) => {
-      builderState.note = e.target.value;
-      updateBuilderPreview();
-    });
-  }
-
-  // Add Custom Gift to Cart
-  const addCustomBtn = document.getElementById("add-custom-gift-btn");
-  if (addCustomBtn) {
-    addCustomBtn.addEventListener("click", () => {
-      const customItem = {
-        id: `custom-gift-${Date.now()}`,
-        name: `Bespoke Gift: ${builderState.shape} (${builderState.scent})`,
-        price: builderState.price,
-        image: builderState.scentImg,
-        note: builderState.note,
-        packaging: builderState.packaging,
-        quantity: 1
-      };
-      
-      let existingIndex = storeState.cart.findIndex(item => item.id === customItem.id);
-      if (existingIndex > -1) {
-        storeState.cart[existingIndex].quantity += 1;
-      } else {
-        storeState.cart.push(customItem);
-      }
-      
-      saveCart();
-      updateCartUI();
-      openCartDrawer();
-      showToast("Custom Gift Added to Cart!");
-    });
-  }
+  
 }
 
 function renderAboutPage() {

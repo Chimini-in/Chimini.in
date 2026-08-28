@@ -41,7 +41,7 @@ export default function AdminGiftsPage() {
   const [config, setConfig] = useState(DEFAULT_CONFIG);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState('shapes');
+  const [activeTab, setActiveTab] = useState('priceTiles');
   const [uploadingIdx, setUploadingIdx] = useState(null);
 
   useEffect(() => {
