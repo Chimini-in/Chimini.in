@@ -64,7 +64,8 @@ export default function ProductsPage() {
     is_published: true,
     sort_order: 0,
     is_best_seller: false,
-    is_gift: false
+    is_gift: false,
+    availability: true
   });
 
   const [uploadingSlots, setUploadingSlots] = useState({ 0: false, 1: false, 2: false, 3: false, 4: false, 5: false });
@@ -128,7 +129,8 @@ export default function ProductsPage() {
         is_published: formData.is_published,
         sort_order: parseInt(formData.sort_order) || 0,
         is_best_seller: formData.is_best_seller || false,
-        is_gift: formData.is_gift || false
+        is_gift: formData.is_gift || false,
+        availability: formData.availability !== false
       };
 
       if (editingId) {
@@ -189,7 +191,8 @@ export default function ProductsPage() {
         is_published: prod.is_published !== false,
         sort_order: prod.sort_order || 0,
         is_best_seller: prod.is_best_seller || false,
-        is_gift: prod.is_gift || false
+        is_gift: prod.is_gift || false,
+        availability: prod.availability !== false
       });
     } else {
       setEditingId(null);
@@ -213,8 +216,9 @@ export default function ProductsPage() {
         is_published: true,
         sort_order: 0,
         is_best_seller: false,
-        is_gift: false
-      });
+        is_gift: false,
+    availability: true
+  });
     }
     setShowModal(true);
   };
@@ -233,6 +237,12 @@ export default function ProductsPage() {
 
   const togglePublish = async (id, currentStatus) => {
     await supabaseClient.from('products').update({ is_published: !currentStatus }).eq('id', id);
+    fetchData();
+  };
+
+  const toggleStock = async (id, currentAvailability) => {
+    const newStatus = currentAvailability === false ? true : false;
+    await supabaseClient.from('products').update({ availability: newStatus }).eq('id', id);
     fetchData();
   };
 
@@ -415,6 +425,29 @@ export default function ProductsPage() {
                     </td>
                     <td style={{ padding: '14px 16px', textAlign: 'center' }}>
                       <button 
+                        type="button"
+                        onClick={() => toggleStock(prod.id, prod.availability)}
+                        style={{ 
+                          padding: '4px 10px', 
+                          borderRadius: '12px', 
+                          fontSize: '0.75rem', 
+                          border: 'none', 
+                          cursor: 'pointer', 
+                          fontWeight: '600', 
+                          backgroundColor: prod.availability !== false ? '#dcfce7' : '#fee2e2', 
+                          color: prod.availability !== false ? '#166534' : '#991b1b',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px'
+                        }}
+                        title="Click to toggle Stock Status"
+                      >
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: prod.availability !== false ? '#16a34a' : '#dc2626' }}></span>
+                        {prod.availability !== false ? 'In Stock' : 'Out of Stock'}
+                      </button>
+                    </td>
+                    <td style={{ padding: '14px 16px', textAlign: 'center' }}>
+                      <button 
                         onClick={() => togglePublish(prod.id, prod.is_published)}
                         style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', border: 'none', cursor: 'pointer', fontWeight: '500', backgroundColor: prod.is_published !== false ? '#dcfce7' : '#f1f5f9', color: prod.is_published !== false ? '#166534' : '#64748b' }}
                       >
@@ -576,6 +609,56 @@ export default function ProductsPage() {
                       <div>
                         <label style={labelStyle}>Badge Tag</label>
                         <input type="text" value={formData.badges} onChange={e => setFormData({...formData, badges: e.target.value})} style={inputStyle} placeholder="e.g. BEST SELLER, NEW ARRIVAL, LIMITED" />
+                      </div>
+                    </div>
+
+                    
+                    {/* Stock Availability Option */}
+                    <div>
+                      <label style={labelStyle}>Inventory Stock Availability *</label>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '6px' }}>
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, availability: true })}
+                          style={{
+                            padding: '10px 14px',
+                            borderRadius: '8px',
+                            border: formData.availability !== false ? '2px solid #16a34a' : '1px solid #cbd5e1',
+                            backgroundColor: formData.availability !== false ? '#f0fdf4' : '#ffffff',
+                            color: formData.availability !== false ? '#15803d' : '#64748b',
+                            fontWeight: formData.availability !== false ? '600' : '500',
+                            fontSize: '0.85rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>✓</span> In Stock (Available for Purchase)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, availability: false })}
+                          style={{
+                            padding: '10px 14px',
+                            borderRadius: '8px',
+                            border: formData.availability === false ? '2px solid #dc2626' : '1px solid #cbd5e1',
+                            backgroundColor: formData.availability === false ? '#fef2f2' : '#ffffff',
+                            color: formData.availability === false ? '#b91c1c' : '#64748b',
+                            fontWeight: formData.availability === false ? '600' : '500',
+                            fontSize: '0.85rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>✕</span> Out of Stock (Disables Purchasing)
+                        </button>
                       </div>
                     </div>
 

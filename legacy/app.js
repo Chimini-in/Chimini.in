@@ -368,11 +368,13 @@ function renderBestSellers() {
   
   displayedProducts.forEach(product => {
     const isWishlisted = storeState.wishlist.includes(product.id);
+    const isOutOfStock = product.availability === false || product.is_out_of_stock === true || product.in_stock === false;
     
     const card = document.createElement("div");
-    card.className = "product-card animate-slide-up";
+    card.className = `product-card animate-slide-up ${isOutOfStock ? "is-out-of-stock" : ""}`;
     card.innerHTML = `
       <div class="product-image-wrapper">
+        ${isOutOfStock ? `<span class="product-badge out-of-stock">Out of Stock</span>` : (product.badge ? `<span class="product-badge">${product.badge}</span>` : '')}
         <a href="/product?id=${product.id}" style="display:block; width:100%; height:100%; text-decoration:none;">
           <img src="${product.image}" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
         </a>
@@ -383,21 +385,31 @@ function renderBestSellers() {
       <div class="product-info">
         <a href="/product?id=${product.id}" style="text-decoration:none; color:inherit;"><h3 class="product-name">${product.name}</h3></a>
         <p class="product-price">₹${Number(product.price).toFixed(2)}</p>
-        <button class="btn btn-primary product-card-btn add-to-cart-btn" data-id="${product.id}">Add to Cart</button>
+        ${isOutOfStock
+          ? `<button class="btn btn-primary product-card-btn btn-out-of-stock" disabled data-id="${product.id}">Out of Stock</button>`
+          : `<button class="btn btn-primary product-card-btn add-to-cart-btn" data-id="${product.id}">Add to Cart</button>`
+        }
       </div>
     `;
     
     // Bind button events
-    card.querySelector(".wishlist-toggle-btn").addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleWishlist(product.id);
-    });
-    card.querySelector(".add-to-cart-btn").addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      addToCart(product.id);
-    });
+    const wlBtn = card.querySelector(".wishlist-toggle-btn");
+    if (wlBtn) {
+      wlBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleWishlist(product.id);
+      });
+    }
+    const cartBtn = card.querySelector(".add-to-cart-btn");
+    if (cartBtn) {
+      cartBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isOutOfStock) return;
+        addToCart(product.id);
+      });
+    }
     
     DOM.bestSellersGrid.appendChild(card);
   });
@@ -807,6 +819,11 @@ function addToCart(productId) {
   const products = storeState.adminSettings.products;
   const product = products.find(p => p.id === productId);
   if (!product) return;
+  
+  if (product.availability === false || product.is_out_of_stock === true || product.in_stock === false) {
+    showToast(`${product.name} is currently out of stock.`);
+    return;
+  }
   
   const existingItem = storeState.cart.find(item => item.id === productId);
   
@@ -2715,14 +2732,19 @@ function renderShopProducts() {
     });
     swatchesHtml += `</div>`;
     
+    const isOutOfStock = product.availability === false || product.is_out_of_stock === true || product.in_stock === false;
+    const finalBadgeHtml = isOutOfStock 
+      ? `<span class="product-badge out-of-stock">Out of Stock</span>` 
+      : (badgeText ? `<span class="product-badge">${badgeText}</span>` : '');
+
     const card = document.createElement("div");
-    card.className = "product-card animate-slide-up";
+    card.className = `product-card animate-slide-up ${isOutOfStock ? "is-out-of-stock" : ""}`;
     
     if (storeState.shopLayout === "list") {
       // List view premium horizontal layout
       card.innerHTML = `
         <div class="product-image-wrapper">
-          ${badgeText ? `<span class="product-badge">${badgeText}</span>` : ''}
+          ${finalBadgeHtml}
           <a href="/product?id=${product.id}" style="display:block; width:100%; height:100%; text-decoration:none;">
             <img src="${product.image}" class="product-image-main" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
             ${product.secondaryImage ? `<img src="${product.secondaryImage}" class="product-image-hover" alt="${product.name}" onerror="this.style.display='none'">` : ''}
@@ -2741,7 +2763,10 @@ function renderShopProducts() {
               <span class="mrp-label">MRP: </span><span class="current-price">₹${Number(product.price).toFixed(0)}</span>
               ${isDiscounted ? `<span class="original-price" style="text-decoration: line-through;">₹${Number(originalPrice).toFixed(0)}</span> <span class="discount-badge-green">${discountText}</span>` : ''}
             </div>
-            <button class="btn btn-primary add-to-cart-btn" data-id="${product.id}" style="padding: 10px 24px;">Add to Cart</button>
+            ${isOutOfStock 
+              ? `<button class="btn btn-primary btn-out-of-stock" disabled data-id="${product.id}" style="padding: 10px 24px;">Out of Stock</button>` 
+              : `<button class="btn btn-primary add-to-cart-btn" data-id="${product.id}" style="padding: 10px 24px;">Add to Cart</button>`
+            }
           </div>
         </div>
       `;
@@ -2749,7 +2774,7 @@ function renderShopProducts() {
       // Grid view layouts
       card.innerHTML = `
         <div class="product-image-wrapper">
-          ${badgeText ? `<span class="product-badge">${badgeText}</span>` : ''}
+          ${finalBadgeHtml}
           <a href="/product?id=${product.id}" style="display:block; width:100%; height:100%; text-decoration:none;">
             <img src="${product.image}" class="product-image-main" alt="${product.name}" onerror="this.src='assets/product_jasmine.png'">
             ${product.secondaryImage ? `<img src="${product.secondaryImage}" class="product-image-hover" alt="${product.name}" onerror="this.style.display='none'">` : ''}
@@ -2757,7 +2782,10 @@ function renderShopProducts() {
           <button class="wishlist-toggle-btn ${isWishlisted ? "active" : ""}" data-id="${product.id}" aria-label="Add to Wishlist">
             <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
           </button>
-          <button class="product-cart-overlay-btn add-to-cart-btn" data-id="${product.id}" aria-label="Add to Cart">+</button>
+          ${isOutOfStock 
+            ? `<button class="product-cart-overlay-btn btn-out-of-stock" disabled aria-label="Out of Stock" title="Out of Stock">&times;</button>` 
+            : `<button class="product-cart-overlay-btn add-to-cart-btn" data-id="${product.id}" aria-label="Add to Cart">+</button>`
+          }
         </div>
         <div class="product-info">
           <a href="/product?id=${product.id}" style="text-decoration:none; color:inherit;"><h3 class="product-name">${product.name}</h3></a>
@@ -2770,16 +2798,23 @@ function renderShopProducts() {
       `;
     }
     
-    card.querySelector(".wishlist-toggle-btn").addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleWishlist(product.id);
-    });
-    card.querySelector(".add-to-cart-btn").addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      addToCart(product.id);
-    });
+    const wlBtn = card.querySelector(".wishlist-toggle-btn");
+    if (wlBtn) {
+      wlBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleWishlist(product.id);
+      });
+    }
+    const cartBtn = card.querySelector(".add-to-cart-btn");
+    if (cartBtn) {
+      cartBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isOutOfStock) return;
+        addToCart(product.id);
+      });
+    }
     
     grid.appendChild(card);
   });
@@ -3898,7 +3933,10 @@ async function fetchSupabaseData() {
         rating: p.rating || 4.9,
         reviewCount: p.review_count || 128,
         is_best_seller: p.is_best_seller || false,
-        is_gift: p.is_gift || false
+        is_gift: p.is_gift || false,
+        availability: p.availability !== false,
+        in_stock: p.availability !== false,
+        is_out_of_stock: p.availability === false
       }));
     }
 
@@ -4133,18 +4171,24 @@ function renderProductDetailPage() {
             '</div>' +
           '</div>' +
 
+          (isOutOfStock ? '<div class="pdp-stock-status out-of-stock"><span class="pdp-stock-dot"></span> Currently Out of Stock</div>' : '') +
           '<!-- Action Buttons: Quantity, Add to Cart, Wishlist -->' +
           '<div class="pdp-actions-wrapper">' +
-            '<div class="pdp-qty-picker">' +
-              '<button type="button" class="pdp-qty-btn" id="pdp-qty-minus" aria-label="Decrease quantity">&minus;</button>' +
-              '<input type="number" class="pdp-qty-input" id="pdp-qty-val" value="1" min="1" max="99" readonly>' +
-              '<button type="button" class="pdp-qty-btn" id="pdp-qty-plus" aria-label="Increase quantity">&plus;</button>' +
+            '<div class="pdp-qty-picker' + (isOutOfStock ? ' disabled' : '') + '">' +
+              '<button type="button" class="pdp-qty-btn" id="pdp-qty-minus" aria-label="Decrease quantity"' + (isOutOfStock ? ' disabled' : '') + '>&minus;</button>' +
+              '<input type="number" class="pdp-qty-input" id="pdp-qty-val" value="1" min="1" max="99" readonly' + (isOutOfStock ? ' disabled' : '') + '>' +
+              '<button type="button" class="pdp-qty-btn" id="pdp-qty-plus" aria-label="Increase quantity"' + (isOutOfStock ? ' disabled' : '') + '>&plus;</button>' +
             '</div>' +
 
-            '<button type="button" class="pdp-add-cart-btn" id="pdp-add-to-cart-btn">' +
-              '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>' +
-              '<span>Add to Cart &bull; ₹' + Number(priceNum).toLocaleString('en-IN', { maximumFractionDigits: 0 }) + '</span>' +
-            '</button>' +
+            (isOutOfStock
+              ? '<button type="button" class="pdp-add-cart-btn pdp-btn-out-of-stock" id="pdp-add-to-cart-btn" disabled>' +
+                  '<span>Out of Stock</span>' +
+                '</button>'
+              : '<button type="button" class="pdp-add-cart-btn" id="pdp-add-to-cart-btn">' +
+                  '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>' +
+                  '<span>Add to Cart &bull; ₹' + Number(priceNum).toLocaleString('en-IN', { maximumFractionDigits: 0 }) + '</span>' +
+                '</button>'
+            ) +
 
             '<button type="button" class="pdp-wishlist-btn-main ' + (isWishlisted ? 'active' : '') + '" id="pdp-wishlist-toggle-btn" aria-label="Add to Wishlist">' +
               '<svg width="18" height="18" viewBox="0 0 24 24" fill="' + (isWishlisted ? '#8C6A3D' : 'none') + '" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>' +
@@ -4299,6 +4343,10 @@ function renderProductDetailPage() {
   // 4. Add to Cart Action
   if (addCartBtn) {
     addCartBtn.addEventListener("click", () => {
+      if (isOutOfStock) {
+        showToast(product.name + " is currently out of stock.");
+        return;
+      }
       const qty = parseInt(qtyInput ? qtyInput.value : 1) || 1;
       for (let i = 0; i < qty; i++) {
         addToCart(product.id);
