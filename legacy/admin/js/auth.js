@@ -47,18 +47,28 @@ document.addEventListener('DOMContentLoaded', () => {
       loginBtn.textContent = 'Signing in...';
       loginBtn.disabled = true;
 
+      const withTimeout = (promise, ms = 10000) => {
+        return Promise.race([
+          promise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error("Request timed out. Please check your network or try again.")), ms))
+        ]);
+      };
+
       try {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
-          email: email,
-          password: password,
-        });
+        const { data, error } = await withTimeout(
+          supabaseClient.auth.signInWithPassword({
+            email: email.trim(),
+            password: password,
+          }),
+          12000
+        );
 
         if (error) throw error;
 
         // Redirect to dashboard
         window.location.href = 'index.html';
       } catch (error) {
-        showError(error.message);
+        showError(error.message || 'Failed to sign in. Please try again.');
         loginBtn.textContent = originalBtnText;
         loginBtn.disabled = false;
       }

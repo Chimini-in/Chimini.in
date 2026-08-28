@@ -25,34 +25,64 @@ export default function AdminLoginPage() {
     setError('');
     setMessage('');
 
+    // Timeout helper to avoid infinite hanging
+    const withTimeout = (promise, ms = 10000) => {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Request timed out. Please check your internet connection or try again.")), ms))
+      ]);
+    };
+
     try {
       if (mode === 'login') {
-        const { data, error: signInError } = await supabaseClient.auth.signInWithPassword({
-          email,
-          password,
-        });
+        const { data, error: signInError } = await withTimeout(
+          supabaseClient.auth.signInWithPassword({
+            email: email.trim(),
+            password,
+          }),
+          12000
+        );
 
         if (signInError) throw signInError;
-        if (data.session) {
-          router.push('/admin');
+        
+        if (data?.session || data?.user) {
+          setMessage('Login successful. Redirecting to dashboard...');
+          // Navigate directly to /admin/dashboard
+          window.location.href = '/admin/dashboard';
+          return;
+        } else {
+          throw new Error('No session returned. Please check your credentials or try again.');
         }
       } else if (mode === 'setup') {
-        // Hidden feature to easily create the first admin account
-        const { data, error: signUpError } = await supabaseClient.auth.signUp({
-          email,
-          password,
-        });
+        // Feature to create the admin account
+        const { data, error: signUpError } = await withTimeout(
+          supabaseClient.auth.signUp({
+            email: email.trim(),
+            password,
+          }),
+          12000
+        );
         
         if (signUpError) throw signUpError;
-        setMessage('Account setup successful. You can now login.');
-        setMode('login');
+        
+        if (data?.user?.identities && data.user.identities.length === 0) {
+          setError('This account already exists. Please enter your password and click Sign In.');
+          setMode('login');
+        } else {
+          setMessage('Account setup successful. You can now login.');
+          setMode('login');
+        }
       } else if (mode === 'forgot') {
-        const { error: resetError } = await supabaseClient.auth.resetPasswordForEmail(email);
+        const { error: resetError } = await withTimeout(
+          supabaseClient.auth.resetPasswordForEmail(email.trim()),
+          12000
+        );
         if (resetError) throw resetError;
         setMessage('Password reset instructions sent to your email.');
         setMode('login');
       }
     } catch (err) {
+      console.error('Admin Auth Error:', err);
       setError(err.message || 'An error occurred during authentication.');
     } finally {
       setLoading(false);
