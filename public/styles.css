@@ -2167,6 +2167,13 @@ section.full-width-banner-section {
     padding: 8px 16px !important;
   }
 
+  /* --- MOBILE LOGO: shift left (search is hidden, so logo drifts right without fix) --- */
+  .header-logo {
+    text-align: left !important;
+    flex: 0 1 auto !important;     /* don't grow to fill empty search space */
+    margin-left: 4px !important;   /* small nudge from left edge */
+  }
+
   .header-actions {
     gap: 6px !important;
   }
@@ -2177,7 +2184,8 @@ section.full-width-banner-section {
     padding: 6px;
   }
 
-  /* --- MOBILE HERO BANNER FIT & NO SIDE CROPPING --- */
+  /* --- MOBILE BANNER FIT: full width, no cropping, no fixed heights --- */
+  /* Hero banner */
   .hero-banner {
     width: 100% !important;
     margin-top: 0 !important;
@@ -2203,6 +2211,46 @@ section.full-width-banner-section {
     display: block !important;
     max-height: none !important;
     margin: 0 !important;
+  }
+
+  /* Products-ads, brand-story, and all other full-width banners */
+  .full-width-banner-section {
+    width: 100% !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+  }
+
+  .full-width-banner-section a,
+  .products-ads-banner a,
+  .brand-story-banner a {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .full-width-banner-section img,
+  .products-ads-banner img,
+  .brand-story-banner img,
+  .banner-slot-img {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: auto !important;
+    object-fit: contain !important;
+    display: block !important;
+    max-height: none !important;
+    margin: 0 !important;
+  }
+
+  /* Override fixed max-heights on specific banner slots */
+  #hero-banner .banner-slot-img,
+  #products-ads-banner-1 .banner-slot-img,
+  #products-ads-banner-2 .banner-slot-img,
+  #brand-story-banner .banner-slot-img {
+    max-height: none !important;
+    object-fit: contain !important;
+    height: auto !important;
   }
 
   /* --- ELIMINATE LARGE GAP BETWEEN BANNER & BEST SELLERS --- */
@@ -2264,14 +2312,14 @@ section.full-width-banner-section {
   /* Responsive Banner Heights for legibility on mobile */
   /* hero-banner mobile rule moved to refined mobile block */
   
+  /* products-ads and brand-story banners: use auto aspect ratio so full image shows on mobile */
   .products-ads-banner a,
-  .products-ads-banner img {
-    aspect-ratio: 16 / 8 !important;
-  }
-  
+  .products-ads-banner img,
   .brand-story-banner a,
   .brand-story-banner img {
-    aspect-ratio: 16 / 9 !important;
+    aspect-ratio: auto !important;
+    object-fit: contain !important;
+    height: auto !important;
   }
 
   /* Grid layout modifications */
