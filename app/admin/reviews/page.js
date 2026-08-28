@@ -15,10 +15,12 @@ export default function ReviewsPage() {
   useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
+    const fetchTimeout = setTimeout(() => setLoading(false), 3000);
     setLoading(true);
     const { data } = await supabaseClient
       .from('reviews').select('*').order('created_at', { ascending: false });
     if (data) setReviews(data);
+    clearTimeout(fetchTimeout);
     setLoading(false);
   };
 

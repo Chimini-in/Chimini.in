@@ -19,6 +19,7 @@ export default function TestimonialsPage() {
   }, []);
 
   const fetchData = async () => {
+    const fetchTimeout = setTimeout(() => setLoading(false), 3000);
     setLoading(true);
     const { data } = await supabaseClient
       .from('testimonials')
@@ -26,6 +27,7 @@ export default function TestimonialsPage() {
       .order('sort_order', { ascending: true });
       
     if (data) setTestimonials(data);
+    clearTimeout(fetchTimeout);
     setLoading(false);
   };
 

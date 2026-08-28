@@ -81,6 +81,7 @@ export default function ProductsPage() {
   }, []);
 
   const fetchData = async () => {
+    const fetchTimeout = setTimeout(() => setLoading(false), 3000);
     setLoading(true);
     try {
       const catRes = await supabaseClient.from('categories').select('*').order('sort_order');
@@ -99,6 +100,7 @@ export default function ProductsPage() {
     } catch (err) {
       console.error('Fetch error:', err);
     }
+    clearTimeout(fetchTimeout);
     setLoading(false);
   };
 

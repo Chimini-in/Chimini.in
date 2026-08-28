@@ -20,6 +20,7 @@ export default function CollectionsAdminPage() {
   useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
+    const fetchTimeout = setTimeout(() => setLoading(false), 3000);
     setLoading(true);
     try {
       const { data, error } = await supabaseClient
@@ -36,6 +37,7 @@ export default function CollectionsAdminPage() {
     } catch (err) {
       console.error('Collections fetch exception:', err);
     }
+    clearTimeout(fetchTimeout);
     setLoading(false);
   };
 

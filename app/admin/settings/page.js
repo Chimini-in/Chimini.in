@@ -5,7 +5,7 @@ import { supabaseClient } from '../../../lib/supabase';
 
 export default function SettingsPage() {
   const [announcements, setAnnouncements] = useState(['']);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -13,11 +13,10 @@ export default function SettingsPage() {
 
   const fetchData = async () => {
     setLoading(true);
-    const { data } = await supabaseClient
-      .from('settings')
-      .select('setting_value')
-      .eq('setting_key', 'announcements')
-      .single();
+    const fetchPromise = supabaseClient.from('settings').select('setting_value').eq('setting_key', 'announcements').limit(1);
+    const timeoutPromise = new Promise(r => setTimeout(() => r({ data: null }), 2000));
+    const res = await Promise.race([fetchPromise, timeoutPromise]);
+    const data = res?.data?.[0];
       
     if (data && data.setting_value && Array.isArray(data.setting_value)) {
       setAnnouncements(data.setting_value);
