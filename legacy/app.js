@@ -603,13 +603,13 @@ function renderTestimonials() {
       </div>
 
       <!-- Grid Container -->
-      <div class="tg-grid">
-        ${displayTests.map((t) => {
+      <div class="tg-grid" id="tg-grid-container">
+        ${displayTests.map((t, idx) => {
           const theme = t.theme || 'gold';
           const initial = t.author ? t.author.charAt(0) : '';
           
           return `
-            <div class="tg-card card-${theme}">
+            <div class="tg-card card-${theme}" data-tg-index="${idx}">
               <!-- Top Accent Bar -->
               <div class="tg-card-accent-bar"></div>
               
@@ -652,8 +652,71 @@ function renderTestimonials() {
           `;
         }).join('')}
       </div>
+
+      <!-- Mobile-only dot indicators -->
+      ${displayTests.length > 1 ? `
+      <div class="tg-mobile-dots" id="tg-dots">
+        ${displayTests.map((_, i) => `<button class="tg-dot${i === 0 ? ' active' : ''}" data-dot="${i}" aria-label="Testimonial ${i + 1}"></button>`).join('')}
+      </div>` : ''}
     </div>
   `;
+
+  // --- Mobile auto-slide logic ---
+  const isMobile = () => window.innerWidth <= 768;
+
+  const cards = section.querySelectorAll('.tg-card');
+  const dots = section.querySelectorAll('.tg-dot');
+  let currentIdx = 0;
+
+  const showCard = (idx) => {
+    cards.forEach((c, i) => {
+      c.classList.toggle('mobile-active', i === idx);
+    });
+    dots.forEach((d, i) => {
+      d.classList.toggle('active', i === idx);
+    });
+    currentIdx = idx;
+  };
+
+  // Set initial state on mobile
+  if (isMobile() && cards.length > 1) {
+    showCard(0);
+  }
+
+  // Bind dot clicks
+  dots.forEach((dot, i) => {
+    dot.addEventListener('click', () => {
+      showCard(i);
+      restartInterval();
+    });
+  });
+
+  // Auto-slide interval
+  let slideInterval = null;
+  const startInterval = () => {
+    if (!isMobile() || cards.length <= 1) return;
+    slideInterval = setInterval(() => {
+      showCard((currentIdx + 1) % cards.length);
+    }, 2000);
+  };
+  const restartInterval = () => {
+    clearInterval(slideInterval);
+    startInterval();
+  };
+
+  startInterval();
+
+  // Restart/stop on resize
+  window.addEventListener('resize', () => {
+    clearInterval(slideInterval);
+    if (isMobile() && cards.length > 1) {
+      showCard(currentIdx);
+      startInterval();
+    } else {
+      // Remove mobile-active on desktop so CSS grid takes over
+      cards.forEach(c => c.classList.remove('mobile-active'));
+    }
+  }, { once: true });
 }
 
 function buildStars(rating) {

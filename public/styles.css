@@ -7656,3 +7656,59 @@ img, svg, video, canvas, audio, iframe, embed, object {
     max-width: 100vw !important;
   }
 }
+
+
+@media (max-width: 768px) {
+  /* Override the 3-column grid - hide all cards by default on mobile */
+  .tg-grid {
+    display: block !important;
+    position: relative !important;
+    width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .tg-card {
+    display: none !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    animation: none !important;
+    transition: opacity 0.5s ease !important;
+  }
+
+  .tg-card.mobile-active {
+    display: block !important;
+    opacity: 1 !important;
+  }
+
+  /* Dot indicators for mobile testimonial slider */
+  .tg-mobile-dots {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    margin-top: 20px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .tg-dot {
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 50% !important;
+    background: rgba(197, 168, 128, 0.3) !important;
+    cursor: pointer !important;
+    transition: background 0.3s ease, transform 0.3s ease !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  .tg-dot.active {
+    background: var(--accent, #c5a880) !important;
+    transform: scale(1.25) !important;
+  }
+}
+
+@media (min-width: 769px) {
+  /* On desktop, hide the dot indicators */
+  .tg-mobile-dots {
+    display: none !important;
+  }
+}
