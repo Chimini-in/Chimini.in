@@ -12,11 +12,31 @@ export default function AdminLayout({ children }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    // If we're on the login page, don't enforce auth here (login page handles its own logic)
+    // If on login page, immediately bypass
     if (pathname === '/admin/login') {
       setLoading(false);
       return;
     }
+
+    // Fast initial check: Check if Supabase session is already stored locally
+    let initialSessionFound = false;
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('sb-') && k.endsWith('-auth-token')) {
+          const raw = localStorage.getItem(k);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed?.user) {
+              setUser(parsed.user);
+              setLoading(false);
+              initialSessionFound = true;
+              break;
+            }
+          }
+        }
+      }
+    } catch (e) {}
 
     const checkAuth = async () => {
       if (!supabaseClient) {
@@ -24,33 +44,53 @@ export default function AdminLayout({ children }) {
         return;
       }
 
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      
-      if (!session) {
-        router.push('/admin/login');
-      } else {
-        setUser(session.user);
+      try {
+        // Fast timeout wrapper (1.8s) so admin pages never get stuck on "Loading..."
+        const sessionPromise = supabaseClient.auth.getSession();
+        const timeoutPromise = new Promise((resolve) => 
+          setTimeout(() => resolve({ data: { session: null }, timedOut: true }), 1800)
+        );
+
+        const result = await Promise.race([sessionPromise, timeoutPromise]);
+        const session = result?.data?.session;
+
+        if (session && session.user) {
+          setUser(session.user);
+          setLoading(false);
+        } else if (result?.timedOut && initialSessionFound) {
+          // Keep current local session if network was just slow
+          setLoading(false);
+        } else if (!initialSessionFound && !session) {
+          router.push('/admin/login');
+          setLoading(false);
+        } else {
+          setLoading(false);
+        }
+      } catch (err) {
+        console.warn("Admin auth check:", err);
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     checkAuth();
 
     // Listen for auth changes
     const { data: authListener } = supabaseClient?.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         if (event === 'SIGNED_OUT') {
+          setUser(null);
           router.push('/admin/login');
-        } else if (session) {
+        } else if (session?.user) {
           setUser(session.user);
+          setLoading(false);
         }
       }
     ) || { data: { subscription: { unsubscribe: () => {} } } };
 
     return () => {
-      authListener?.subscription.unsubscribe();
+      authListener?.subscription?.unsubscribe();
     };
-  }, [pathname, router]);
+  }, []); // Run once on mount, NOT on every pathname change!
 
   const handleSignOut = async () => {
     if (supabaseClient) {
@@ -59,8 +99,19 @@ export default function AdminLayout({ children }) {
     }
   };
 
+  // Render children immediately if login page or if already loaded
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
+
   if (loading) {
-    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: 'var(--color-bg)' }}>Loading CHIMINI Admin...</div>;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#fcfbf9', gap: '16px' }}>
+        <div style={{ width: '36px', height: '36px', border: '3px solid rgba(197, 168, 128, 0.2)', borderTopColor: '#c5a880', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></div>
+        <style dangerouslySetInnerHTML={{ __html: '@keyframes spin { to { transform: rotate(360deg); } }' }} />
+        <span style={{ fontFamily: 'sans-serif', fontSize: '0.9rem', color: '#64748b', letterSpacing: '0.5px' }}>Loading CHIMINI Admin...</span>
+      </div>
+    );
   }
 
   // Render just the children if we are on the login page
