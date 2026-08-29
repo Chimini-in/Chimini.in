@@ -3894,6 +3894,7 @@ function renderProductDetailPage() {
 
   // Wishlist state
   const isWishlisted = storeState.wishlist.includes(product.id);
+  const isOutOfStock = product.availability === false || product.is_out_of_stock === true || product.in_stock === false;
 
   // Descriptions & Accordion Content with luxury fallback
   const descriptionText = product.description || ("Immerse your sanctuary in the transcendent warmth of " + product.name + ". Handcrafted with 100% natural botanical soy wax and infused with rare essential oils, this slow-burning candle fills your living spaces with an aura of understated luxury and serene calm.");
