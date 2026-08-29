@@ -3651,7 +3651,7 @@ async function fetchSupabaseData() {
     const [settingsRes, bannersRes, productsRes, categoriesRes, testimonialsRes, pagesRes, collectionsRes] = await Promise.all([
       fetch(`${SUPABASE_URL}/rest/v1/settings?select=*`, { headers, cache: 'no-store' }),
       fetch(`${SUPABASE_URL}/rest/v1/banners?select=*&order=sort_order.asc`, { headers, cache: 'no-store' }),
-      fetch(`${SUPABASE_URL}/rest/v1/products?select=*,categories(title)&is_published=eq.true&order=sort_order.asc`, { headers, cache: 'no-store' }),
+      fetch(`${SUPABASE_URL}/rest/v1/products?select=*&is_published=eq.true&order=sort_order.asc`, { headers, cache: 'no-store' }),
       fetch(`${SUPABASE_URL}/rest/v1/categories?select=*&order=sort_order.asc`, { headers, cache: 'no-store' }),
       fetch(`${SUPABASE_URL}/rest/v1/testimonials?select=*&is_published=eq.true&order=sort_order.asc`, { headers, cache: 'no-store' }),
       fetch(`${SUPABASE_URL}/rest/v1/page_content?select=*`, { headers, cache: 'no-store' }),
@@ -3757,7 +3757,9 @@ async function fetchSupabaseData() {
       }
     }
 
-        // Map Products
+        // Map Products (preserve cached products if Supabase returns empty to avoid overwriting with mock defaults)
+    const cachedProducts = storeState.adminSettings && storeState.adminSettings.products && storeState.adminSettings.products.length > 0
+      ? storeState.adminSettings.products : null;
     if (products && Array.isArray(products) && products.length > 0) {
       newSettings.products = products.map(p => ({
         id: p.id,
@@ -3770,25 +3772,27 @@ async function fetchSupabaseData() {
         images: (Array.isArray(p.images) && p.images.length > 0) 
           ? p.images 
           : (p.image_url ? [p.image_url, p.secondary_image_url || 'assets/product_sandalwood.png', 'assets/product_rose.png', 'assets/product_fig.png'].filter(Boolean) : ['assets/product_jasmine.png']),
-        category: p.categories?.title?.toLowerCase() || p.category || 'candles',
-        categoryTitle: p.categories?.title || 'Artisanal Candles',
-        fragrance_tag: p.fragrance_tag || '',
-        collection_tag: p.collection_tag || '',
-        fragrance: p.fragrance || 'Signature Botanical Blend',
-        description: p.description || '',
-        careInfo: p.care_info || '',
-        shippingInfo: p.shipping_info || '',
-        returnsInfo: p.returns_info || '',
-        rating: p.rating || 4.9,
-        reviewCount: p.review_count || 128,
-        is_best_seller: p.is_best_seller || false,
-        is_gift: p.is_gift || false,
-        availability: p.availability !== false,
-        in_stock: p.availability !== false,
-        is_out_of_stock: p.availability === false
-      }));
+                  category: catTitle.toLowerCase() || 'candles',
+          categoryTitle: catTitle || 'Artisanal Candles',
+          fragrance_tag: p.fragrance_tag || '',
+          collection_tag: p.collection_tag || '',
+          fragrance: p.fragrance || 'Signature Botanical Blend',
+          description: p.description || '',
+          careInfo: p.care_info || '',
+          shippingInfo: p.shipping_info || '',
+          returnsInfo: p.returns_info || '',
+          rating: p.rating || 4.9,
+          reviewCount: p.review_count || 128,
+          is_best_seller: p.is_best_seller || false,
+          is_gift: p.is_gift || false,
+          availability: p.availability !== false,
+          in_stock: p.availability !== false,
+          is_out_of_stock: p.availability === false
+        };
+      });
+    } else if (cachedProducts) {
+      newSettings.products = cachedProducts; // Keep cached real products if fetch returned 0
     }
-
     // Overwrite global store and persist in localStorage to prevent image flash on future page loads
     storeState.adminSettings = newSettings;
     try {
@@ -3816,9 +3820,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Fetch latest live data from Supabase in background without blocking initial DOM paint
   fetchSupabaseData().then(() => {
-    initStore();
+  initStore();
   initAuth();
-});
+}).catch(() => { initStore(); });
 });
 
 
@@ -3830,7 +3834,16 @@ function renderProductDetailPage() {
   if (!container) return;
 
   const products = (storeState.adminSettings && storeState.adminSettings.products) || [];
-  if (products.length === 0) return;
+  if (products.length === 0) {
+    // Show retry message instead of hanging on loading skeleton
+    setTimeout(() => {
+      const c2 = document.getElementById("product-page-container");
+      if (c2 && c2.querySelector('.pdp-loading-skeleton')) {
+        c2.innerHTML = '<div class="section-container" style="padding: 80px 20px; text-align: center;"><p style="font-family: var(--font-serif); font-size: 1.1rem; color: var(--text-secondary);">Unable to load product. <a href="/shop" style="color: var(--color-gold); text-decoration: underline;">Browse all products</a></p></div>';
+      }
+    }, 5000);
+    return;
+  }
 
   // Get product ID from URL query parameters
   const urlParams = new URLSearchParams(window.location.search);
