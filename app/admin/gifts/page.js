@@ -120,12 +120,13 @@ export default function AdminGiftsPage() {
       alert('Image upload failed: ' + err.message);
     } finally {
       setUploadingIdx(null);
+      // Tile items handlers
     }
   };
 
-  // Tile items handlers
   const addTile = (key, defaultLabel) => {
     let newItem;
+    const slug = defaultLabel.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
     if (key === 'priceTiles') {
       const existingCount = (config.priceTiles || []).length;
       const defaultThreshold = (existingCount + 1) * 100;
@@ -136,9 +137,11 @@ export default function AdminGiftsPage() {
         link: `/shop?maxPrice=${defaultThreshold}`
       };
     } else if (key === 'giftCards') {
-      newItem = { title: defaultLabel, image: 'assets/campaign_banner.png', link: '/shop?category=gifts' };
+      newItem = { title: defaultLabel, image: 'assets/campaign_banner.png', link: `/shop?category=${slug || 'gift-cards'}` };
+    } else if (key === 'recipientTiles') {
+      newItem = { label: defaultLabel, image: 'assets/product_rose.png', link: `/shop?category=${slug || 'recipient'}` };
     } else {
-      newItem = { label: defaultLabel, image: 'assets/product_jasmine.png', link: '/shop?category=gifts' };
+      newItem = { label: defaultLabel, image: 'assets/campaign_banner.png', link: `/shop?category=${slug || 'occasion'}` };
     }
     setConfig({ ...config, [key]: [...(config[key] || []), newItem] });
   };
@@ -157,7 +160,19 @@ export default function AdminGiftsPage() {
 
   const updateTile = (key, index, field, val) => {
     const arr = [...(config[key] || [])];
-    arr[index] = { ...arr[index], [field]: val };
+    const prev = arr[index] || {};
+    const updated = { ...prev, [field]: val };
+
+    // Auto-update link if title/label changed and link was default or empty
+    if ((field === 'label' || field === 'title') && val && key !== 'priceTiles') {
+      const slug = val.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
+      const prevSlug = (prev.label || prev.title || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
+      if (!prev.link || prev.link === '/shop?category=gifts' || prev.link === `/shop?category=${prevSlug}`) {
+        updated.link = `/shop?category=${slug}`;
+      }
+    }
+
+    arr[index] = updated;
     setConfig({ ...config, [key]: arr });
   };
 
@@ -185,7 +200,7 @@ export default function AdminGiftsPage() {
         <div>
           <h3 style={{ margin: '0 0 4px 0', color: '#1a1a1a', fontSize: '1.2rem' }}>Gifts Page & Price Circles Manager</h3>
           <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
-            Manage the "Shop by Price" threshold filters and curated gifting sections.
+            Manage the "Shop by Price" threshold filters, Recipients, Occasions, and Gift Cards.
           </p>
         </div>
         <button onClick={handleSave} disabled={saving} style={{ padding: '10px 22px', backgroundColor: 'var(--color-text-dark)', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}>
@@ -206,27 +221,37 @@ export default function AdminGiftsPage() {
             <div>
               <h4 style={{ margin: '0 0 4px 0', textTransform: 'capitalize' }}>
                 {activeTab === 'priceTiles' && 'Shop by Price Circles (Auto-Filter by Product Price)'}
-                {activeTab === 'recipientTiles' && 'Shop by Recipient Tiles (3 Per Row, Box)'}
-                {activeTab === 'occasionTiles' && 'Shop by Occasion Tiles (4 Per Row, Box)'}
-                {activeTab === 'giftCards' && 'Gift Cards (4 Per Row, 500x625px)'}
+                {activeTab === 'recipientTiles' && 'Shop by Recipient Tiles (Auto-Filter by Category Tag)'}
+                {activeTab === 'occasionTiles' && 'Shop by Occasion Tiles (Auto-Filter by Category Tag)'}
+                {activeTab === 'giftCards' && 'Gift Cards (Auto-Filter by Category Tag)'}
               </h4>
               {activeTab === 'priceTiles' && (
                 <p style={{ margin: 0, fontSize: '0.85rem', color: '#0369a1', backgroundColor: '#f0f9ff', padding: '8px 12px', borderRadius: '6px', border: '1px solid #bae6fd' }}>
                   ⚡ <strong>Auto-detection logic:</strong> Admin only sets the price threshold number (e.g. 200, 300, 400, 5000). Clicking a circle automatically filters the Shop page to show products with price ≤ threshold based on each product's price field. No manual product mapping needed.
                 </p>
               )}
+              {activeTab !== 'priceTiles' && (
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#0369a1', backgroundColor: '#f0f9ff', padding: '8px 12px', borderRadius: '6px', border: '1px solid #bae6fd' }}>
+                  🏷️ <strong>Collections Pattern:</strong> Clicking a tile automatically filters the Shop page by category tag (e.g. <code>/shop?category=mother</code>, <code>/shop?category=birthday</code>). Tag products in <a href="/admin/products" style={{ fontWeight: 'bold', color: '#0284c7', textDecoration: 'underline' }}>Products &amp; Shop</a> to show them here.
+                </p>
+              )}
             </div>
             <button onClick={() => addTile(activeTab, activeTab === 'priceTiles' ? '500' : 'New Tile')} style={{ padding: '8px 16px', backgroundColor: '#f1f5f9', color: '#334155', border: '1px solid #cbd5e1', borderRadius: '6px', cursor: 'pointer', fontWeight: '500', whiteSpace: 'nowrap', marginLeft: '12px' }}>
-              + Add {activeTab === 'priceTiles' ? 'Price Circle' : 'Item'}
+              + Add {activeTab === 'priceTiles' ? 'Price Circle' : 'Tile'}
             </button>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))', gap: '20px', marginTop: '20px' }}>
-            {(config[activeTab] || []).map((item, idx) => (
+            {(config[activeTab] || []).map((item, idx) => {
+              const name = item.title || item.label || '';
+              const slug = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
+              const autoLink = `/shop?category=${slug || 'gifts'}`;
+
+              return (
               <div key={idx} style={{ padding: '18px', border: '1px solid #e2e8f0', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative', backgroundColor: '#fafafa' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '0.8rem', fontWeight: '600', color: '#64748b' }}>
-                    {activeTab === 'priceTiles' ? `Price Circle #${idx + 1}` : `Item #${idx + 1}`}
+                    {activeTab === 'priceTiles' ? `Price Circle #${idx + 1}` : `Tile #${idx + 1}`}
                   </span>
                   <button onClick={() => deleteTile(activeTab, idx)} title="Delete" style={{ backgroundColor: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontWeight: 'bold', fontSize: '1.1rem' }}>&times;</button>
                 </div>
@@ -234,7 +259,7 @@ export default function AdminGiftsPage() {
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                   <img src={item.image || 'assets/product_jasmine.png'} alt="Preview" style={{ width: activeTab === 'priceTiles' ? '65px' : '70px', height: activeTab === 'priceTiles' ? '65px' : '70px', borderRadius: activeTab === 'priceTiles' ? '50%' : '6px', objectFit: 'cover', border: '2px solid #e2e8f0', backgroundColor: '#fff' }} />
                   <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginBottom: '4px', fontWeight: '600' }}>Circle Image</label>
+                    <label style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginBottom: '4px', fontWeight: '600' }}>{activeTab === 'priceTiles' ? 'Circle Image' : 'Tile Image'}</label>
                     <input type="file" accept="image/*" onChange={e => e.target.files?.[0] && handleFileUpload(e.target.files[0], activeTab, idx)} style={{ fontSize: '0.8rem' }} />
                     {uploadingIdx === `${activeTab}-${idx}` && <span style={{ fontSize: '0.75rem', color: '#0284c7', display: 'block', marginTop: '2px' }}>Uploading...</span>}
                   </div>
@@ -283,16 +308,27 @@ export default function AdminGiftsPage() {
                     <div>
                       <label style={{ fontSize: '0.75rem', color: '#334155', display: 'block', marginBottom: '4px', fontWeight: '600' }}>Title / Label</label>
                       <input type="text" value={item.title || item.label || ''} onChange={e => updateTile(activeTab, idx, activeTab === 'giftCards' ? 'title' : 'label', e.target.value)} style={inputStyle} />
+                      {slug && (
+                        <span style={{ fontSize: '0.72rem', color: '#0369a1', marginTop: '4px', display: 'block' }}>
+                          Product Tag: <strong>{slug}</strong> (links to: <code>{item.link || autoLink}</code>)
+                        </span>
+                      )}
                     </div>
 
                     <div>
                       <label style={{ fontSize: '0.75rem', color: '#334155', display: 'block', marginBottom: '4px', fontWeight: '600' }}>Link URL</label>
-                      <input type="text" value={item.link || ''} onChange={e => updateTile(activeTab, idx, 'link', e.target.value)} style={inputStyle} placeholder="/shop?category=gifts" />
+                      <input 
+                        type="text" 
+                        value={item.link || autoLink} 
+                        onChange={e => updateTile(activeTab, idx, 'link', e.target.value)} 
+                        style={inputStyle} 
+                        placeholder={autoLink} 
+                      />
                     </div>
                   </>
                 )}
               </div>
-            ))}
+            );})}
           </div>
         </div>
       </div>

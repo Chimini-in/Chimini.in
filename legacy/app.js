@@ -2996,13 +2996,22 @@ function renderGiftsPage() {
           <p style="color: var(--text-secondary);">Curated tokens for every special person in your life</p>
         </div>
         <div class="recipient-tiles-grid">
-          ${recipientTiles.map(r => `
-            <a href="${r.link || '/shop?category=gifts'}" class="recipient-box-tile">
-              <img src="${r.image || 'assets/product_rose.png'}" alt="${r.label}" class="recipient-box-img" onerror="this.src='assets/product_rose.png'">
+          ${recipientTiles.map(r => {
+            const name = r.label || r.title || "Recipient";
+            const slug = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
+            const isHtmlExt = window.location.pathname.endsWith('.html');
+            const defaultLink = (isHtmlExt ? 'shop.html' : '/shop') + '?category=' + encodeURIComponent(slug);
+            let targetLink = defaultLink;
+            if (r.link && !r.link.startsWith('#') && r.link !== '/shop' && r.link !== '/shop?category=gifts' && r.link !== 'shop.html' && r.link !== 'shop.html?category=gifts') {
+              targetLink = r.link;
+            }
+            return `
+            <a href="${targetLink}" class="recipient-box-tile">
+              <img src="${r.image || 'assets/product_rose.png'}" alt="${name}" class="recipient-box-img" onerror="this.src='assets/product_rose.png'">
               <div class="recipient-box-overlay"></div>
-              <span class="recipient-box-label">${r.label}</span>
+              <span class="recipient-box-label">${name}</span>
             </a>
-          `).join('')}
+          `;}).join('')}
         </div>
       </section>
 
@@ -3013,13 +3022,22 @@ function renderGiftsPage() {
           <p style="color: var(--text-secondary);">Fragrant tokens designed for milestones and celebrations</p>
         </div>
         <div class="occasion-tiles-grid">
-          ${occasionTiles.map(o => `
-            <a href="${o.link || '/shop?category=gifts'}" class="occasion-box-tile">
-              <img src="${o.image || 'assets/campaign_banner.png'}" alt="${o.label}" class="occasion-box-img" onerror="this.src='assets/campaign_banner.png'">
+          ${occasionTiles.map(o => {
+            const name = o.label || o.title || "Occasion";
+            const slug = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
+            const isHtmlExt = window.location.pathname.endsWith('.html');
+            const defaultLink = (isHtmlExt ? 'shop.html' : '/shop') + '?category=' + encodeURIComponent(slug);
+            let targetLink = defaultLink;
+            if (o.link && !o.link.startsWith('#') && o.link !== '/shop' && o.link !== '/shop?category=gifts' && o.link !== 'shop.html' && o.link !== 'shop.html?category=gifts') {
+              targetLink = o.link;
+            }
+            return `
+            <a href="${targetLink}" class="occasion-box-tile">
+              <img src="${o.image || 'assets/campaign_banner.png'}" alt="${name}" class="occasion-box-img" onerror="this.src='assets/campaign_banner.png'">
               <div class="occasion-box-overlay"></div>
-              <span class="occasion-box-label">${o.label}</span>
+              <span class="occasion-box-label">${name}</span>
             </a>
-          `).join('')}
+          `;}).join('')}
         </div>
       </section>
 
@@ -3030,14 +3048,23 @@ function renderGiftsPage() {
           <p style="color: var(--text-secondary);">Give the gift of choice with our bespoke CHIMINI luxury digital &amp; physical gift passes</p>
         </div>
         <div class="gift-cards-grid">
-          ${giftCards.map(gc => `
-            <a href="${gc.link || '/shop?category=gifts'}" class="gift-card-item">
-              <img src="${gc.image || 'assets/campaign_banner.png'}" alt="${gc.title}" class="gift-card-bg-img" onerror="this.src='assets/campaign_banner.png'">
+          ${giftCards.map(gc => {
+            const name = gc.title || gc.label || "Gift Card";
+            const slug = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
+            const isHtmlExt = window.location.pathname.endsWith('.html');
+            const defaultLink = (isHtmlExt ? 'shop.html' : '/shop') + '?category=' + encodeURIComponent(slug);
+            let targetLink = defaultLink;
+            if (gc.link && !gc.link.startsWith('#') && gc.link !== '/shop' && gc.link !== '/shop?category=gifts' && gc.link !== 'shop.html' && gc.link !== 'shop.html?category=gifts') {
+              targetLink = gc.link;
+            }
+            return `
+            <a href="${targetLink}" class="gift-card-item">
+              <img src="${gc.image || 'assets/campaign_banner.png'}" alt="${name}" class="gift-card-bg-img" onerror="this.src='assets/campaign_banner.png'">
               <div class="gift-card-overlay"></div>
-              <h3 class="gift-card-title">${gc.title}</h3>
+              <h3 class="gift-card-title">${name}</h3>
               <span class="gift-card-badge">EXPLORE CARD &rarr;</span>
             </a>
-          `).join('')}
+          `;}).join('')}
         </div>
       </section>
 

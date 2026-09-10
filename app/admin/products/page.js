@@ -36,6 +36,7 @@ export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [collections, setCollections] = useState([]);
+  const [giftsConfig, setGiftsConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   
   const [showModal, setShowModal] = useState(false);
@@ -89,6 +90,16 @@ export default function ProductsPage() {
 
       const collRes = await supabaseClient.from('collections').select('*').order('sort_order');
       if (collRes.data) setCollections(collRes.data);
+
+      try {
+        const giftsRes = await supabaseClient.from('settings').select('setting_value').eq('setting_key', 'gifts_page_config').limit(1);
+        if (giftsRes.data && giftsRes.data.length > 0 && giftsRes.data[0]?.setting_value) {
+          const raw = giftsRes.data[0].setting_value;
+          setGiftsConfig(typeof raw === 'string' ? JSON.parse(raw) : raw);
+        }
+      } catch (gErr) {
+        console.log('No custom gifts config found');
+      }
 
       const prodRes = await supabaseClient
         .from('products')
@@ -535,11 +546,11 @@ export default function ProductsPage() {
                       </div>
                     </div>
 
-                    {/* Multi-Select Collections */}
+                    {/* Multi-Select Collections & Gifting Categories */}
                     <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                         <label style={{ ...labelStyle, margin: 0 }}>
-                          Assigned Collections <span style={{fontWeight:'normal', color:'#94a3b8'}}>(click to select multiple — e.g. Gifts &amp; Home Decor)</span>
+                          Collections &amp; Gifting Categories <span style={{fontWeight:'normal', color:'#94a3b8'}}>(click to tag product — e.g. Mother, Birthday, Signature)</span>
                         </label>
                         {formData.collection_tags?.length > 0 && (
                           <span style={{ fontSize: '0.78rem', color: '#0369a1', fontWeight: '600' }}>
@@ -547,44 +558,184 @@ export default function ProductsPage() {
                           </span>
                         )}
                       </div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', backgroundColor: '#f8fafc', minHeight: '48px', alignItems: 'center' }}>
-                        {collections.length === 0 ? (
-                          <span style={{ fontSize: '0.82rem', color: '#94a3b8' }}>No collections found. Create collections in /admin/collections first.</span>
-                        ) : (
-                          collections.map(c => {
-                            const slug = (c.title || c.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-                            const isSelected = (formData.collection_tags || []).includes(slug);
-                            return (
-                              <button
-                                type="button"
-                                key={c.id}
-                                onClick={() => {
-                                  const current = formData.collection_tags || [];
-                                  const updated = isSelected ? current.filter(s => s !== slug) : [...current, slug];
-                                  setFormData({ ...formData, collection_tags: updated });
-                                }}
-                                style={{
-                                  padding: '6px 14px',
-                                  borderRadius: '20px',
-                                  border: isSelected ? '1px solid #0f172a' : '1px solid #cbd5e1',
-                                  backgroundColor: isSelected ? '#0f172a' : '#ffffff',
-                                  color: isSelected ? '#ffffff' : '#475569',
-                                  fontSize: '0.82rem',
-                                  fontWeight: isSelected ? '600' : '400',
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '6px',
-                                  transition: 'all 0.15s ease',
-                                  boxShadow: isSelected ? '0 2px 6px rgba(15,23,42,0.15)' : 'none'
-                                }}
-                              >
-                                <span style={{ fontWeight: 'bold' }}>{isSelected ? '✓' : '+'}</span>
-                                <span>{c.title || c.name}</span>
-                              </button>
-                            );
-                          })
-                        )}
+                      
+                      <div style={{ padding: '14px', border: '1px solid #cbd5e1', borderRadius: '8px', backgroundColor: '#f8fafc', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {/* 1. Collections */}
+                        <div>
+                          <span style={{ fontSize: '0.72rem', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>
+                            Collections
+                          </span>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                            {collections.length === 0 ? (
+                              <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>No collections found.</span>
+                            ) : (
+                              collections.map(c => {
+                                const slug = (c.title || c.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                                const isSelected = (formData.collection_tags || []).includes(slug);
+                                return (
+                                  <button
+                                    type="button"
+                                    key={c.id}
+                                    onClick={() => {
+                                      const current = formData.collection_tags || [];
+                                      const updated = isSelected ? current.filter(s => s !== slug) : [...current, slug];
+                                      setFormData({ ...formData, collection_tags: updated });
+                                    }}
+                                    style={{
+                                      padding: '5px 12px',
+                                      borderRadius: '16px',
+                                      border: isSelected ? '1px solid #0f172a' : '1px solid #cbd5e1',
+                                      backgroundColor: isSelected ? '#0f172a' : '#ffffff',
+                                      color: isSelected ? '#ffffff' : '#475569',
+                                      fontSize: '0.8rem',
+                                      fontWeight: isSelected ? '600' : '400',
+                                      cursor: 'pointer',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '5px',
+                                      transition: 'all 0.15s ease'
+                                    }}
+                                  >
+                                    <span style={{ fontWeight: 'bold' }}>{isSelected ? '✓' : '+'}</span>
+                                    <span>{c.title || c.name}</span>
+                                  </button>
+                                );
+                              })
+                            )}
+                          </div>
+                        </div>
+
+                        {/* 2. Shop by Recipient */}
+                        <div>
+                          <span style={{ fontSize: '0.72rem', fontWeight: '700', color: '#4338ca', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>
+                            Gifting — Shop by Recipient
+                          </span>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                            {(giftsConfig?.recipientTiles && giftsConfig.recipientTiles.length > 0 ? giftsConfig.recipientTiles : [
+                              { label: 'Girls' }, { label: 'Boyfriend' }, { label: 'Sister' }, { label: 'Mother' }, { label: 'Father' }, { label: 'Friend' }
+                            ]).map((r, i) => {
+                              const name = r.label || r.title || 'Recipient';
+                              const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                              const isSelected = (formData.collection_tags || []).includes(slug);
+                              return (
+                                <button
+                                  type="button"
+                                  key={slug + i}
+                                  onClick={() => {
+                                    const current = formData.collection_tags || [];
+                                    const updated = isSelected ? current.filter(s => s !== slug) : [...current, slug];
+                                    setFormData({ ...formData, collection_tags: updated });
+                                  }}
+                                  style={{
+                                    padding: '5px 12px',
+                                    borderRadius: '16px',
+                                    border: isSelected ? '1px solid #4338ca' : '1px solid #c7d2fe',
+                                    backgroundColor: isSelected ? '#4338ca' : '#ffffff',
+                                    color: isSelected ? '#ffffff' : '#3730a3',
+                                    fontSize: '0.8rem',
+                                    fontWeight: isSelected ? '600' : '400',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    transition: 'all 0.15s ease'
+                                  }}
+                                >
+                                  <span style={{ fontWeight: 'bold' }}>{isSelected ? '✓' : '+'}</span>
+                                  <span>{name}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* 3. Shop by Occasion */}
+                        <div>
+                          <span style={{ fontSize: '0.72rem', fontWeight: '700', color: '#047857', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>
+                            Gifting — Shop by Occasion
+                          </span>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                            {(giftsConfig?.occasionTiles && giftsConfig.occasionTiles.length > 0 ? giftsConfig.occasionTiles : [
+                              { label: 'Birthday' }, { label: 'Housewarming' }, { label: 'Anniversary' }, { label: 'Festive' }
+                            ]).map((o, i) => {
+                              const name = o.label || o.title || 'Occasion';
+                              const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                              const isSelected = (formData.collection_tags || []).includes(slug);
+                              return (
+                                <button
+                                  type="button"
+                                  key={slug + i}
+                                  onClick={() => {
+                                    const current = formData.collection_tags || [];
+                                    const updated = isSelected ? current.filter(s => s !== slug) : [...current, slug];
+                                    setFormData({ ...formData, collection_tags: updated });
+                                  }}
+                                  style={{
+                                    padding: '5px 12px',
+                                    borderRadius: '16px',
+                                    border: isSelected ? '1px solid #047857' : '1px solid #a7f3d0',
+                                    backgroundColor: isSelected ? '#047857' : '#ffffff',
+                                    color: isSelected ? '#ffffff' : '#065f46',
+                                    fontSize: '0.8rem',
+                                    fontWeight: isSelected ? '600' : '400',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    transition: 'all 0.15s ease'
+                                  }}
+                                >
+                                  <span style={{ fontWeight: 'bold' }}>{isSelected ? '✓' : '+'}</span>
+                                  <span>{name}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* 4. Gift Cards */}
+                        <div>
+                          <span style={{ fontSize: '0.72rem', fontWeight: '700', color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>
+                            Gifting — Gift Cards &amp; Pass
+                          </span>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                            {(giftsConfig?.giftCards && giftsConfig.giftCards.length > 0 ? giftsConfig.giftCards : [
+                              { title: 'Gift Cards' }, { title: 'Celebration Gift Card' }, { title: 'Luxury Scent E-Card' }
+                            ]).map((gc, i) => {
+                              const name = gc.title || gc.label || 'Gift Cards';
+                              const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                              const isSelected = (formData.collection_tags || []).includes(slug);
+                              return (
+                                <button
+                                  type="button"
+                                  key={slug + i}
+                                  onClick={() => {
+                                    const current = formData.collection_tags || [];
+                                    const updated = isSelected ? current.filter(s => s !== slug) : [...current, slug];
+                                    setFormData({ ...formData, collection_tags: updated });
+                                  }}
+                                  style={{
+                                    padding: '5px 12px',
+                                    borderRadius: '16px',
+                                    border: isSelected ? '1px solid #b45309' : '1px solid #fde68a',
+                                    backgroundColor: isSelected ? '#b45309' : '#ffffff',
+                                    color: isSelected ? '#ffffff' : '#92400e',
+                                    fontSize: '0.8rem',
+                                    fontWeight: isSelected ? '600' : '400',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    transition: 'all 0.15s ease'
+                                  }}
+                                >
+                                  <span style={{ fontWeight: 'bold' }}>{isSelected ? '✓' : '+'}</span>
+                                  <span>{name}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
                       </div>
                     </div>
 
