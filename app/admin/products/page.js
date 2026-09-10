@@ -364,159 +364,214 @@ export default function ProductsPage() {
 
       <div style={{ backgroundColor: '#fff', borderRadius: '10px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
         {loading ? <p style={{ padding: '30px', textAlign: 'center', color: '#64748b' }}>Loading products...</p> : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '2px solid #e2e8f0', textAlign: 'left', backgroundColor: '#f8fafc' }}>
-                <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b', width: '60px' }}>Image</th>
-                <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b' }}>Title &amp; Fragrance</th>
-                <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b' }}>Collection</th>
-                <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b' }}>Fragrance Tag</th>
-                <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b' }}>Photos</th>
-                <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b' }}>Price</th>
-                <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b', textAlign: 'center' }}>Badges</th>
-                <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b', textAlign: 'center' }}>Status</th>
-                <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b', textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.length === 0 ? (
-                <tr><td colSpan="9" style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>No products found. Create your first product above!</td></tr>
-              ) : products.map(prod => {
-                const totalPhotos = Array.isArray(prod.images) ? prod.images.filter(Boolean).length : (prod.image_url ? (prod.secondary_image_url ? 2 : 1) : 0);
-                return (
-                  <tr key={prod.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '14px 16px' }}>
-                      <div style={{ width: '48px', height: '48px', backgroundColor: '#f1f5f9', borderRadius: '6px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-                        <img src={prod.image_url || 'assets/product_jasmine.png'} alt={prod.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.target.src='assets/product_jasmine.png'; }} />
-                      </div>
-                    </td>
-                    <td style={{ padding: '14px 16px' }}>
-                      <div style={{ fontSize: '0.92rem', color: '#1a1a1a', fontWeight: '600' }}>{prod.title}</div>
-                      {prod.fragrance && <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>{prod.fragrance}</div>}
-                    </td>
-                    <td style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#475569' }}>
-                      {(() => {
-                        const tags = prod.collection_tag ? prod.collection_tag.split(',').map(s => s.trim()).filter(Boolean) : [];
-                        if (tags.length === 0) return <span style={{ color: '#cbd5e1' }}>—</span>;
-                        return (
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                            {tags.map(t => (
-                              <span key={t} style={{ padding: '2px 7px', borderRadius: '4px', backgroundColor: '#f1f5f9', color: '#334155', fontSize: '0.74rem', fontWeight: '500' }}>
-                                {t.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                              </span>
-                            ))}
-                          </div>
-                        );
-                      })()}
-                    </td>
-                    <td style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#475569' }}>
-                      {prod.fragrance_tag || prod.categories?.title ? (
-                        <span style={{ padding: '3px 8px', borderRadius: '4px', backgroundColor: '#fdf4ff', color: '#86198f', fontSize: '0.78rem', fontWeight: '500' }}>
-                          {(prod.fragrance_tag || prod.categories?.title).replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+          <div style={{ overflowX: 'auto', width: '100%', WebkitOverflowScrolling: 'touch' }}>
+            <table style={{ width: '100%', minWidth: '1050px', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid #e2e8f0', textAlign: 'left', backgroundColor: '#f8fafc' }}>
+                  <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b', width: '60px' }}>Image</th>
+                  <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b', minWidth: '220px' }}>Title &amp; Fragrance</th>
+                  <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b' }}>Collection</th>
+                  <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b' }}>Fragrance Tag</th>
+                  <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b', textAlign: 'center' }}>Photos</th>
+                  <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b' }}>Price</th>
+                  <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b', textAlign: 'center' }}>Badges</th>
+                  <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b', textAlign: 'center' }}>Status</th>
+                  <th style={{ 
+                    padding: '14px 16px', 
+                    fontSize: '0.85rem', 
+                    color: '#0f172a', 
+                    textAlign: 'center',
+                    position: 'sticky',
+                    right: 0,
+                    backgroundColor: '#f8fafc',
+                    boxShadow: '-3px 0 6px rgba(0,0,0,0.06)',
+                    zIndex: 2,
+                    minWidth: '150px'
+                  }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.length === 0 ? (
+                  <tr><td colSpan="9" style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>No products found. Create your first product above!</td></tr>
+                ) : products.map(prod => {
+                  const totalPhotos = Array.isArray(prod.images) ? prod.images.filter(Boolean).length : (prod.image_url ? (prod.secondary_image_url ? 2 : 1) : 0);
+                  return (
+                    <tr key={prod.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      <td style={{ padding: '14px 16px' }}>
+                        <div style={{ width: '48px', height: '48px', backgroundColor: '#f1f5f9', borderRadius: '6px', overflow: 'hidden', border: '1px solid #e2e8f0', cursor: 'pointer' }} onClick={() => openModal(prod)} title="Click to edit product">
+                          <img src={prod.image_url || 'assets/product_jasmine.png'} alt={prod.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.target.src='assets/product_jasmine.png'; }} />
+                        </div>
+                      </td>
+                      <td style={{ padding: '14px 16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <span 
+                            onClick={() => openModal(prod)} 
+                            title="Click to edit product"
+                            style={{ fontSize: '0.92rem', color: '#1a1a1a', fontWeight: '600', cursor: 'pointer', textDecoration: 'none' }}
+                            onMouseEnter={e => e.target.style.color = '#2563eb'}
+                            onMouseLeave={e => e.target.style.color = '#1a1a1a'}
+                          >
+                            {prod.title}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => openModal(prod)}
+                            title="Edit product"
+                            style={{
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                              border: '1px solid #bfdbfe',
+                              backgroundColor: '#eff6ff',
+                              color: '#1d4ed8',
+                              fontSize: '0.72rem',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px'
+                            }}
+                          >
+                            ✏ Edit
+                          </button>
+                        </div>
+                        {prod.fragrance && <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>{prod.fragrance}</div>}
+                      </td>
+                      <td style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#475569' }}>
+                        {(() => {
+                          const tags = prod.collection_tag ? prod.collection_tag.split(',').map(s => s.trim()).filter(Boolean) : [];
+                          if (tags.length === 0) return <span style={{ color: '#cbd5e1' }}>—</span>;
+                          return (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                              {tags.map(t => (
+                                <span key={t} style={{ padding: '2px 7px', borderRadius: '4px', backgroundColor: '#f1f5f9', color: '#334155', fontSize: '0.74rem', fontWeight: '500' }}>
+                                  {t.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                </span>
+                              ))}
+                            </div>
+                          );
+                        })()}
+                      </td>
+                      <td style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#475569' }}>
+                        {prod.fragrance_tag || prod.categories?.title ? (
+                          <span style={{ padding: '3px 8px', borderRadius: '4px', backgroundColor: '#fdf4ff', color: '#86198f', fontSize: '0.78rem', fontWeight: '500' }}>
+                            {(prod.fragrance_tag || prod.categories?.title).replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          </span>
+                        ) : (
+                          <span style={{ color: '#cbd5e1' }}>—</span>
+                        )}
+                      </td>
+                      <td style={{ padding: '14px 16px', fontSize: '0.82rem', color: '#64748b', textAlign: 'center' }}>
+                        <span style={{ padding: '2px 8px', borderRadius: '12px', backgroundColor: totalPhotos >= 3 ? '#ecfdf5' : '#f8fafc', color: totalPhotos >= 3 ? '#065f46' : '#64748b', fontWeight: '600', border: '1px solid #e2e8f0' }}>
+                          📷 {totalPhotos}/6
                         </span>
-                      ) : (
-                        <span style={{ color: '#cbd5e1' }}>—</span>
-                      )}
-                    </td>
-                    <td style={{ padding: '14px 16px', fontSize: '0.82rem', color: '#64748b' }}>
-                      <span style={{ padding: '2px 8px', borderRadius: '12px', backgroundColor: totalPhotos >= 3 ? '#ecfdf5' : '#f8fafc', color: totalPhotos >= 3 ? '#065f46' : '#64748b', fontWeight: '600', border: '1px solid #e2e8f0' }}>
-                        📷 {totalPhotos}/6
-                      </span>
-                    </td>
-                    <td style={{ padding: '14px 16px', fontSize: '0.92rem', color: '#1a1a1a', fontWeight: '600' }}>
-                      ₹{prod.price}
-                      {prod.original_price && <span style={{ fontSize: '0.75rem', color: '#94a3b8', textDecoration: 'line-through', marginLeft: '6px' }}>₹{prod.original_price}</span>}
-                    </td>
-                    <td style={{ padding: '14px 16px', textAlign: 'center' }}>
-                      {prod.badges ? (
-                        <span style={{ padding: '3px 8px', borderRadius: '4px', backgroundColor: '#fef3c7', color: '#92400e', fontSize: '0.72rem', fontWeight: '600' }}>{prod.badges}</span>
-                      ) : prod.is_best_seller ? (
-                        <span style={{ padding: '3px 8px', borderRadius: '4px', backgroundColor: '#dbeafe', color: '#1e40af', fontSize: '0.72rem', fontWeight: '600' }}>BEST SELLER</span>
-                      ) : (
-                        <span style={{ color: '#cbd5e1', fontSize: '0.75rem' }}>—</span>
-                      )}
-                    </td>
-                    <td style={{ padding: '14px 16px', textAlign: 'center' }}>
-                      <button 
-                        type="button"
-                        onClick={() => toggleStock(prod.id, prod.availability)}
-                        style={{ 
-                          padding: '4px 10px', 
-                          borderRadius: '12px', 
-                          fontSize: '0.75rem', 
-                          border: 'none', 
-                          cursor: 'pointer', 
-                          fontWeight: '600', 
-                          backgroundColor: prod.availability !== false ? '#dcfce7' : '#fee2e2', 
-                          color: prod.availability !== false ? '#166534' : '#991b1b',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '5px'
-                        }}
-                        title="Click to toggle Stock Status"
-                      >
-                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: prod.availability !== false ? '#16a34a' : '#dc2626' }}></span>
-                        {prod.availability !== false ? 'In Stock' : 'Out of Stock'}
-                      </button>
-                    </td>
-                    <td style={{ padding: '14px 16px', textAlign: 'center' }}>
-                      <button 
-                        onClick={() => togglePublish(prod.id, prod.is_published)}
-                        style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', border: 'none', cursor: 'pointer', fontWeight: '500', backgroundColor: prod.is_published !== false ? '#dcfce7' : '#f1f5f9', color: prod.is_published !== false ? '#166534' : '#64748b' }}
-                      >
-                        {prod.is_published !== false ? 'Published' : 'Hidden'}
-                      </button>
-                    </td>
-                    <td style={{ padding: '10px 16px', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                        <button
-                          onClick={() => openModal(prod)}
-                          title="Edit product"
-                          style={{
-                            display: 'inline-flex', alignItems: 'center', gap: '4px',
-                            padding: '5px 12px', borderRadius: '6px', border: '1.5px solid #2563eb',
-                            backgroundColor: '#eff6ff', color: '#2563eb',
-                            cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600',
-                            transition: 'all 0.15s ease'
+                      </td>
+                      <td style={{ padding: '14px 16px', fontSize: '0.92rem', color: '#1a1a1a', fontWeight: '600' }}>
+                        ₹{prod.price}
+                        {prod.original_price && <span style={{ fontSize: '0.75rem', color: '#94a3b8', textDecoration: 'line-through', marginLeft: '6px' }}>₹{prod.original_price}</span>}
+                      </td>
+                      <td style={{ padding: '14px 16px', textAlign: 'center' }}>
+                        {prod.badges ? (
+                          <span style={{ padding: '3px 8px', borderRadius: '4px', backgroundColor: '#fef3c7', color: '#92400e', fontSize: '0.72rem', fontWeight: '600' }}>{prod.badges}</span>
+                        ) : prod.is_best_seller ? (
+                          <span style={{ padding: '3px 8px', borderRadius: '4px', backgroundColor: '#dbeafe', color: '#1e40af', fontSize: '0.72rem', fontWeight: '600' }}>BEST SELLER</span>
+                        ) : (
+                          <span style={{ color: '#cbd5e1', fontSize: '0.75rem' }}>—</span>
+                        )}
+                      </td>
+                      <td style={{ padding: '14px 16px', textAlign: 'center' }}>
+                        <button 
+                          type="button"
+                          onClick={() => toggleStock(prod.id, prod.availability)}
+                          style={{ 
+                            padding: '4px 10px', 
+                            borderRadius: '12px', 
+                            fontSize: '0.75rem', 
+                            border: 'none', 
+                            cursor: 'pointer', 
+                            fontWeight: '600', 
+                            backgroundColor: prod.availability !== false ? '#dcfce7' : '#fee2e2', 
+                            color: prod.availability !== false ? '#166534' : '#991b1b',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px'
                           }}
+                          title="Click to toggle Stock Status"
                         >
-                          ✏ Edit
+                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: prod.availability !== false ? '#16a34a' : '#dc2626' }}></span>
+                          {prod.availability !== false ? 'In Stock' : 'Out of Stock'}
                         </button>
-                        <a
-                          href={`/product?id=${prod.id}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          title="View live product page"
-                          style={{
-                            display: 'inline-flex', alignItems: 'center', gap: '4px',
-                            padding: '5px 10px', borderRadius: '6px', border: '1.5px solid #e2e8f0',
-                            backgroundColor: '#f8fafc', color: '#475569',
-                            textDecoration: 'none', fontSize: '0.8rem', fontWeight: '500',
-                            transition: 'all 0.15s ease'
-                          }}
+                      </td>
+                      <td style={{ padding: '14px 16px', textAlign: 'center' }}>
+                        <button 
+                          onClick={() => togglePublish(prod.id, prod.is_published)}
+                          style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', border: 'none', cursor: 'pointer', fontWeight: '500', backgroundColor: prod.is_published !== false ? '#dcfce7' : '#f1f5f9', color: prod.is_published !== false ? '#166534' : '#64748b' }}
                         >
-                          ↗
-                        </a>
-                        <button
-                          onClick={() => handleDelete(prod.id)}
-                          title="Delete product"
-                          style={{
-                            display: 'inline-flex', alignItems: 'center', gap: '4px',
-                            padding: '5px 10px', borderRadius: '6px', border: '1.5px solid #fecaca',
-                            backgroundColor: '#fef2f2', color: '#dc2626',
-                            cursor: 'pointer', fontSize: '0.8rem', fontWeight: '500',
-                            transition: 'all 0.15s ease'
-                          }}
-                        >
-                          🗑
+                          {prod.is_published !== false ? 'Published' : 'Hidden'}
                         </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      </td>
+                      <td style={{ 
+                        padding: '10px 16px', 
+                        textAlign: 'center', 
+                        whiteSpace: 'nowrap',
+                        position: 'sticky',
+                        right: 0,
+                        backgroundColor: '#ffffff',
+                        boxShadow: '-3px 0 6px rgba(0,0,0,0.05)',
+                        zIndex: 1
+                      }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          <button
+                            type="button"
+                            onClick={() => openModal(prod)}
+                            title="Edit product details, images & pricing"
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', gap: '4px',
+                              padding: '6px 14px', borderRadius: '6px', border: '1.5px solid #2563eb',
+                              backgroundColor: '#2563eb', color: '#ffffff',
+                              cursor: 'pointer', fontSize: '0.82rem', fontWeight: '600',
+                              boxShadow: '0 1px 3px rgba(37,99,235,0.25)',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            ✏ Edit
+                          </button>
+                          <a
+                            href={`/product?id=${prod.id}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            title="View live product page"
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', gap: '4px',
+                              padding: '6px 10px', borderRadius: '6px', border: '1.5px solid #cbd5e1',
+                              backgroundColor: '#f8fafc', color: '#334155',
+                              textDecoration: 'none', fontSize: '0.82rem', fontWeight: '500',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            ↗
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(prod.id)}
+                            title="Delete product"
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', gap: '4px',
+                              padding: '6px 10px', borderRadius: '6px', border: '1.5px solid #fecaca',
+                              backgroundColor: '#fef2f2', color: '#dc2626',
+                              cursor: 'pointer', fontSize: '0.82rem', fontWeight: '500',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            🗑
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
