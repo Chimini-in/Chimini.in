@@ -18,9 +18,6 @@ const BANNER_SLOTS = [
   { id: 'collections_top',    page: 'Collections', label: 'Top Banner',            hint: 'Banner at the top of the /collections page' },
   // GIFTS PAGE
   { id: 'gifts_top',          page: 'Gifts',       label: 'Top Banner',            hint: 'Banner at the top of the /gifts page' },
-  { id: 'gifts_promo_1',      page: 'Gifts',       label: 'Promo Banner 1',        hint: 'Below the gift customizer section' },
-  { id: 'gifts_promo_2',      page: 'Gifts',       label: 'Promo Banner 2',        hint: 'Between Recipient and Occasion sections' },
-  { id: 'gifts_promo_3',      page: 'Gifts',       label: 'Promo Banner 3',        hint: 'Bottom CTA banner on the gifts page' },
   // ABOUT PAGE
   { id: 'about_top',          page: 'About Us',    label: 'Top Banner',            hint: 'Banner at the top of the /about page' },
   // CONTACT PAGE

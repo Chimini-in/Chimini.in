@@ -2947,22 +2947,9 @@ function renderGiftsPage() {
     container.innerHTML = `
     ${renderPageHeroHtml("gifts")}
 
-    <!-- 1. Hero Section -->
-    <section class="gifts-hero-section section-container">
-      <span class="gifts-hero-badge">ART OF GIFTING</span>
-      <h1 class="gifts-hero-title">Gifts That Feel Personal</h1>
-      <p class="gifts-hero-subtitle">Thoughtfully curated candle hampers, bespoke personalized inscriptions, and hand-poured artisanal sets for every special moment.</p>
-      <div class="gifts-hero-actions">
-        <a href="/shop?category=gifts" class="btn btn-primary">Shop All Gifts &rarr;</a>
-        <a href="#gift-cards-section" class="btn btn-secondary">Explore Gift Cards</a>
-      </div>
-    </section>
-
     <div class="section-container">
 
-      <!-- Promo Banner 1 -->${renderBannerSlot('gifts_promo_1') ? '<div class="gifts-img-banner">' + renderBannerSlot('gifts_promo_1') + '</div>' : ''}
-
-      <!-- 4. Shop by Price (Single Unified Row of Round Tiles) -->
+      <!-- Shop by Price (Single Unified Row of Round Tiles) -->
       <section class="price-section-block">
         <div style="text-align: center; margin-bottom: 30px;">
           <h2 style="font-family: var(--font-serif); font-size: 2.2rem;">Shop by Price</h2>
@@ -2980,7 +2967,7 @@ function renderGiftsPage() {
         </div>
       </section>
 
-      <!-- 5. Shop by Recipient (3 Tiles Per Row, Box-Shaped) -->
+      <!-- Shop by Recipient (3 Tiles Per Row, Box-Shaped) -->
       <section class="tile-grid-section">
         <div class="tile-grid-header">
           <h2>Shop by Recipient</h2>
@@ -2997,9 +2984,7 @@ function renderGiftsPage() {
         </div>
       </section>
 
-      <!-- 6. Promo Banner 2 -->${renderBannerSlot('gifts_promo_2') ? '<div class="gifts-img-banner">' + renderBannerSlot('gifts_promo_2') + '</div>' : ''}
-
-      <!-- 7. Shop by Occasion (4 Tiles Per Row, Box-Shaped) -->
+      <!-- Shop by Occasion (4 Tiles Per Row, Box-Shaped) -->
       <section class="tile-grid-section">
         <div class="tile-grid-header">
           <h2>Shop by Occasion</h2>
@@ -3016,7 +3001,7 @@ function renderGiftsPage() {
         </div>
       </section>
 
-      <!-- 8. Gift Cards (Replaces Curated Gift Hampers & Sets) -->
+      <!-- Gift Cards (Replaces Curated Gift Hampers & Sets) -->
       <section id="gift-cards-section" style="margin-bottom: 70px;">
         <div class="tile-grid-header">
           <h2>Gift Cards</h2>
@@ -3034,12 +3019,8 @@ function renderGiftsPage() {
         </div>
       </section>
 
-      <!-- 9. Promo Banner 3 -->${renderBannerSlot('gifts_promo_3') ? '<div class="gifts-img-banner">' + renderBannerSlot('gifts_promo_3') + '</div>' : ''}
-
     </div>
   `;
-
-  
 }
 
 function renderAboutPage() {
@@ -3761,18 +3742,25 @@ async function fetchSupabaseData() {
     const cachedProducts = storeState.adminSettings && storeState.adminSettings.products && storeState.adminSettings.products.length > 0
       ? storeState.adminSettings.products : null;
     if (products && Array.isArray(products) && products.length > 0) {
-      newSettings.products = products.map(p => ({
-        id: p.id,
-        name: p.title,
-        price: p.price,
-        originalPrice: p.original_price || null,
-        badge: (p.badges && p.badges.trim() !== '') ? p.badges.trim() : null,
-        image: p.image_url || 'assets/product_jasmine.png',
-        secondaryImage: p.secondary_image_url || p.image_url || 'assets/product_sandalwood.png',
-        images: (Array.isArray(p.images) && p.images.length > 0) 
-          ? p.images 
-          : (p.image_url ? [p.image_url, p.secondary_image_url || 'assets/product_sandalwood.png', 'assets/product_rose.png', 'assets/product_fig.png'].filter(Boolean) : ['assets/product_jasmine.png']),
-                  category: catTitle.toLowerCase() || 'candles',
+      // Build a quick category lookup map from separately-fetched categories array
+      const catMap = {};
+      if (Array.isArray(categories)) {
+        categories.forEach(c => { if (c.id) catMap[c.id] = c.title || ''; });
+      }
+      newSettings.products = products.map(p => {
+        const catTitle = catMap[p.category_id] || p.category || '';
+        return {
+          id: p.id,
+          name: p.title,
+          price: p.price,
+          originalPrice: p.original_price || null,
+          badge: (p.badges && p.badges.trim() !== '') ? p.badges.trim() : null,
+          image: p.image_url || 'assets/product_jasmine.png',
+          secondaryImage: p.secondary_image_url || p.image_url || 'assets/product_sandalwood.png',
+          images: (Array.isArray(p.images) && p.images.length > 0)
+            ? p.images
+            : (p.image_url ? [p.image_url, p.secondary_image_url || 'assets/product_sandalwood.png', 'assets/product_rose.png', 'assets/product_fig.png'].filter(Boolean) : ['assets/product_jasmine.png']),
+          category: catTitle.toLowerCase() || 'candles',
           categoryTitle: catTitle || 'Artisanal Candles',
           fragrance_tag: p.fragrance_tag || '',
           collection_tag: p.collection_tag || '',

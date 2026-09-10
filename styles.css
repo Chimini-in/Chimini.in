@@ -2167,11 +2167,11 @@ section.full-width-banner-section {
     padding: 8px 16px !important;
   }
 
-  /* --- MOBILE LOGO: shift left --- */
+  /* --- MOBILE LOGO: shift left (search is hidden, so logo drifts right without fix) --- */
   .header-logo {
     text-align: left !important;
-    flex: 0 1 auto !important;
-    margin-left: 4px !important;
+    flex: 0 1 auto !important;     /* don't grow to fill empty search space */
+    margin-left: 4px !important;   /* small nudge from left edge */
   }
 
   .header-actions {
@@ -2184,7 +2184,8 @@ section.full-width-banner-section {
     padding: 6px;
   }
 
-  /* --- MOBILE HERO BANNER FIT & NO SIDE CROPPING --- */
+  /* --- MOBILE BANNER FIT: full width, no cropping, no fixed heights --- */
+  /* Hero banner */
   .hero-banner {
     width: 100% !important;
     margin-top: 0 !important;
@@ -2212,7 +2213,7 @@ section.full-width-banner-section {
     margin: 0 !important;
   }
 
-  /* Products-ads, brand-story, all full-width banners */
+  /* Products-ads, brand-story, and all other full-width banners */
   .full-width-banner-section {
     width: 100% !important;
     overflow: hidden !important;
@@ -2242,6 +2243,7 @@ section.full-width-banner-section {
     margin: 0 !important;
   }
 
+  /* Override fixed max-heights on specific banner slots */
   #hero-banner .banner-slot-img,
   #products-ads-banner-1 .banner-slot-img,
   #products-ads-banner-2 .banner-slot-img,
@@ -2310,7 +2312,7 @@ section.full-width-banner-section {
   /* Responsive Banner Heights for legibility on mobile */
   /* hero-banner mobile rule moved to refined mobile block */
   
-  /* products-ads and brand-story: auto aspect so full image shows on mobile */
+  /* products-ads and brand-story banners: use auto aspect ratio so full image shows on mobile */
   .products-ads-banner a,
   .products-ads-banner img,
   .brand-story-banner a,
