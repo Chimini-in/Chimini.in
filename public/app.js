@@ -1974,11 +1974,13 @@ function renderShopPage() {
   const container = document.getElementById("shop-page-container");
   if (!container) return;
   
-  // Parse URL parameters for initial category/fragrance filter
+  // Parse URL parameters for initial category/fragrance/price filter
   const params = new URLSearchParams(window.location.search);
   const catQuery = params.get("category");
   const fragranceQuery = params.get("fragrance");
   const searchQuery = params.get("q");
+  const maxPriceParam = params.get("maxPrice") || params.get("max_price") || params.get("price") || params.get("max");
+  const minPriceParam = params.get("minPrice") || params.get("min_price") || params.get("min");
 
   // On mobile screens, default layout to grid-2 if not explicitly selected
   if (typeof window !== 'undefined' && window.innerWidth <= 768) {
@@ -2004,6 +2006,17 @@ function renderShopPage() {
     storeState.shopInitialized = true;
     const si = document.getElementById("search-input");
     if (si) si.value = storeState.searchQuery;
+  }
+
+  if (maxPriceParam !== null && maxPriceParam !== undefined && maxPriceParam !== "" && !isNaN(parseFloat(maxPriceParam))) {
+    storeState.priceMax = parseFloat(maxPriceParam);
+    storeState.priceBracket = "custom";
+    storeState.shopInitialized = true;
+  }
+  if (minPriceParam !== null && minPriceParam !== undefined && minPriceParam !== "" && !isNaN(parseFloat(minPriceParam))) {
+    storeState.priceMin = parseFloat(minPriceParam);
+    storeState.priceBracket = "custom";
+    storeState.shopInitialized = true;
   }
 
   const bannerHtml = renderPageHeroHtml("shop");
@@ -2032,7 +2045,7 @@ function renderShopPage() {
     if (storeState.activeCategory && storeState.activeCategory !== 'all') count++;
     if (storeState.activeFragrance && storeState.activeFragrance !== 'all') count++;
     if (storeState.priceBracket && storeState.priceBracket !== 'all') count++;
-    if ((storeState.priceMin !== null && storeState.priceMin !== undefined) || (storeState.priceMax !== null && storeState.priceMax !== undefined)) count++;
+    if (storeState.priceBracket !== 'custom' && ((storeState.priceMin !== null && storeState.priceMin !== undefined) || (storeState.priceMax !== null && storeState.priceMax !== undefined))) count++;
     if (storeState.activeDiscount && storeState.activeDiscount !== 'all') count++;
     if (storeState.inStockOnly) count++;
     return count;
@@ -2957,13 +2970,22 @@ function renderGiftsPage() {
         </div>
 
         <div class="price-round-tiles-row">
-          ${priceTiles.map(pt => `
-            <a href="${pt.link || '/shop?category=gifts'}" class="price-round-tile">
-              <img src="${pt.image || 'assets/product_jasmine.png'}" alt="${pt.label}" class="price-round-img" onerror="this.src='assets/product_jasmine.png'">
+          ${priceTiles.map(pt => {
+            const rawThreshold = (pt.threshold !== undefined && pt.threshold !== null && pt.threshold !== '')
+              ? String(pt.threshold).trim()
+              : (pt.label ? pt.label.replace(/[^0-9.]/g, '').trim() : '');
+            let link = pt.link || '';
+            if (!link || link === '/shop?category=gifts' || link === '/shop') {
+              link = rawThreshold ? `/shop?maxPrice=${rawThreshold}` : '/shop';
+            }
+            const displayLabel = pt.label || (rawThreshold ? `₹${rawThreshold}` : '');
+            return `
+            <a href="${link}" class="price-round-tile" data-max-price="${rawThreshold || ''}">
+              <img src="${pt.image || 'assets/product_jasmine.png'}" alt="${displayLabel || 'Shop by Price'}" class="price-round-img" onerror="this.src='assets/product_jasmine.png'">
               <div class="price-round-overlay"></div>
-              <span class="price-round-label">${pt.label}</span>
+              ${displayLabel ? `<span class="price-round-label">${displayLabel}</span>` : ''}
             </a>
-          `).join('')}
+          `;}).join('')}
         </div>
       </section>
 
