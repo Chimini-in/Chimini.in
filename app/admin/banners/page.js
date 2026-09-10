@@ -57,6 +57,9 @@ function BannerSlotCard({ slot, record, onChange }) {
   const [localImageUrl, setLocalImageUrl] = useState(record?.image_url || '');
   const [localLinkUrl, setLocalLinkUrl] = useState(record?.link_url || '');
   const [localOfferPct, setLocalOfferPct] = useState(record?.offer_pct != null ? String(record.offer_pct) : '');
+  const [destType, setDestType] = useState(
+    (record?.offer_pct != null && String(record.offer_pct).trim() !== '') ? 'offer' : 'link'
+  );
   const [isPublished, setIsPublished] = useState(record?.is_published !== false);
   const [uploading, setUploading] = useState(false);
   const [uploadErr, setUploadErr] = useState(null);
@@ -67,14 +70,13 @@ function BannerSlotCard({ slot, record, onChange }) {
   // Sync state whenever record prop changes from Supabase fetch
   useEffect(() => {
     setLocalImageUrl(record?.image_url || '');
-    setLocalLinkUrl(record?.link_url || '');
-    setLocalOfferPct(record?.offer_pct != null ? String(record.offer_pct) : '');
+    const offerVal = (record?.offer_pct != null && String(record.offer_pct).trim() !== '') ? String(record.offer_pct) : '';
+    const linkVal = record?.link_url || '';
+    setLocalOfferPct(offerVal);
+    setLocalLinkUrl(linkVal);
+    setDestType(offerVal ? 'offer' : 'link');
     setIsPublished(record?.is_published !== false);
   }, [record?.image_url, record?.link_url, record?.offer_pct, record?.is_published]);
-
-  // XOR: only one of link or offer can be active
-  const hasOffer = localOfferPct.trim() !== '';
-  const hasLink = localLinkUrl.trim() !== '';
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
@@ -92,29 +94,40 @@ function BannerSlotCard({ slot, record, onChange }) {
     }
   };
 
-  const handleOfferChange = (val) => {
-    setLocalOfferPct(val);
-    // If setting an offer, clear the link URL
-    if (val.trim() !== '') setLocalLinkUrl('');
+  const handleSelectOfferMode = () => {
+    setDestType('offer');
+    setLocalLinkUrl('');
   };
 
-  const handleLinkChange = (val) => {
-    setLocalLinkUrl(val);
-    // If setting a link, clear the offer
-    if (val.trim() !== '') setLocalOfferPct('');
+  const handleSelectLinkMode = () => {
+    setDestType('link');
+    setLocalOfferPct('');
   };
 
   const handleSave = async () => {
     setSaving(true);
     setSaved(false);
     try {
-      const offerNum = localOfferPct.trim() !== '' ? parseInt(localOfferPct, 10) : null;
+      const isOffer = destType === 'offer';
+      const cleanDigits = localOfferPct.replace(/[^0-9]/g, '');
+      const offerNum = (isOffer && cleanDigits !== '') ? parseInt(cleanDigits, 10) : null;
+      const finalLink = isOffer ? '' : localLinkUrl.trim();
+
       await onChange(slot.id, {
         image_url: localImageUrl,
-        link_url: hasOffer ? '' : localLinkUrl,
+        link_url: finalLink,
         offer_pct: offerNum,
         is_published: isPublished,
       });
+
+      // Keep local state in sync
+      if (isOffer) {
+        setLocalOfferPct(offerNum ? String(offerNum) : '');
+        setLocalLinkUrl('');
+      } else {
+        setLocalLinkUrl(finalLink);
+        setLocalOfferPct('');
+      }
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (err) {
@@ -139,34 +152,43 @@ function BannerSlotCard({ slot, record, onChange }) {
       {/* Preview strip */}
       <div style={{ width: '100%', height: '140px', backgroundColor: '#f8fafc', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
         {localImageUrl ? (
-          <img src={localImageUrl} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />
+          <img
+            src={localImageUrl}
+            alt={slot.label}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            onError={e => { e.currentTarget.style.display = 'none'; }}
+          />
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#94a3b8', fontSize: '0.85rem', gap: '8px' }}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            No image set
+          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '0.85rem' }}>
+            No Image Set
           </div>
         )}
-        <span style={{ position: 'absolute', top: '8px', right: '8px', backgroundColor: isPublished ? '#dcfce7' : '#f1f5f9', color: isPublished ? '#166534' : '#64748b', fontSize: '0.7rem', fontWeight: '600', padding: '3px 8px', borderRadius: '12px', letterSpacing: '0.05em' }}>
+        <span style={{
+          position: 'absolute', top: '8px', right: '8px',
+          padding: '2px 8px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: '600',
+          backgroundColor: isPublished ? '#dcfce7' : '#fee2e2',
+          color: isPublished ? '#166534' : '#991b1b',
+        }}>
           {isPublished ? 'LIVE' : 'HIDDEN'}
         </span>
       </div>
 
-      {/* Content */}
-      <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
+      {/* Card Body */}
+      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
         <div>
-          <div style={{ fontSize: '1rem', fontWeight: '700', color: '#1a1a1a', marginBottom: '2px' }}>{slot.label}</div>
-          <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>{slot.hint}</div>
+          <h4 style={{ margin: '0 0 2px 0', fontSize: '1rem', color: '#1a1a1a' }}>{slot.label}</h4>
+          <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>{slot.hint}</p>
         </div>
 
-        {/* Image URL */}
+        {/* Image URL Input */}
         <div>
-          <label style={{ fontSize: '0.75rem', fontWeight: '600', color: '#475569', display: 'block', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Banner Image URL</label>
+          <label style={{ fontSize: '0.72rem', fontWeight: '600', color: '#475569', display: 'block', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Banner Image URL</label>
           <input
             type="text"
             value={localImageUrl}
             onChange={e => setLocalImageUrl(e.target.value)}
             placeholder="https://... or upload below"
-            style={{ width: '100%', padding: '9px', border: '1px solid #e2e8f0', borderRadius: '6px', fontSize: '0.85rem', boxSizing: 'border-box' }}
+            style={{ width: '100%', padding: '8px', border: '1px solid #e2e8f0', borderRadius: '6px', fontSize: '0.82rem', boxSizing: 'border-box' }}
           />
         </div>
 
@@ -184,67 +206,129 @@ function BannerSlotCard({ slot, record, onChange }) {
           {uploadErr && <p style={{ color: '#dc2626', fontSize: '0.75rem', marginTop: '4px' }}>{uploadErr}</p>}
         </div>
 
-        {/* Offer % OR Link URL — XOR toggle */}
+        {/* Click Destination — Offer % OR Link URL with Interactive Radio Tabs */}
         <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <div style={{ fontSize: '0.72rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '2px' }}>
+          <div style={{ fontSize: '0.72rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
             Click Destination — choose one:
           </div>
 
-          {/* Offer % field */}
-          <div>
-            <label style={{ fontSize: '0.73rem', fontWeight: '600', color: hasOffer ? '#7c3aed' : '#475569', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '5px' }}>
-              <span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%', background: hasOffer ? '#7c3aed' : '#cbd5e1', flexShrink: 0 }} />
-              Offer % (e.g. 10 → shows all products with ≥10% off)
-            </label>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <input
-                type="number"
-                min="1"
-                max="99"
-                value={localOfferPct}
-                onChange={e => handleOfferChange(e.target.value)}
-                placeholder="e.g. 10"
-                style={{
-                  width: '90px', padding: '8px', border: `1.5px solid ${hasOffer ? '#7c3aed' : '#e2e8f0'}`,
-                  borderRadius: '6px', fontSize: '0.88rem', boxSizing: 'border-box',
-                  background: hasLink ? '#f1f5f9' : '#fff', color: hasLink ? '#94a3b8' : '#1a1a1a'
-                }}
-                disabled={hasLink}
-              />
-              {hasOffer && (
-                <span style={{ fontSize: '0.78rem', color: '#7c3aed', fontWeight: '600' }}>
-                  → /shop?discount={localOfferPct}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Divider */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
-            <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: '600' }}>OR</span>
-            <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
-          </div>
-
-          {/* Link URL field */}
-          <div>
-            <label style={{ fontSize: '0.73rem', fontWeight: '600', color: hasLink ? '#0369a1' : '#475569', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '5px' }}>
-              <span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%', background: hasLink ? '#0369a1' : '#cbd5e1', flexShrink: 0 }} />
-              Link URL (manual destination)
-            </label>
-            <input
-              type="text"
-              value={localLinkUrl}
-              onChange={e => handleLinkChange(e.target.value)}
-              placeholder="/shop or https://..."
+          {/* Radio Buttons */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <label
+              onClick={handleSelectOfferMode}
               style={{
-                width: '100%', padding: '9px', border: `1.5px solid ${hasLink ? '#0369a1' : '#e2e8f0'}`,
-                borderRadius: '6px', fontSize: '0.85rem', boxSizing: 'border-box',
-                background: hasOffer ? '#f1f5f9' : '#fff', color: hasOffer ? '#94a3b8' : '#1a1a1a'
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 10px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                border: `1.5px solid ${destType === 'offer' ? '#7c3aed' : '#e2e8f0'}`,
+                backgroundColor: destType === 'offer' ? '#f5f3ff' : '#fff',
+                color: destType === 'offer' ? '#6d28d9' : '#64748b',
+                fontWeight: '600',
+                fontSize: '0.78rem',
+                userSelect: 'none',
+                transition: 'all 0.15s ease'
               }}
-              disabled={hasOffer}
-            />
+            >
+              <input
+                type="radio"
+                name={`dest_${slot.id}`}
+                checked={destType === 'offer'}
+                onChange={handleSelectOfferMode}
+                style={{ accentColor: '#7c3aed', cursor: 'pointer' }}
+              />
+              Offer % (Auto-filter)
+            </label>
+
+            <label
+              onClick={handleSelectLinkMode}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 10px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                border: `1.5px solid ${destType === 'link' ? '#0369a1' : '#e2e8f0'}`,
+                backgroundColor: destType === 'link' ? '#f0f9ff' : '#fff',
+                color: destType === 'link' ? '#0369a1' : '#64748b',
+                fontWeight: '600',
+                fontSize: '0.78rem',
+                userSelect: 'none',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <input
+                type="radio"
+                name={`dest_${slot.id}`}
+                checked={destType === 'link'}
+                onChange={handleSelectLinkMode}
+                style={{ accentColor: '#0369a1', cursor: 'pointer' }}
+              />
+              Manual Link URL
+            </label>
           </div>
+
+          {/* Active Field */}
+          {destType === 'offer' ? (
+            <div style={{ paddingTop: '2px' }}>
+              <label style={{ fontSize: '0.73rem', fontWeight: '600', color: '#7c3aed', display: 'block', marginBottom: '5px' }}>
+                Offer % (e.g. 10 → auto-filters shop with &ge;10% off)
+              </label>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <div style={{ position: 'relative', width: '100px' }}>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={localOfferPct}
+                    onChange={e => setLocalOfferPct(e.target.value.replace(/[^0-9]/g, ''))}
+                    placeholder="e.g. 10"
+                    style={{
+                      width: '100%',
+                      padding: '8px 24px 8px 10px',
+                      border: '1.5px solid #7c3aed',
+                      borderRadius: '6px',
+                      fontSize: '0.88rem',
+                      fontWeight: '600',
+                      boxSizing: 'border-box',
+                      background: '#fff',
+                      color: '#1a1a1a'
+                    }}
+                  />
+                  <span style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', color: '#7c3aed', fontWeight: '700', fontSize: '0.85rem', pointerEvents: 'none' }}>%</span>
+                </div>
+                {localOfferPct && (
+                  <span style={{ fontSize: '0.78rem', color: '#7c3aed', fontWeight: '600' }}>
+                    &rarr; /shop?discount={localOfferPct}
+                  </span>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div style={{ paddingTop: '2px' }}>
+              <label style={{ fontSize: '0.73rem', fontWeight: '600', color: '#0369a1', display: 'block', marginBottom: '5px' }}>
+                Link URL Destination
+              </label>
+              <input
+                type="text"
+                value={localLinkUrl}
+                onChange={e => setLocalLinkUrl(e.target.value)}
+                placeholder="/shop, /collections, or https://..."
+                style={{
+                  width: '100%',
+                  padding: '9px',
+                  border: '1.5px solid #0369a1',
+                  borderRadius: '6px',
+                  fontSize: '0.85rem',
+                  boxSizing: 'border-box',
+                  background: '#fff',
+                  color: '#1a1a1a'
+                }}
+              />
+            </div>
+          )}
         </div>
 
         {/* Publish Toggle + Save */}
@@ -308,32 +392,54 @@ export default function BannersPage() {
 
   const handleChange = async (slotId, updates) => {
     const existing = records[slotId];
+    const cleanOfferStr = (updates.offer_pct != null && String(updates.offer_pct).trim() !== '') ? String(updates.offer_pct) : '';
+    const cleanOfferNum = cleanOfferStr ? parseInt(cleanOfferStr, 10) : null;
+    const cleanLink = updates.link_url || '';
+
+    const dbPayload = {
+      image_url: updates.image_url || '',
+      link_url: cleanLink,
+      offer_pct: cleanOfferNum,
+      is_published: updates.is_published !== false,
+    };
+
+    const statePayload = {
+      image_url: updates.image_url || '',
+      link_url: cleanLink,
+      offer_pct: cleanOfferStr,
+      is_published: updates.is_published !== false,
+    };
+
     if (existing && existing.id) {
       // Update existing row
-      const { error } = await supabaseClient.from('banners').update({
-        image_url: updates.image_url,
-        link_url: updates.link_url,
-        offer_pct: updates.offer_pct ?? null,
-        is_published: updates.is_published,
-      }).eq('id', existing.id);
+      const { error } = await supabaseClient
+        .from('banners')
+        .update(dbPayload)
+        .eq('id', existing.id);
       if (error) throw error;
+      setRecords(prev => ({
+        ...prev,
+        [slotId]: { ...(prev[slotId] || {}), ...statePayload, id: existing.id }
+      }));
     } else {
       // Insert new row
-      const { data, error } = await supabaseClient.from('banners').insert([{
-        section_id: slotId,
-        image_url: updates.image_url,
-        link_url: updates.link_url,
-        offer_pct: updates.offer_pct ?? null,
-        is_published: updates.is_published,
-        sort_order: 0,
-      }]).select().single();
+      const { data, error } = await supabaseClient
+        .from('banners')
+        .insert([{
+          section_id: slotId,
+          ...dbPayload,
+          sort_order: 0,
+        }])
+        .select()
+        .single();
       if (error) throw error;
       if (data) {
-        setRecords(prev => ({ ...prev, [slotId]: { id: data.id, ...updates } }));
-        return;
+        setRecords(prev => ({
+          ...prev,
+          [slotId]: { id: data.id, ...statePayload }
+        }));
       }
     }
-    setRecords(prev => ({ ...prev, [slotId]: { ...(prev[slotId] || {}), ...updates } }));
   };
 
   const slotsForPage = BANNER_SLOTS.filter(s => s.page === activePage);
