@@ -1888,7 +1888,7 @@ function getPageBanner(slotId) {
       b.section_id === slotId && (b.is_published !== false) &&
       b.image_url && b.image_url.trim() !== ''
     );
-    if (found) return { image: found.image_url, link: found.link_url || '#' };
+    if (found) return { image: found.image_url, link: found.link_url || '#', offer_pct: found.offer_pct ?? null };
   }
 
   // Legacy fallback: old section_id style without page prefix
@@ -1898,7 +1898,7 @@ function getPageBanner(slotId) {
       (b.section_id === legacyKey || b.section_id === slotId.split('_').pop()) && (b.is_published !== false) &&
       b.image_url && b.image_url.trim() !== ''
     );
-    if (found) return { image: found.image_url, link: found.link_url || '#' };
+    if (found) return { image: found.image_url, link: found.link_url || '#', offer_pct: found.offer_pct ?? null };
   }
 
   // Legacy adminSettings fallbacks
@@ -1922,7 +1922,13 @@ function getPageBanner(slotId) {
 function renderBannerSlot(slotId, extraStyle = '') {
   const banner = getPageBanner(slotId);
   if (!banner || !banner.image || banner.image.trim() === '') return '';
-  return `<a href="${banner.link || '#'}" class="banner-slot-link" style="${extraStyle}">
+  // If offer_pct is set, link navigates to /shop?discount=N (auto-filter by discount %)
+  const isHtmlExt = typeof window !== 'undefined' && window.location.pathname.endsWith('.html');
+  const shopBase = isHtmlExt ? 'shop.html' : '/shop';
+  const href = (banner.offer_pct != null && banner.offer_pct !== '')
+    ? `${shopBase}?discount=${encodeURIComponent(banner.offer_pct)}`
+    : (banner.link || '#');
+  return `<a href="${href}" class="banner-slot-link" style="${extraStyle}">
     <img src="${banner.image}" alt="banner" class="banner-slot-img" onerror="this.parentElement.style.display='none'">
   </a>`;
 }
@@ -1981,6 +1987,7 @@ function renderShopPage() {
   const searchQuery = params.get("q");
   const maxPriceParam = params.get("maxPrice") || params.get("max_price") || params.get("price") || params.get("max");
   const minPriceParam = params.get("minPrice") || params.get("min_price") || params.get("min");
+  const discountParam = params.get("discount") || params.get("offer") || params.get("offer_pct");
 
   // On mobile screens, default layout to grid-2 if not explicitly selected
   if (typeof window !== 'undefined' && window.innerWidth <= 768) {
@@ -2016,6 +2023,10 @@ function renderShopPage() {
   if (minPriceParam !== null && minPriceParam !== undefined && minPriceParam !== "" && !isNaN(parseFloat(minPriceParam))) {
     storeState.priceMin = parseFloat(minPriceParam);
     storeState.priceBracket = "custom";
+    storeState.shopInitialized = true;
+  }
+  if (discountParam !== null && discountParam !== undefined && discountParam !== "" && !isNaN(parseInt(discountParam, 10))) {
+    storeState.activeDiscount = String(parseInt(discountParam, 10));
     storeState.shopInitialized = true;
   }
 

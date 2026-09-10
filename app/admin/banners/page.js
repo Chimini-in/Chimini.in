@@ -26,7 +26,7 @@ const BANNER_SLOTS = [
 
 const PAGE_GROUPS = ['Home', 'Shop', 'Collections', 'Gifts', 'About Us', 'Contact Us'];
 
-const EMPTY_BANNER = { image_url: '', link_url: '', is_published: true };
+const EMPTY_BANNER = { image_url: '', link_url: '', offer_pct: '', is_published: true };
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper: Supabase image upload
@@ -56,6 +56,7 @@ async function uploadImage(file) {
 function BannerSlotCard({ slot, record, onChange }) {
   const [localImageUrl, setLocalImageUrl] = useState(record?.image_url || '');
   const [localLinkUrl, setLocalLinkUrl] = useState(record?.link_url || '');
+  const [localOfferPct, setLocalOfferPct] = useState(record?.offer_pct != null ? String(record.offer_pct) : '');
   const [isPublished, setIsPublished] = useState(record?.is_published !== false);
   const [uploading, setUploading] = useState(false);
   const [uploadErr, setUploadErr] = useState(null);
@@ -67,8 +68,13 @@ function BannerSlotCard({ slot, record, onChange }) {
   useEffect(() => {
     setLocalImageUrl(record?.image_url || '');
     setLocalLinkUrl(record?.link_url || '');
+    setLocalOfferPct(record?.offer_pct != null ? String(record.offer_pct) : '');
     setIsPublished(record?.is_published !== false);
-  }, [record?.image_url, record?.link_url, record?.is_published]);
+  }, [record?.image_url, record?.link_url, record?.offer_pct, record?.is_published]);
+
+  // XOR: only one of link or offer can be active
+  const hasOffer = localOfferPct.trim() !== '';
+  const hasLink = localLinkUrl.trim() !== '';
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
@@ -86,11 +92,29 @@ function BannerSlotCard({ slot, record, onChange }) {
     }
   };
 
+  const handleOfferChange = (val) => {
+    setLocalOfferPct(val);
+    // If setting an offer, clear the link URL
+    if (val.trim() !== '') setLocalLinkUrl('');
+  };
+
+  const handleLinkChange = (val) => {
+    setLocalLinkUrl(val);
+    // If setting a link, clear the offer
+    if (val.trim() !== '') setLocalOfferPct('');
+  };
+
   const handleSave = async () => {
     setSaving(true);
     setSaved(false);
     try {
-      await onChange(slot.id, { image_url: localImageUrl, link_url: localLinkUrl, is_published: isPublished });
+      const offerNum = localOfferPct.trim() !== '' ? parseInt(localOfferPct, 10) : null;
+      await onChange(slot.id, {
+        image_url: localImageUrl,
+        link_url: hasOffer ? '' : localLinkUrl,
+        offer_pct: offerNum,
+        is_published: isPublished,
+      });
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (err) {
@@ -160,16 +184,67 @@ function BannerSlotCard({ slot, record, onChange }) {
           {uploadErr && <p style={{ color: '#dc2626', fontSize: '0.75rem', marginTop: '4px' }}>{uploadErr}</p>}
         </div>
 
-        {/* Link URL */}
-        <div>
-          <label style={{ fontSize: '0.75rem', fontWeight: '600', color: '#475569', display: 'block', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Link URL (click destination)</label>
-          <input
-            type="text"
-            value={localLinkUrl}
-            onChange={e => setLocalLinkUrl(e.target.value)}
-            placeholder="/shop or https://..."
-            style={{ width: '100%', padding: '9px', border: '1px solid #e2e8f0', borderRadius: '6px', fontSize: '0.85rem', boxSizing: 'border-box' }}
-          />
+        {/* Offer % OR Link URL — XOR toggle */}
+        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ fontSize: '0.72rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '2px' }}>
+            Click Destination — choose one:
+          </div>
+
+          {/* Offer % field */}
+          <div>
+            <label style={{ fontSize: '0.73rem', fontWeight: '600', color: hasOffer ? '#7c3aed' : '#475569', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '5px' }}>
+              <span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%', background: hasOffer ? '#7c3aed' : '#cbd5e1', flexShrink: 0 }} />
+              Offer % (e.g. 10 → shows all products with ≥10% off)
+            </label>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <input
+                type="number"
+                min="1"
+                max="99"
+                value={localOfferPct}
+                onChange={e => handleOfferChange(e.target.value)}
+                placeholder="e.g. 10"
+                style={{
+                  width: '90px', padding: '8px', border: `1.5px solid ${hasOffer ? '#7c3aed' : '#e2e8f0'}`,
+                  borderRadius: '6px', fontSize: '0.88rem', boxSizing: 'border-box',
+                  background: hasLink ? '#f1f5f9' : '#fff', color: hasLink ? '#94a3b8' : '#1a1a1a'
+                }}
+                disabled={hasLink}
+              />
+              {hasOffer && (
+                <span style={{ fontSize: '0.78rem', color: '#7c3aed', fontWeight: '600' }}>
+                  → /shop?discount={localOfferPct}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+            <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: '600' }}>OR</span>
+            <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+          </div>
+
+          {/* Link URL field */}
+          <div>
+            <label style={{ fontSize: '0.73rem', fontWeight: '600', color: hasLink ? '#0369a1' : '#475569', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '5px' }}>
+              <span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%', background: hasLink ? '#0369a1' : '#cbd5e1', flexShrink: 0 }} />
+              Link URL (manual destination)
+            </label>
+            <input
+              type="text"
+              value={localLinkUrl}
+              onChange={e => handleLinkChange(e.target.value)}
+              placeholder="/shop or https://..."
+              style={{
+                width: '100%', padding: '9px', border: `1.5px solid ${hasLink ? '#0369a1' : '#e2e8f0'}`,
+                borderRadius: '6px', fontSize: '0.85rem', boxSizing: 'border-box',
+                background: hasOffer ? '#f1f5f9' : '#fff', color: hasOffer ? '#94a3b8' : '#1a1a1a'
+              }}
+              disabled={hasOffer}
+            />
+          </div>
         </div>
 
         {/* Publish Toggle + Save */}
@@ -219,6 +294,7 @@ export default function BannersPage() {
             id: row.id,
             image_url: row.image_url || '',
             link_url: row.link_url || '',
+            offer_pct: row.offer_pct != null ? String(row.offer_pct) : '',
             is_published: row.is_published !== false,
           };
         });
@@ -237,6 +313,7 @@ export default function BannersPage() {
       const { error } = await supabaseClient.from('banners').update({
         image_url: updates.image_url,
         link_url: updates.link_url,
+        offer_pct: updates.offer_pct ?? null,
         is_published: updates.is_published,
       }).eq('id', existing.id);
       if (error) throw error;
@@ -246,6 +323,7 @@ export default function BannersPage() {
         section_id: slotId,
         image_url: updates.image_url,
         link_url: updates.link_url,
+        offer_pct: updates.offer_pct ?? null,
         is_published: updates.is_published,
         sort_order: 0,
       }]).select().single();
