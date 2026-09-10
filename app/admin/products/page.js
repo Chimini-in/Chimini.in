@@ -467,10 +467,50 @@ export default function ProductsPage() {
                         {prod.is_published !== false ? 'Published' : 'Hidden'}
                       </button>
                     </td>
-                    <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                      <a href={`/product?id=${prod.id}`} target="_blank" rel="noreferrer" style={{ color: '#0369a1', textDecoration: 'none', marginRight: '14px', fontSize: '0.85rem' }}>View Live</a>
-                      <button onClick={() => openModal(prod)} style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', marginRight: '14px', fontSize: '0.85rem', fontWeight: '500' }}>Edit</button>
-                      <button onClick={() => handleDelete(prod.id)} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '0.85rem' }}>Delete</button>
+                    <td style={{ padding: '10px 16px', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <button
+                          onClick={() => openModal(prod)}
+                          title="Edit product"
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '4px',
+                            padding: '5px 12px', borderRadius: '6px', border: '1.5px solid #2563eb',
+                            backgroundColor: '#eff6ff', color: '#2563eb',
+                            cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          ✏ Edit
+                        </button>
+                        <a
+                          href={`/product?id=${prod.id}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          title="View live product page"
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '4px',
+                            padding: '5px 10px', borderRadius: '6px', border: '1.5px solid #e2e8f0',
+                            backgroundColor: '#f8fafc', color: '#475569',
+                            textDecoration: 'none', fontSize: '0.8rem', fontWeight: '500',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          ↗
+                        </a>
+                        <button
+                          onClick={() => handleDelete(prod.id)}
+                          title="Delete product"
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '4px',
+                            padding: '5px 10px', borderRadius: '6px', border: '1.5px solid #fecaca',
+                            backgroundColor: '#fef2f2', color: '#dc2626',
+                            cursor: 'pointer', fontSize: '0.8rem', fontWeight: '500',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          🗑
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
