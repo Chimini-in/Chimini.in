@@ -375,7 +375,8 @@ export default function ProductsPage() {
                   <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b', textAlign: 'center' }}>Photos</th>
                   <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b' }}>Price</th>
                   <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b', textAlign: 'center' }}>Badges</th>
-                  <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b', textAlign: 'center' }}>Status</th>
+                  <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b', textAlign: 'center' }}>Stock</th>
+                  <th style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#64748b', textAlign: 'center' }}>Visibility</th>
                   <th style={{ 
                     padding: '14px 16px', 
                     fontSize: '0.85rem', 
@@ -392,7 +393,7 @@ export default function ProductsPage() {
               </thead>
               <tbody>
                 {products.length === 0 ? (
-                  <tr><td colSpan="9" style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>No products found. Create your first product above!</td></tr>
+                  <tr><td colSpan="10" style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>No products found. Create your first product above!</td></tr>
                 ) : products.map(prod => {
                   const totalPhotos = Array.isArray(prod.images) ? prod.images.filter(Boolean).length : (prod.image_url ? (prod.secondary_image_url ? 2 : 1) : 0);
                   return (
