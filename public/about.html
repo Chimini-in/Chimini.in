@@ -66,19 +66,31 @@
       <!-- Navigation Menu -->
       <nav class="main-navigation">
         <ul class="nav-links">
-          <li><a href="/home" class="nav-link active">Home</a></li>
+          <li><a href="/home" class="nav-link">Home</a></li>
           <li><a href="/shop" class="nav-link">Shop</a></li>
           <li><a href="/collections" class="nav-link">Collections</a></li>
           <li><a href="/gifts" class="nav-link">Gifts</a></li>
-          <li><a href="/about" class="nav-link">About Us</a></li>
+          <li><a href="/about" class="nav-link active">About Us</a></li>
           <li><a href="/contact" class="nav-link">Contact Us</a></li>
         </ul>
       </nav>
     </header>
   </div>
 
-  <main class="storefront-content" id="about-page-container">
-    <!-- About Us content dynamically rendered here by app.js -->
+    <main class="storefront-content" id="about-page-container">
+    <div class="about-banners-wrapper">
+      <div class="about-banners-container">
+        <div class="about-banner-slot filled-slot" id="about-slot-1">
+          <img src="assets/story_banner.png" alt="About Banner 1" class="about-banner-img" onerror="this.closest('.about-banner-slot').style.display='none';">
+        </div>
+        <div class="about-banner-slot filled-slot" id="about-slot-2">
+          <img src="assets/hero_banner_1.png" alt="About Banner 2" class="about-banner-img" onerror="this.closest('.about-banner-slot').style.display='none';">
+        </div>
+        <div class="about-banner-slot filled-slot" id="about-slot-3">
+          <img src="assets/campaign_banner.png" alt="About Banner 3" class="about-banner-img" onerror="this.closest('.about-banner-slot').style.display='none';">
+        </div>
+      </div>
+    </div>
   </main>
 
   <!-- 12. Footer -->

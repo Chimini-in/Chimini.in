@@ -55,6 +55,12 @@ http.createServer((req, res) => {
 
   let relativePath = routeMap[decodedUrl] || decodedUrl;
   let filePath = path.join(__dirname, relativePath);
+  if (!fs.existsSync(filePath)) {
+    const publicPath = path.join(__dirname, 'public', relativePath);
+    if (fs.existsSync(publicPath)) {
+      filePath = publicPath;
+    }
+  }
   const ext = path.extname(filePath).toLowerCase();
   const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 

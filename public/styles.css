@@ -4429,6 +4429,114 @@ section.full-width-banner-section {
   border-radius: 8px;
 }
 
+/* ==========================================================================
+   ABOUT PAGE: 3 LUXURY BANNER SLOTS (IMAGE ONLY, NO TEXT/BUTTONS)
+   ========================================================================== */
+.about-banners-wrapper {
+  width: 100%;
+  padding: 36px 20px 80px 20px;
+  background-color: var(--bg-primary, #FAF9F6);
+  min-height: 60vh;
+  box-sizing: border-box;
+}
+
+.about-banners-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.about-banner-slot {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  background-color: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-sizing: border-box;
+}
+
+.about-banner-slot.filled-slot {
+  line-height: 0;
+}
+
+.about-banner-slot.filled-slot:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+}
+
+.about-banner-slot.empty-slot {
+  background-color: #fbfaf8;
+  border: 1.5px dashed #dcd6cc;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 21 / 9;
+}
+
+.about-banner-empty-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+.about-placeholder-icon {
+  color: #c4bcb0;
+  width: 52px;
+  height: 52px;
+  opacity: 0.75;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.about-banner-slot.empty-slot:hover .about-placeholder-icon {
+  opacity: 1;
+  transform: scale(1.06);
+}
+
+.about-banner-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.about-banner-link {
+  display: block;
+  width: 100%;
+  text-decoration: none;
+  cursor: pointer;
+  line-height: 0;
+}
+
+@media (max-width: 768px) {
+  .about-banners-wrapper {
+    padding: 20px 14px 60px 14px;
+  }
+  
+  .about-banners-container {
+    gap: 20px;
+  }
+
+  .about-banner-slot.empty-slot {
+    min-height: 180px;
+    aspect-ratio: 16 / 9;
+    border-radius: 10px;
+  }
+
+  .about-placeholder-icon {
+    width: 40px;
+    height: 40px;
+  }
+}
+
 
 /* ==========================================================================
    CHIMINI LUXURY PRODUCT DETAIL PAGE (PDP) STYLES

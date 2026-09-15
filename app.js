@@ -3083,72 +3083,65 @@ function renderGiftsPage() {
   `;
 }
 
+function renderAboutBannerSlot(slotId, fallbackSlotId, slotNumber, defaultImg = '') {
+  let banner = getPageBanner(slotId);
+  if ((!banner || !banner.image || banner.image.trim() === '') && fallbackSlotId) {
+    banner = getPageBanner(fallbackSlotId);
+  }
+
+  // Check if slot was explicitly unpublished/hidden in Supabase
+  const isExplicitlyHidden = storeState.banners && Array.isArray(storeState.banners) &&
+    storeState.banners.some(b => (b.section_id === slotId || (fallbackSlotId && b.section_id === fallbackSlotId)) && b.is_published === false);
+
+  if (isExplicitlyHidden) {
+    return '';
+  }
+
+  const imageUrl = (banner && banner.image && banner.image.trim() !== '') ? banner.image : defaultImg;
+
+  if (imageUrl) {
+    const isHtmlExt = typeof window !== 'undefined' && window.location.pathname.endsWith('.html');
+    const shopBase = isHtmlExt ? 'shop.html' : '/shop';
+    const href = (banner && banner.offer_pct != null && banner.offer_pct !== '')
+      ? `${shopBase}?discount=${encodeURIComponent(banner.offer_pct)}`
+      : (banner && banner.link && banner.link.trim() !== '#' && banner.link.trim() !== '' ? banner.link.trim() : '');
+
+    const errorFallback = `this.closest('.about-banner-slot').style.display='none';`;
+
+    if (href) {
+      return `
+        <div class="about-banner-slot filled-slot" id="about-slot-${slotNumber}">
+          <a href="${href}" class="about-banner-link" aria-label="About Banner ${slotNumber}">
+            <img src="${imageUrl}" alt="About Banner ${slotNumber}" class="about-banner-img" onerror="${errorFallback}">
+          </a>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="about-banner-slot filled-slot" id="about-slot-${slotNumber}">
+        <img src="${imageUrl}" alt="About Banner ${slotNumber}" class="about-banner-img" onerror="${errorFallback}">
+      </div>
+    `;
+  }
+
+  return '';
+}
+
 function renderAboutPage() {
   const container = document.getElementById("about-page-container");
   if (!container) return;
-  if (storeState.adminSettings.pages && storeState.adminSettings.pages['about_us']) {
-    container.innerHTML = storeState.adminSettings.pages['about_us'];
-    return;
-  }
 
-  const about = storeState.adminSettings.about || {};
-  
-  
-  const bannerHtml = renderPageHeroHtml("about");
+  const slot1 = renderAboutBannerSlot('about_banner_1', 'about_top', 1, 'assets/story_banner.png');
+  const slot2 = renderAboutBannerSlot('about_banner_2', null, 2, 'assets/hero_banner_1.png');
+  const slot3 = renderAboutBannerSlot('about_banner_3', null, 3, 'assets/campaign_banner.png');
 
   container.innerHTML = `
-    ${bannerHtml || ''}
-    
-    <div class="about-story-section section-container" id="our-story">
-      <div class="about-story-grid">
-        <div class="about-story-text animate-slide-up">
-          <h2 class="about-section-heading">Our Origin</h2>
-          <p class="about-paragraph">${about.desc1 || ''}</p>
-          <p class="about-paragraph">${about.desc2 || ''}</p>
-        </div>
-        <div class="about-story-image animate-slide-up">
-          <img src="${about.image1 || 'assets/story_banner.png'}" alt="Handcrafted Soy Candle Scenting" onerror="this.src='assets/story_banner.png'">
-        </div>
-      </div>
-    </div>
-
-    <div class="about-quote-banner">
-      <div class="section-container">
-        <blockquote class="about-quote">
-          "A scent is an invisible architecture, shaping the quiet spaces of our memories."
-        </blockquote>
-        <span class="about-quote-author">— Harshida, Founder of CHIMINI</span>
-      </div>
-    </div>
-
-    <div class="about-story-section section-container">
-      <div class="about-story-grid reverse">
-        <div class="about-story-image animate-slide-up">
-          <img src="${about.image2 || 'assets/hero_banner_1.png'}" alt="Crafting Scented Elements" onerror="this.src='assets/hero_banner_1.png'">
-        </div>
-        <div class="about-story-text animate-slide-up">
-          <h2 class="about-section-heading">Our Craft & Philosophy</h2>
-          <p class="about-paragraph">Each batch is mixed and poured in micro-runs at our Mangalore atelier. We trace our ingredients back to their botanical sources: organic soy from local family farms, wild-harvested absolute oils, and lead-free cotton fibers.</p>
-          <p class="about-paragraph">Sustainability isn't a badge we wear; it is the fundamental core of our design process. Every single container is engineered for secondary lifetime usage as a premium storage jar, vase, or decorative luxury organizer.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="about-values section-container">
-      <h2 class="section-title">Core Principles</h2>
-      <div class="values-grid">
-        <div class="value-card">
-          <h3>Soot-Free Purity</h3>
-          <p>Strictly lead-free and chemical-free botanical elements.</p>
-        </div>
-        <div class="value-card">
-          <h3>Artisanal Integrity</h3>
-          <p>Micro-batch production ensures peak scent throw control.</p>
-        </div>
-        <div class="value-card">
-          <h3>Lifetime Vessels</h3>
-          <p>Refillable or repurposable containers that last forever.</p>
-        </div>
+    <div class="about-banners-wrapper">
+      <div class="about-banners-container">
+        ${slot1}
+        ${slot2}
+        ${slot3}
       </div>
     </div>
   `;

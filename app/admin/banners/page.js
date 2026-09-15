@@ -19,7 +19,9 @@ const BANNER_SLOTS = [
   // GIFTS PAGE
   { id: 'gifts_top',          page: 'Gifts',       label: 'Top Banner',            hint: 'Banner at the top of the /gifts page' },
   // ABOUT PAGE
-  { id: 'about_top',          page: 'About Us',    label: 'Top Banner',            hint: 'Banner at the top of the /about page' },
+  { id: 'about_banner_1',     page: 'About Us',    label: 'Banner Slot 1',         hint: 'First full-width banner image on /about page (image only)' },
+  { id: 'about_banner_2',     page: 'About Us',    label: 'Banner Slot 2',         hint: 'Second banner image on /about page (image only)' },
+  { id: 'about_banner_3',     page: 'About Us',    label: 'Banner Slot 3',         hint: 'Third banner image on /about page (image only)' },
   // CONTACT PAGE
   { id: 'contact_top',        page: 'Contact Us',  label: 'Top Banner',            hint: 'Banner at the top of the /contact page' },
 ];
@@ -362,7 +364,16 @@ export default function BannersPage() {
   const [loading, setLoading] = useState(true);
   const [activePage, setActivePage] = useState('Home');
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => {
+    fetchAll();
+    if (typeof window !== 'undefined') {
+      const sp = new URLSearchParams(window.location.search);
+      const target = sp.get('page') || sp.get('tab');
+      if (target && PAGE_GROUPS.includes(target)) {
+        setActivePage(target);
+      }
+    }
+  }, []);
 
   const fetchAll = async () => {
     setLoading(true);
@@ -382,6 +393,9 @@ export default function BannersPage() {
             is_published: row.is_published !== false,
           };
         });
+        if (!map['about_banner_1'] && map['about_top']) {
+          map['about_banner_1'] = { ...map['about_top'] };
+        }
       }
       setRecords(map);
     } catch (err) {
@@ -397,6 +411,7 @@ export default function BannersPage() {
     const cleanLink = updates.link_url || '';
 
     const dbPayload = {
+      section_id: slotId,
       image_url: updates.image_url || '',
       link_url: cleanLink,
       offer_pct: cleanOfferNum,

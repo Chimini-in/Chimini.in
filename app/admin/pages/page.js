@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { supabaseClient } from '../../../lib/supabase';
 
 const STATIC_PAGE_DEFS = [
-  { key: 'about_us', label: 'About Us / Our Story', route: '/about' },
+  { key: 'about_us', label: 'About Us (3 Plain Banners)', route: '/about' },
   { key: 'sustainability', label: 'Sustainability & Eco Practices', route: '/sustainability' },
   { key: 'shipping_returns', label: 'Shipping & Returns Policy', route: '/shipping-returns' },
   { key: 'faq', label: 'Frequently Asked Questions (FAQ)', route: '/faq' },
@@ -90,18 +90,43 @@ export default function StaticPages() {
   const renderFormFields = () => {
     if (editingPage === 'about_us') {
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          <h4 style={{ margin: '10px 0 0', borderBottom: '1px solid #eee', paddingBottom: '5px' }}>Hero Section</h4>
-          <div><label style={lStyle}>Hero Title</label><input style={iStyle} value={contentObj.hero_title || ''} onChange={e => handleFieldChange('hero_title', e.target.value)} /></div>
-          <div><label style={lStyle}>Hero Subtitle</label><input style={iStyle} value={contentObj.hero_subtitle || ''} onChange={e => handleFieldChange('hero_subtitle', e.target.value)} /></div>
-          
-          <h4 style={{ margin: '10px 0 0', borderBottom: '1px solid #eee', paddingBottom: '5px' }}>Our Story / Origin</h4>
-          <div><label style={lStyle}>Story Heading</label><input style={iStyle} value={contentObj.story_a_heading || ''} onChange={e => handleFieldChange('story_a_heading', e.target.value)} /></div>
-          <div><label style={lStyle}>Story Body Paragraph</label><textarea style={{...iStyle, minHeight: '80px'}} value={contentObj.story_a_body || ''} onChange={e => handleFieldChange('story_a_body', e.target.value)} /></div>
+        <div style={{ padding: '20px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
+            <span style={{ fontSize: '0.72rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#0369a1', backgroundColor: '#e0f2fe', padding: '3px 8px', borderRadius: '4px' }}>Visual Banner Page</span>
+            <h4 style={{ margin: '8px 0 4px 0', fontSize: '1.1rem', color: '#0f172a' }}>About Us (3 Plain Banners)</h4>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: '#475569', lineHeight: 1.5 }}>
+              All legacy text blocks (Our Origin text, founder quote, and Core Principles cards) have been completely removed. The <strong>/about</strong> page now displays 3 plain luxury banners (image only, with optional click destinations).
+            </p>
+          </div>
 
-          <h4 style={{ margin: '10px 0 0', borderBottom: '1px solid #eee', paddingBottom: '5px' }}>Founder & Quote</h4>
-          <div><label style={lStyle}>Signature Quote</label><input style={iStyle} value={contentObj.big_quote || ''} onChange={e => handleFieldChange('big_quote', e.target.value)} /></div>
-          <div><label style={lStyle}>Founder Name</label><input style={iStyle} value={contentObj.founder_name || ''} onChange={e => handleFieldChange('founder_name', e.target.value)} /></div>
+          <div style={{ backgroundColor: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '14px' }}>
+            <h5 style={{ margin: '0 0 8px 0', fontSize: '0.88rem', color: '#1e293b' }}>Managed Banner Slots:</h5>
+            <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.82rem', color: '#64748b', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <li><strong>Banner Slot 1:</strong> Top full-width banner image on /about</li>
+              <li><strong>Banner Slot 2:</strong> Middle full-width banner image on /about</li>
+              <li><strong>Banner Slot 3:</strong> Bottom full-width banner image on /about</li>
+            </ul>
+          </div>
+
+          <a
+            href="/admin/banners?page=About+Us"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '11px 18px',
+              backgroundColor: '#1a1a1a',
+              color: '#ffffff',
+              borderRadius: '6px',
+              fontWeight: '600',
+              fontSize: '0.88rem',
+              textDecoration: 'none',
+              textAlign: 'center',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}
+          >
+            Manage 3 About Banners in Banners Manager &rarr;
+          </a>
         </div>
       );
     } else if (editingPage === 'sustainability') {
