@@ -4430,47 +4430,66 @@ section.full-width-banner-section {
 }
 
 /* ==========================================================================
-   ABOUT PAGE: 3 LUXURY BANNER SLOTS (IMAGE ONLY, NO TEXT/BUTTONS)
+   ABOUT PAGE: 3 FULL-WIDTH BANNERS — EDGE TO EDGE, NO GAPS
    ========================================================================== */
+#about-page-container {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
 .about-banners-wrapper {
-  width: 100%;
-  padding: 36px 20px 80px 20px;
-  background-color: var(--bg-primary, #FAF9F6);
-  min-height: 60vh;
-  box-sizing: border-box;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background-color: transparent !important;
+  box-sizing: border-box !important;
 }
 
 .about-banners-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  box-sizing: border-box !important;
 }
 
 .about-banner-slot {
-  width: 100%;
-  border-radius: 12px;
-  overflow: hidden;
-  position: relative;
-  background-color: #ffffff;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-sizing: border-box;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  position: relative !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  box-sizing: border-box !important;
+  line-height: 0 !important;
+  font-size: 0 !important;
 }
 
 .about-banner-slot.filled-slot {
-  line-height: 0;
+  line-height: 0 !important;
+  font-size: 0 !important;
 }
 
 .about-banner-slot.filled-slot:hover {
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+  box-shadow: none !important;
 }
 
 .about-banner-slot.empty-slot {
-  background-color: #fbfaf8;
-  border: 1.5px dashed #dcd6cc;
-  min-height: 280px;
+  background-color: #f0ede8;
+  border: none;
+  border-bottom: 1px dashed #dcd6cc;
+  min-height: 260px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4501,34 +4520,53 @@ section.full-width-banner-section {
 }
 
 .about-banner-img {
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: cover;
-  border-radius: 12px;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  object-fit: cover !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  vertical-align: bottom !important;
 }
 
 .about-banner-link {
-  display: block;
-  width: 100%;
-  text-decoration: none;
-  cursor: pointer;
-  line-height: 0;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  line-height: 0 !important;
+  font-size: 0 !important;
 }
 
 @media (max-width: 768px) {
   .about-banners-wrapper {
-    padding: 20px 14px 60px 14px;
+    padding: 0 !important;
+    margin: 0 !important;
   }
-  
+
   .about-banners-container {
-    gap: 20px;
+    gap: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .about-banner-slot {
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   .about-banner-slot.empty-slot {
-    min-height: 180px;
+    min-height: 160px;
     aspect-ratio: 16 / 9;
-    border-radius: 10px;
+    border-radius: 0 !important;
   }
 
   .about-placeholder-icon {
